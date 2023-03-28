@@ -423,6 +423,50 @@ TEST ///
   assert(sectionalGenus I == 11)
 ///
 
+doc ///
+  Key
+      (arithmeticGenus, Ideal)
+      arithmeticGenus
+  Headline
+      computes the arithmetic genus of a smooth surface in projective 4-space
+  Usage
+      arithmeticGenus I
+  Inputs
+      I:Ideal
+  Outputs
+      :ZZ
+  Description
+    Text     This function returns the arithmetic genus of the projective variety with ideal $I$.
+    Example 	
+       I = example "ab.d10.g6";
+       betti res I
+       arithmeticGenus I
+       degree I
+       sectionalGenus I
+       surfaceInvariants I
+  SeeAlso
+      (sectionalGenus, Ideal)
+      (surfaceInvariants, Ideal)
+      (degree, Ideal)
+      (resolution, Ideal)
+///
+
+TEST ///
+  I = example "bielliptic.d10.g6";
+  degree I
+  genera I
+  assert(arithmeticGenus I == -1)
+  assert(degree I == 10)
+///
+
+TEST ///
+  I = example "rat.d11.g11.infty-sixsecants";
+  betti res I
+  assert(degree I == 11)
+  genera I
+  assert(arithmeticGenus I == 0)
+///
+
 -* Test section *-
 ///
 -*
