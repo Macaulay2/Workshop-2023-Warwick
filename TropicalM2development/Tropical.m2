@@ -36,8 +36,8 @@ Version => "1.1",
 PackageExports => {"gfanInterface","EliminationMatrices","Polyhedra","Binomials","Matroids"},
 --        PackageExports => {"gfanInterface","EliminationMatrices","Matroids","Polyhedra"},
 	DebuggingMode => true,
-	AuxiliaryFiles => true,
---	AuxiliaryFiles => false,
+--	AuxiliaryFiles => true,
+	AuxiliaryFiles => false,
 	CacheExampleOutput => true
 )
 
@@ -1492,7 +1492,7 @@ doc///
     Description
 		Text
 			If the option value "true" is provided, then homogeneity of the ideal is not tested.
-      By default the ideal is	always assumed not homogeneous and a test is
+      			By default the ideal is always assumed not to be homogeneous and a test is
 			performed before applying the function tropicalVariety.
 		Example
 		          QQ[x,y];
