@@ -14,7 +14,7 @@ Version => "1.1",
                   {Name => "Carlos Amendola", Email => "carlos.amendola@tum.de", HomePage=>""},
                   {Name => "Kathlen Kohn", Email => "kathlen.korn@gmail.com", HomePage=>""},
                   {Name => "Sara Lamboglia", Email => "", HomePage=>""},
-                  {Name => "Diane Maclagan", Email => "D.Maclagan@warwick.ac.uk", HomePage=>"http://homepages.warwic$
+                  {Name => "Diane Maclagan", Email => "D.Maclagan@warwick.ac.uk", HomePage=>"http://homepages.warwick.ac.uk/staff/D.Maclagan/"},
                   {Name => "Ben Smith", Email => "benjamin.smith-3@manchester.ac.uk", HomePage=>""},
                   {Name => "Jeff Sommars", Email => "", HomePage=>""},
                   {Name => "Paolo Tripoli", Email => "", HomePage=>""},
@@ -30,18 +30,15 @@ Version => "1.1",
 		"tropicalMax" => false,
 		"polymakeCommand" =>""
 	},
-
     --Might need PackageImports here - should Polyhedra be here instead??
 --tropicalVarietyWithPuiseuxVal--        
-
-
+    	OptionalComponentsPresent => true,
 PackageExports => {"gfanInterface","EliminationMatrices","Polyhedra","Binomials","Matroids"},
-        PackageExports => {"gfanInterface","EliminationMatrices","Matroids","Polyhedra"},
+--        PackageExports => {"gfanInterface","EliminationMatrices","Matroids","Polyhedra"},
 	DebuggingMode => true,
 	AuxiliaryFiles => true,
 --	AuxiliaryFiles => false,
 	CacheExampleOutput => true
---	optArgs
 )
 
 --We would like to have the following command:
