@@ -929,40 +929,42 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     
     --- we expect that we are working over 	QQ{{t}}, where t is the first variable of the poly ring.
 
-	local T;
-    local F;
 	listOfSlicedCones := {};
-	T = tropicalVariety(I);
-	
-		-- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
-		addsemiringAdd := minmax();
-		heightCut := 0;
-		if (addsemiringAdd == "Min") then
-			heightCut = 1
-		else heightCut = -1;
+	T := tropicalVariety(I);
+	emptyCones:={};
+
+    -- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
+	addsemiringAdd := minmax();
+	heightCut := 0;
+	if (addsemiringAdd == "Min") then
+		heightCut = 1
+	else heightCut = -1;
 			
-		M := matrix{{join(toSequence{1},(numgens ring I -1): 0)}}; 
-		N := matrix{{(numgens ring I): 0}}; 
-		slicePlane := polyhedronFromHData(N, matrix{{0}}, M, matrix{{heightCut}});
+	M := matrix{{join(toSequence{1},(numgens ring I -1): 0)}}; 
+	N := matrix{{(numgens ring I): 0}}; 
+	slicePlane := polyhedronFromHData(N, matrix{{0}}, M, matrix{{heightCut}});
 
-		--- for each cone in the fan fan T, slice and append to PolyhedralComplex Output
-		raysMatrix := rays (T);
-		listOfMaxCones := maxCones(T);
-		numberOfMaxCones := length listOfMaxCones; 
+	--- for each cone in the fan fan T, slice and append to PolyhedralComplexOutput		
+	raysMatrix := rays (T);
+	listOfMaxCones := maxCones(T);
+	numberOfMaxCones := length listOfMaxCones; 
 
-		if (numberOfMaxCones == 0) then (print "The vartiey is empty!"; return T;)
-		else( 
-			for i from 1 when i < (numberOfMaxCones) do (
-				currentMaxCone := coneFromVData submatrix(raysMatrix, listOfMaxCones#i);  
-				slicedMaxCone := intersection(currentMaxCone, slicePlane);
-				A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
-				newSlicedMaxCone := affineImage(A,slicedMaxCone);
-				listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone};
-			)
-		);
-
-		PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, multiplicities(T));
-		return PC;
+	if (numberOfMaxCones == 0) then (print "The variety is empty!"; return T;)
+	else( 
+ 	    for i from 0 when i < (numberOfMaxCones) do (
+		currentMaxCone := coneFromVData submatrix(raysMatrix, listOfMaxCones#i);  
+		slicedMaxCone := intersection(currentMaxCone, slicePlane);
+		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
+		newSlicedMaxCone := affineImage(A,slicedMaxCone);
+		if dim(newSlicedMaxCone)>-1 then 
+		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
+		else emptyCones = emptyCones |{i};
+            )	
+	);
+    	conesToKeep := select(numberOfMaxCones,i->(not(member(i,emptyCones))));
+	mults:=(multiplicities(T))_conesToKeep;
+	PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, multiplicities(T));
+	return PC;
      )
 
 	 ------------------------------------------------------------------------------
