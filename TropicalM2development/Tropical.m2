@@ -49,7 +49,7 @@ PackageExports => {"gfanInterface","EliminationMatrices","Polyhedra","Binomials"
 
 export{
   "TropicalCycle",
---"TropicalCycle1",
+  "TropicalCycle1",
   "tropicalCycle",
   "isBalanced",
   "tropicalPrevariety",
@@ -58,7 +58,7 @@ export{
   "stableIntersection",
   "tropicalVariety",
 --"tropicalVarietyWithValExternal",
---"tropicalVarietyWithPuiseuxVal",
+  "tropicalVarietyWithPuiseuxVal",
   "isTropicalBasis",
   "multiplicities",
   "IsHomogeneous",
@@ -1146,7 +1146,7 @@ doc ///
     	T:TropicalCycle1
     Description
 		Text
-			This function creates a tropical cycle from a fpolyhedral complex and a list of multiplicities.
+			This function creates a tropical cycle from a polyhedral complex and a list of multiplicities.
 			The multiplicities must be given in the same order as the maximal cones
 			appear in the MaximalCones list.
 ///
@@ -1324,7 +1324,7 @@ doc///
 ///
 *-
 
--*
+
 doc///
     Key
       tropicalVarietyWithPuiseuxVal
@@ -1341,13 +1341,13 @@ doc///
         F:TropicalCycle1
     Description
        Text
-         EXPERIMENTAL feature to implement puiseux valuation.
+         EXPERIMENTAL feature to implement Puiseux valuation.
       Example
       	QQ[t,x,y]
 	  	I = ideal (t*x^2+x*y+t*y^2+x+y+t^2)
       	tropicalVarietyWithPuiseuxVal(I)
 ///
-*-
+
 
 doc///
     Key
