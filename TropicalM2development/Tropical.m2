@@ -36,8 +36,8 @@ Version => "1.1",
 PackageExports => {"gfanInterface","EliminationMatrices","Polyhedra","Binomials","Matroids"},
 --        PackageExports => {"gfanInterface","EliminationMatrices","Matroids","Polyhedra"},
 	DebuggingMode => true,
---	AuxiliaryFiles => true,
-	AuxiliaryFiles => false,
+	AuxiliaryFiles => true,
+--	AuxiliaryFiles => false,
 	CacheExampleOutput => true
 )
 
@@ -757,7 +757,7 @@ dim TropicalCycle:= T->( dim fan T)
 
 ambDim TropicalCycle:= T->( ambDim fan T)
 
-fVector (TropicalCycle) := o->T->(Polyhedra$fVector fan T)
+fVector (TropicalCycle) := T->(Polyhedra$fVector fan T)
 
 fan TropicalCycle := T -> (T#"Fan")
 
