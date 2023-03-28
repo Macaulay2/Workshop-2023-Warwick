@@ -15,8 +15,8 @@ newPackage("SurfacesInP4",
                 {Name => "Mike Stillman", 
                  Email => "mike@math.cornell.edu", 
                  HomePage => "http://pi.math.cornell.edu/~mike"}},
-    Version => "0.1",
-    Date => "January 5, 2021",
+    Version => "0.2",
+    Date => "28 March 2023",
     Headline => "Smooth surfaces in P4, not of general type",
     AuxiliaryFiles => true,
     DebuggingMode => true
@@ -323,6 +323,25 @@ Caveat
 SeeAlso
 ///
 
+///
+  Key
+    surfacesInP4
+  Headline
+    selects surfaces of given degree, sectional genus, type  
+  Usage
+    surfacesInP4(Degree => d, Genus => g, Type => typ)
+  Inputs
+    Degree => ZZ
+      
+  Outputs
+  Description
+    Text
+    Example
+  Caveat
+  SeeAlso
+///
+
+
  ///
 Key
  surfacesInP4
@@ -355,6 +374,54 @@ SeeAlso
  -- Type => String
  --   one of "rat", "ab","k3","enr","ell","bielliptic"
 
+
+doc ///
+  Key
+    (sectionalGenus, Ideal)
+    sectionalGenus
+  Headline
+    the sectional genus of a smooth surface in projective 4-space
+  Usage
+    sectionalGenus I
+  Inputs
+    I:Ideal
+  Outputs
+    :ZZ
+  Description
+    Text
+      This function returns the arithmetic genus of a general linear section
+      of the projective variety with ideal $I$.
+    Example
+      I = example "ell.d8.g7";
+      betti res I
+      sectionalGenus I
+      degree I
+      arithmeticGenus I
+      surfaceInvariants I
+  SeeAlso
+    (arithmeticGenus, Ideal)
+    (surfaceInvariants, Ideal)
+    (degree, Ideal)
+    (resolution, Ideal)
+///
+
+TEST ///
+  S = QQ[x_0..x_5]
+  R = QQ[r,s,t]
+  phi = map(R, S, {r^2, r*s, r*t, s^2, s*t, t^2})
+  I = ker phi
+  degree I
+  genera I
+  assert(sectionalGenus I == 0)
+  assert(degree I == 4)
+///
+
+TEST ///
+  I = example "k3.d11.g11.2-sixsecants";
+  betti res I
+  assert(degree I == 11)
+  assert(sectionalGenus I == 11)
+///
 
 -* Test section *-
 ///
@@ -492,6 +559,20 @@ debug needsPackage "SurfacesInP4"
 check "SurfacesInP4"
 viewHelp SurfacesInP4
 viewHelp
+
+doc ///
+  Key
+  Headline
+  Usage
+  Inputs
+  Outputs
+  Description
+    Text
+    Example
+  Caveat
+  SeeAlso
+///
+
 
 
 restart
