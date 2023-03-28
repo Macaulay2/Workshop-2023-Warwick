@@ -22,8 +22,8 @@ Version => "1.1",
               },
 	Headline => "A package for doing computations in tropical geometry",
 	Configuration => {
-		"path" => "",
-		"fig2devpath" => "",
+--		"path" => "",
+--		"fig2devpath" => "",
 --		"keepfiles" => true,
 "keepfiles" => false,
 		"cachePolyhedralOutput" => true,
@@ -1048,6 +1048,7 @@ doc ///
 		visualizeHypersurface
 		(visualizeHypersurface,RingElement)
 		[visualizeHypersurface,Valuation]
+		Valuation
 	Headline
 		visualize the tropical hypersurface of the given polynomial
 	Usage
