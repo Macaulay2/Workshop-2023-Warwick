@@ -952,7 +952,7 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 	if (numberOfMaxCones == 0) then (print "The variety is empty!"; return T;)
 	else( 
  	    for i from 0 when i < (numberOfMaxCones) do (
-		currentMaxCone := coneFromVData submatrix(raysMatrix, listOfMaxCones#i);  
+		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
 		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
 		newSlicedMaxCone := affineImage(A,slicedMaxCone);
