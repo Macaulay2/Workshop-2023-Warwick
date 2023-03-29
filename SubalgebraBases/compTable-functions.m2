@@ -311,7 +311,7 @@ autosubduceSagbi (HashTable) := (compTable) -> (
 )
 
 
--- updateComputation: checks the Strategy: DegreeByDegree or Incremental.
+-- updateComputation: checks the Strategy: DegreeByDegree, Incremental, or FourTiTwo.
 --   passes to a function that recomputed the rings, maps and ideals wrt new sagbiGenerators
 -- NB if there are no new sagbiGenerators, then this function is not called
 
@@ -323,8 +323,10 @@ updateComputation(HashTable) := (compTable) -> (
 	updateComputationDegreeByDegree(compTable);
 	) else if compTable#SAGBIoptions#Strategy == "Incremental" then (
 	updateComputationIncremental(compTable);
-	) else (
-	error("unknown Strategy, expected \"Master\", \"DegreeByDegree\", or \"Incremental\"\nThe next time 'sagbi' or 'subalgebraBases' is used on the same input, run it with the option: 'RenewOptions => true'");
+	) else if compTable#SAGBIoptions#Strategy == "FourTiTwo" then (
+    updateComputationFourTiTwo(compTable);
+    ) else (
+	error("unknown Strategy, expected \"Master\", \"DegreeByDegree\", \"Incremental\" or \"FourTiTwo\"\nThe next time 'sagbi' or 'subalgebraBases' is used on the same input, run it with the option: 'RenewOptions => true'");
 	);
     )
 
@@ -516,6 +518,80 @@ updateComputationIncremental(HashTable) := (compTable) -> (
     compTable#SAGBIideals#"reductionIdeal" = ideal newReductionGB;    
     );
 
+--------------------------------------------------------------------------
+-- updateComputation using FourTiTwo strategy 
+-- The gb computation uses 4ti2  
+-- Does not work for quotient rings
+
+updateComputationFourTiTwo = method();
+updateComputationFourTiTwo(HashTable) := (compTable) -> (
+
+    sagbiGens := compTable#SAGBIdata#"sagbiGenerators";
+    
+    -- Changes to the rings:
+    -- quotientRing (unchanged)
+    -- liftedRing   (unchanged)
+    -- tensorRing   (modified)
+    liftedRing := compTable#SAGBIrings#"liftedRing";
+    quotientRing := compTable#SAGBIrings.quotientRing;
+
+    if not (liftedRing === quotientRing) then error("Strategy \"FourTiTwo\" not applicable to quotient rings! Try strategy \"DegreeByDegree\" or \"Incremental\" instead.");
+
+    numberVariables := numgens compTable#SAGBIrings#"liftedRing";
+    numberGenerators := numColumns sagbiGens;
+    newMonomialOrder := append((monoid liftedRing).Options.MonomialOrder, Eliminate numberVariables);    
+    tensorVariables := monoid[
+        Variables => numberVariables + numberGenerators,
+        Degrees => degrees source vars liftedRing | degrees source sagbiGens,
+        MonomialOrder => newMonomialOrder];
+    tensorRing := (coefficientRing liftedRing) tensorVariables;
+    compTable#SAGBIrings.tensorRing = tensorRing;
+
+    -- Changes to the maps:
+    -- inclusionLifted  (modified)
+    -- substitution     (modified)
+    -- projectionLifted (modified)
+    -- sagbiInclusion   (modified)
+    -- fullSubstitution (modified)
+    -- quotient         (unchanged)
+    
+    inclusionLifted := map(tensorRing, liftedRing, (vars tensorRing)_{0..numberVariables-1});
+    substitution := map(tensorRing, tensorRing , (vars tensorRing)_{0..numberVariables-1} | inclusionLifted(sub(sagbiGens, liftedRing)));
+    projectionLifted := map(liftedRing, tensorRing, vars liftedRing | matrix {toList(numberGenerators:0_(liftedRing))});
+    sagbiInclusion := map(tensorRing, tensorRing, matrix {toList (numberVariables:0_(tensorRing))} | (vars tensorRing)_{numberVariables .. numberVariables + numberGenerators - 1});
+    
+    compTable#SAGBImaps#"inclusionLifted"  = inclusionLifted;
+    compTable#SAGBImaps#"substitution"     = substitution;
+    compTable#SAGBImaps#"projectionLifted" = projectionLifted;
+    compTable#SAGBImaps#"sagbiInclusion"   = sagbiInclusion;
+    compTable#SAGBImaps#"fullSubstitution" = projectionLifted * substitution,
+    
+    -- Changes to the ideals:
+    -- I              (unchanged)
+    -- SIdeal         (modified)
+    -- leadTermsI     (unchanged)
+    -- reductionIdeal (modified)
+    
+    generatingVariables := (vars tensorRing)_{numberVariables..numberVariables + numberGenerators - 1};
+
+    pVariableMonoid := monoid[
+        Variables => numberGenerators,
+        Degrees => degrees source sagbiGens
+        ];
+    -- Could have user specify order on p variables, this will be used by 4ti2 
+    pRing := (coefficientRing liftedRing) pVariableMonoid;
+    pInclusion := map(tensorRing, pRing, (vars tensorRing)_{numberVariables..numberGenerators-1});
+    exponentMatrix := transpose matrix apply(flatten entries sagbiGens, m -> first exponents leadTerm m);
+    pIntersection := toricGroebner(exponentMatrix, pRing); -- to specify term order, create new polynomial ring in p variables
+    sIdealGB := pInclusion(gens pIntersection) | (generatingVariables - inclusionLifted(sub(leadTerm sagbiGens, liftedRing)));
+    forceGB sIdealGB;
+
+    SIdeal := ideal(sIdealGB);
+    compTable#SAGBIideals#"SIdeal" = SIdeal;
+    compTable#SAGBIideals#"reductionIdeal" = inclusionLifted compTable#SAGBIideals#"leadTermsI" + SIdeal; 
+    );
+
+-------------------------------------------------------------------------------
 
 -- Finds the lowest list in Pending
 lowestDegree = method()

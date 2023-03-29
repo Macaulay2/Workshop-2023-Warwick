@@ -33,6 +33,8 @@ newPackage(
         )
 exportMutable {}
 
+needsPackage("FourTiTwo")
+
 needs "./SubalgebraBases/exports.m2"
 needs "./SubalgebraBases/classes.m2"
 needs "./SubalgebraBases/sagbi-functions.m2"

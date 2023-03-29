@@ -18,9 +18,23 @@ needsPackage "FourTiTwo"
 -- Determine how to go from a 1xn matrix of polynomials
 -- to a 'matrix of exponents of lead terms'
 
+leadTermExponents = M -> transpose matrix apply( 
+                            flatten entries M, 
+                            m -> first exponents leadTerm m
+                            )
+
 -- small running example
 R = QQ[x,y]
 M = matrix {{x^2+x*y, x*y + y^2, x^3*y^2 - x^2*y^3}}
+M^{0}
+flatten exponents 
+
+first exponents (leadTerm first first entries M)
+
+flatten M
+leadTermExponents M
+viewHelp List
+
 S = QQ[p_1, p_2, p_3]
 
 
@@ -28,7 +42,7 @@ S = QQ[p_1, p_2, p_3]
 -- apply the function "exponents" to each "leadTerm" of each entry of the matrix
 -- and make the result into a matrix with one column for each exponent
 -- then apply toricGroebner to the output
-first exponents leadTerm M_(0,0)
+leadTerm M_(0,0)
 apply({1,2,3}, x -> x^2)
 
 A = matrix {{2, 1, 3}, {0, 1, 2}}
@@ -56,13 +70,14 @@ zero ideal Q
 -- b) make sure the term order is the same as the one that toricGroebner wants
 (options R).MonomialOrder
 
--- 1.1 if any of these checks fail, then fall back on another strategy
+-- 1.1 if any of these checks fail, then fall back on another strategy (or throw an error)
 
 -- 2. copy over DegreeByDegree code to update all the maps and rings
 -- 3. modify the part where we set the "SIdeal" is computed
 --    using the solutions to the previous tasks
 -- 4. Dangerous part! forceGB to make the generators from toricGroebner a GB
 --    only ever use forceGB when you know you have a GB
+
 G = matrix {{x^10 + y, x*y + y, y^10 + y^2}}
 forceGB G
 I = ideal G
@@ -71,6 +86,12 @@ peek G -- the GB is stuck in the cache of the matrix
 H = matrix {{x^10 + y, x*y + y, y^10 + y^2}}
 J = ideal H
 gens gb J
+
+R = QQ[x,y,z] 
+S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}
+SB = sagbi(S, Strategy=>"FourTiTwo")
+SB1 = sagbi S
+
 -- 5. the reduction ideal is equal to the SIdeal when ambient ring is not a quotient
 
 
