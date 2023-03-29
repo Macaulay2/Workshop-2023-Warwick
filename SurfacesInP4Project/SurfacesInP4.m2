@@ -466,6 +466,14 @@ TEST ///
   assert(degree I == 10)
 ///
 
+TEST ///
+  I = example "rat.d11.g11.infty-sixsecants";
+  betti res I
+  assert(degree I == 11)
+  genera I
+  assert(arithmeticGenus I == 0)
+///
+
 doc ///
   Key
     (intersectionProduct, Ideal, Module, Module)
@@ -505,12 +513,37 @@ doc ///
     assert(intersectionProduct(I,K,K) == 8)
 ///
 
+doc ///
+  Key
+    (intersectionMatrix, Ideal, List)
+    intersectionMatrix
+  Headline
+    the intersection matrix of a list of divisors on a smooth projective surface
+  Usage
+    intersectionMatrix(I,L)
+  Inputs
+    I: Ideal
+    L: List
+  Outputs
+    :Matrix ZZ
+  Description
+    Text
+      This function calculates the intersection matrix of a list of divisors on a projective variety with ideal $I$.
+    Example
+      I = example "ell.d8.g7";
+      K = canonicalModule I;
+      H = S^1/I**S^{1};
+      intersectionMatrix(I,{H,K})
+  SeeAlso
+    (intersectionProduct, Ideal, Module, Module)
+///
+
 TEST ///
-  I = example "rat.d11.g11.infty-sixsecants";
-  betti res I
-  assert(degree I == 11)
-  genera I
-  assert(arithmeticGenus I == 0)
+  I = example "rat.d3.g0.cubicscroll";
+  K = canonicalModule I;
+  H = S^1/I**S^{1};
+  M = intersectionMatrix(I,{H,K})
+  assert(M == matrix{{3,-5},{-5,8}}})
 ///
 
 -* Test section *-
