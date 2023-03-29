@@ -22,8 +22,8 @@ Version => "1.1",
               },
 	Headline => "A package for doing computations in tropical geometry",
 	Configuration => {
-		"path" => "",
-		"fig2devpath" => "",
+--		"path" => "",
+--		"fig2devpath" => "",
 --		"keepfiles" => true,
 "keepfiles" => false,
 		"cachePolyhedralOutput" => true,
@@ -117,7 +117,7 @@ polynomialCoeffs := (parameter,polyn) -> (
 --inputs: var power of a monomial
 --outputs: term with power as coefficient
 expToCoeff = (var) -> (
-    temp := separate("^",toString(var));
+    temp := separate("\\^",toString(var));
     if (length temp === 1) then return var else return concatenate(temp_1,temp_0);
 )
 
@@ -126,7 +126,7 @@ expToCoeff = (var) -> (
 toTropPoly = method(TypicalValue=>String)
 
 toTropPoly (RingElement) := (polyn) ->(
-    termList := apply(apply(terms polyn,toString),term->separate("*",term));
+    termList := apply(apply(terms polyn,toString),term->separate("\\*",term));
     tropTerms := apply(apply(apply(termList, term->apply(term,expToCoeff)),term->between("+",term)),concatenate);
     return "min("|concatenate(between(",",tropTerms))|")";
 )
@@ -135,7 +135,7 @@ toTropPoly (RingElement) := (polyn) ->(
 --outputs: min of linear polynomials for polymake
 toTropPoly (Matrix,Matrix) := (termList,coeffs) ->(
     noCoeffs := sum flatten entries termList;
-    termString := apply(apply(terms noCoeffs,toString),term->separate("*",term));
+    termString := apply(apply(terms noCoeffs,toString),term->separate("\\*",term));
     tropTerms := apply(apply(apply(termString, term->apply(term,expToCoeff)),term->between("+",term)),concatenate);
     withCoeffs := for i when i<numColumns termList list toString((flatten entries coeffs)_i)|"+"|tropTerms_i;
     return "min("|concatenate(between(",",withCoeffs))|")";
@@ -1048,6 +1048,7 @@ doc ///
 		visualizeHypersurface
 		(visualizeHypersurface,RingElement)
 		[visualizeHypersurface,Valuation]
+		Valuation
 	Headline
 		visualize the tropical hypersurface of the given polynomial
 	Usage
