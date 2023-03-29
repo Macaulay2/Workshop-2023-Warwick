@@ -2297,7 +2297,7 @@ assert(rank source R ==17)
 assert(dim(T)==rank(A))
 ///
 
--*
+
 -----------------------
 --tropicalVarietyWithPuiseuxVal
 -----------------------
@@ -2307,7 +2307,18 @@ I = ideal (t*x^2+x*y+t*y^2+x+y+t^2)
 T:=tropicalVarietyWithPuiseuxVal(I)
 assert(vertices(T#"PolyhedralComplex")==transpose matrix{{0,0},{-1,0},{0,-1},{2,2}})
 ///
-*-
+
+
+TEST///
+QQ[t,x,y]
+I = ideal(x*y+x+y+t)
+T:=tropicalVarietyWithPuiseuxVal(I)
+assert(rank(source(rays(fan(T))))== 4)
+assert(member({0,1},entries(transpose(lift(rays(fan(T)),ZZ)))))
+assert(lift(vertices(fan(T)),ZZ)== matrix{{0,1},{0,1}})
+///
+
+
 
 -----------------------
 --convertToPolymake
