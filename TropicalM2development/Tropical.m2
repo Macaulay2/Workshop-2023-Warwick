@@ -927,12 +927,21 @@ tropicalVarietyWithPuiseuxVal = method(
 
 --Temporary code until we get affineImage fixed in Polyhedra
 --input: polyhedron
-tempaffineImage = (A,P) ->(
-    Mv := A*(vertices P);
-    Mr := A*(rays P);
-    zeros:=transpose matrix({apply(rank target A,i->0_QQ)});
-    convexHull(Mv,Mr)+coneFromVData(zeros,A*(linealitySpace P))
-)    
+--tempaffineImage = (A,P) ->(
+--    Mv := A*(vertices P);
+--    Mr := A*(rays P);
+--    zeros:=transpose matrix({apply(rank target A,i->0_QQ)});
+--    convexHull(Mv,Mr)+coneFromVData(zeros,A*(linealitySpace P))
+--)   
+
+-- We shouldn't need something as complicated as affineImage. We have a polyhedron inside of
+-- a slice in R^n where the first coordinate is constant, and we just want to think of it
+-- as a polyhedron in R^{n-1}.
+-- input: polyhedron inside a slice in R^n where the first coordinate is constant
+-- output: polyhedron in R^{n-1}
+projectFromSlice = P -> (
+    return convexHull(submatrix'(vertices P ,{0},),submatrix'(rays P ,{0},), submatrix'(linealitySpace P ,{0},))
+    ) 
 
 tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     
@@ -963,8 +972,8 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
  	    for i from 0 when i < (numberOfMaxCones) do (
 		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
-		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
-		newSlicedMaxCone := tempaffineImage(A,slicedMaxCone);
+--		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
+		newSlicedMaxCone := projectFromSlice(slicedMaxCone);
 		if dim(newSlicedMaxCone)>-1 then 
 		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
 		else emptyCones = emptyCones |{i};
@@ -972,7 +981,12 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 	);
     	conesToKeep := select(numberOfMaxCones,i->(not(member(i,emptyCones))));
 	mults:=(multiplicities(T))_conesToKeep;
-	PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, multiplicities(T));
+	if (#conesToKeep == 0) then (
+	    print "The variety is empty!"; return null
+--	    Really we should output the empty tropical cycle here, but the command below appears to give null...
+--	    PC := tropicalCycle1(polyhedralComplex({emptyPolyhedron(numgens(ring(I))-1)}),mults)
+	    )
+	else (PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, mults));
 	return PC;
      )
 
@@ -2331,11 +2345,14 @@ assert(lift(vertices(fan(T)),ZZ)== matrix{{0,1},{0,1}})
 
 TEST///
 QQ[t,x,y,z]
-I = ideal(x*z-t*y^2,t*y-x^2)
-T:=tropicalVarietyWithPuiseuxVal(I)
+I = ideal(x*z-y^2,t*y-x^2)
+T=tropicalVarietyWithPuiseuxVal(I)
+-- The following asserts check that T is just a line with direction vector {1,2,3} through {1,1,1}
 assert(rank(source(linealitySpace(fan(T))))==1)
 assert(rank(rays(fan(T)))==0)
-assert(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))
+assert(rank(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))==1)
+assert(rank(source(vertices(fan(T))))==1)
+assert(rank(matrix({flatten(entries(transpose(vertices(fan(T)))-matrix({{1,1,1}}))),{1,2,3}}))==1)
 ///
 
 TEST/// 
@@ -2348,6 +2365,26 @@ assert(rank(source(linealitySpace(fan(T))))==0)
 assert(dim(fan(TT))==1)
 ///
 
+
+TEST///
+QQ[t,x,y]
+I = ideal(t-1,x+y+t)
+T=tropicalVarietyWithPuiseuxVal(I)
+--Add after making tropicalCycle1 behave better with empty input:
+--assert(rank(source(vertices(T)))==0)
+--assert(rank(source(rays(T)))==0)
+///
+
+
+-- From Example 3.1.9 of Tropical Geometry, Maclagan-Sturmfels
+TEST///
+QQ[t,x,y,z]
+I=ideal(t^2*x^2+t^2*y^2+t^3*z^2+x*y+t*x*z+y*z+x+y+t*z+t^2)
+T=tropicalVarietyWithPuiseuxVal(I)
+assert(rank(source(linealitySpace(fan(T))))==1)
+assert(rank(source(vertices(fan(T))))==8)
+--Add more assertions one issues with "polyhedra" get figured out
+//
 
 
 -----------------------
