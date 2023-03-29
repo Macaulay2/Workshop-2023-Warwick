@@ -2306,7 +2306,7 @@ TEST///
 QQ[t,x,y]
 I = ideal (t*x^2+x*y+t*y^2+x+y+t^2)
 T:=tropicalVarietyWithPuiseuxVal(I)
-assert(vertices(T#"PolyhedralComplex")==transpose matrix{{0,0},{-1,0},{0,-1},{2,2}})
+assert(lift(vertices(T#"PolyhedralComplex"),ZZ)==transpose matrix{{0,0},{-1,0},{0,-1},{2,2}})
 ///
 
 
