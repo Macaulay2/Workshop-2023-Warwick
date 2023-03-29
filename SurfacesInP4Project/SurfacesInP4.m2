@@ -280,6 +280,12 @@ randomVanishingIdeal(Module, Module) := Ideal => (F,G) -> (
      if numgens source sz =!= 1 then
        << "warning: expected syzygy to be a (twisted) ideal" << endl;
      ideal sz)
+ randomVanishingIdeal(Matrix) := Ideal => (A) -> (
+     presentIX := presentation cokernel A;
+     sz := syz transpose presentIX;
+     if numgens source sz =!= 1 then
+       << "warning: expected syzygy to be a (twisted) ideal" << endl;
+     ideal sz)
 
 -* Documentation section *-
 beginDocumentation()
