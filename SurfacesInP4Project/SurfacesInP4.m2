@@ -522,10 +522,10 @@ doc ///
   Usage
     intersectionMatrix(I,L)
   Inputs
-    I: Ideal
-    L: List
+    I:Ideal associated to a smooth projective surface
+    L:List of graded modules of same ring as I representing divisors
   Outputs
-    :Matrix ZZ
+    :Matrix
   Description
     Text
       This function calculates the intersection matrix of a list of divisors on a projective variety with ideal $I$.
@@ -543,7 +543,7 @@ TEST ///
   K = canonicalModule I;
   H = S^1/I**S^{1};
   M = intersectionMatrix(I,{H,K})
-  assert(M == matrix{{3,-5},{-5,8}}})
+  assert(M == matrix{{3,-5},{-5,8}})
 ///
 
 -* Test section *-
