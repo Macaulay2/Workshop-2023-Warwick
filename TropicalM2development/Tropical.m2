@@ -927,12 +927,21 @@ tropicalVarietyWithPuiseuxVal = method(
 
 --Temporary code until we get affineImage fixed in Polyhedra
 --input: polyhedron
-tempaffineImage = (A,P) ->(
-    Mv := A*(vertices P);
-    Mr := A*(rays P);
-    zeros:=transpose matrix({apply(rank target A,i->0_QQ)});
-    convexHull(Mv,Mr)+coneFromVData(zeros,A*(linealitySpace P))
-)    
+--tempaffineImage = (A,P) ->(
+--    Mv := A*(vertices P);
+--    Mr := A*(rays P);
+--    zeros:=transpose matrix({apply(rank target A,i->0_QQ)});
+--    convexHull(Mv,Mr)+coneFromVData(zeros,A*(linealitySpace P))
+--)   
+
+-- We shouldn't need something as complicated as affineImage. We have a polyhedron inside of
+-- a slice in R^n where the first coordinate is constant, and we just want to think of it
+-- as a polyhedron in R^{n-1}.
+-- input: polyhedron inside a slice in R^n where the first coordinate is constant
+-- output: polyhedron in R^{n-1}
+projectFromSlice = P -> (
+    return convexHull(submatrix'(vertices P ,{0},),submatrix'(rays P ,{0},), submatrix'(linealitySpace P ,{0},))
+    ) 
 
 tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     
@@ -963,8 +972,8 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
  	    for i from 0 when i < (numberOfMaxCones) do (
 		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
-		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
-		newSlicedMaxCone := tempaffineImage(A,slicedMaxCone);
+--		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
+		newSlicedMaxCone := projectFromSlice(slicedMaxCone);
 		if dim(newSlicedMaxCone)>-1 then 
 		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
 		else emptyCones = emptyCones |{i};
@@ -2333,9 +2342,13 @@ TEST///
 QQ[t,x,y,z]
 I = ideal(x*z-t*y^2,t*y-x^2)
 T:=tropicalVarietyWithPuiseuxVal(I)
+-- The following asserts check that T is just a line with direction vector {1,2,3} through {1,1,1}
 assert(rank(source(linealitySpace(fan(T))))==1)
 assert(rank(rays(fan(T)))==0)
-assert(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))
+assert(rank(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))==1)
+assert(rank(source(vertices(fan(T))))==1)
+
+assert(rank(matrix({flatten(entries(transpose(vertices(fan(T)))-matrix({{1,1,1}}))),{1,2,3}}))==1)
 ///
 
 
