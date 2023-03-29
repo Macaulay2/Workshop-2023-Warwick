@@ -436,7 +436,8 @@ doc ///
   Outputs
       :ZZ
   Description
-    Text     This function returns the arithmetic genus of the projective variety with ideal $I$.
+    Text     
+       This function returns the arithmetic genus of the projective variety with ideal $I$.
     Example 	
        I = example "ab.d10.g6";
        betti res I
