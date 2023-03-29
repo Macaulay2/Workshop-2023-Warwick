@@ -2320,6 +2320,16 @@ assert(lift(vertices(fan(T)),ZZ)== matrix{{0,1},{0,1}})
 ///
 
 
+TEST///
+QQ[t,x,y,z]
+I = ideal(x*z-t*y^2,t*y-x^2)
+T:=tropicalVarietyWithPuiseuxVal(I)
+assert(rank(source(linealitySpace(fan(T))))==1)
+assert(rank(rays(fan(T)))==0)
+assert(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))
+///
+
+
 
 -----------------------
 --convertToPolymake
