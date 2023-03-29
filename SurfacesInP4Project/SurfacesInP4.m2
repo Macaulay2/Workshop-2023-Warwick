@@ -522,8 +522,10 @@ doc ///
   Usage
     intersectionMatrix(I,L)
   Inputs
-    I:Ideal associated to a smooth projective surface
-    L:List of graded modules of same ring as I representing divisors
+    I:Ideal 
+      of a smooth projective surface
+    L:List 
+      of graded modules of the same ring as I representing divisors
   Outputs
     :Matrix
   Description
