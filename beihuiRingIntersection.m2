@@ -40,4 +40,19 @@ transpose gens I
 transpose gens gb I
 transpose leadTerm I
 
+-- count the number of monomials 
+use R
+
+-- the sagbi basis is monomial so we can just take these
+L = monomials (y_2 + x_2 + y_1 + 1)^6
+M = L % (leadTerm I)
+help compress
+
+transpose oo
+
+-- initial subring 
+-- S subring of R/I
+-- in(S) subring of R/in(I)
+
 -- we should write substitute for subrings
+-- we should write a leadTerm Subring function
