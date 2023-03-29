@@ -981,7 +981,12 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 	);
     	conesToKeep := select(numberOfMaxCones,i->(not(member(i,emptyCones))));
 	mults:=(multiplicities(T))_conesToKeep;
-	PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, multiplicities(T));
+	if (#conesToKeep == 0) then (
+	    print "The variety is empty!"; return null
+--	    Really we should output the empty tropical cycle here, but the command below appears to give null...
+--	    PC := tropicalCycle1(polyhedralComplex({emptyPolyhedron(numgens(ring(I))-1)}),mults)
+	    )
+	else (PC := tropicalCycle1(polyhedralComplex listOfSlicedCones, mults));
 	return PC;
      )
 
@@ -2340,17 +2345,36 @@ assert(lift(vertices(fan(T)),ZZ)== matrix{{0,1},{0,1}})
 
 TEST///
 QQ[t,x,y,z]
-I = ideal(x*z-t*y^2,t*y-x^2)
-T:=tropicalVarietyWithPuiseuxVal(I)
+I = ideal(x*z-y^2,t*y-x^2)
+T=tropicalVarietyWithPuiseuxVal(I)
 -- The following asserts check that T is just a line with direction vector {1,2,3} through {1,1,1}
 assert(rank(source(linealitySpace(fan(T))))==1)
 assert(rank(rays(fan(T)))==0)
 assert(rank(matrix({flatten(entries(linealitySpace(fan(T)))),{1,2,3}}))==1)
 assert(rank(source(vertices(fan(T))))==1)
-
 assert(rank(matrix({flatten(entries(transpose(vertices(fan(T)))-matrix({{1,1,1}}))),{1,2,3}}))==1)
 ///
 
+
+TEST///
+QQ[t,x,y]
+I = ideal(t-1,x+y+t)
+T=tropicalVarietyWithPuiseuxVal(I)
+--Add after making tropicalCycle1 behave better with empty input:
+--assert(rank(source(vertices(T)))==0)
+--assert(rank(source(rays(T)))==0)
+///
+
+
+-- From Example 3.1.9 of Tropical Geometry, Maclagan-Sturmfels
+TEST///
+QQ[t,x,y,z]
+I=ideal(t^2*x^2+t^2*y^2+t^3*z^2+x*y+t*x*z+y*z+x+y+t*z+t^2)
+T=tropicalVarietyWithPuiseuxVal(I)
+assert(rank(source(linealitySpace(fan(T))))==1)
+assert(rank(source(vertices(fan(T))))==8)
+--Add more assertions one issues with "polyhedra" get figured out
+//
 
 
 -----------------------
