@@ -1,0 +1,23 @@
+-- -*- M2-comint -*- hash: 1091944333
+-- polymake not present
+
+i1 : QQ[t,x,y]
+
+o1 = QQ[t, x..y]
+
+o1 : PolynomialRing
+
+i2 :         I = ideal (t*x^2+x*y+t*y^2+x+y+t^2)
+
+              2      2    2
+o2 = ideal(t*x  + t*y  + t  + x*y + x + y)
+
+o2 : Ideal of QQ[t, x..y]
+
+i3 : tropicalVarietyWithPuiseuxVal(I)
+
+o3 = TropicalCycle1{...2...}
+
+o3 : TropicalCycle1
+
+i4 : 
