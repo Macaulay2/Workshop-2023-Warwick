@@ -27,9 +27,9 @@ S = QQ[p_1, p_2, p_3]
 -- TASK
 -- apply the function "exponents" to each "leadTerm" of each entry of the matrix
 -- and make the result into a matrix with one column for each exponent
-
+-- then apply toricGroebner to the output
 first exponents leadTerm M_(0,0)
-
+apply({1,2,3}, x -> x^2)
 
 A = matrix {{2, 1, 3}, {0, 1, 2}}
 toricMarkov(A, S) -- a minimal generating set
