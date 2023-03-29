@@ -466,6 +466,45 @@ TEST ///
   assert(degree I == 10)
 ///
 
+doc ///
+  Key
+    (intersectionProduct, Ideal, Module, Module)
+    intersectionProduct
+  Headline
+    the intersection product of two divisors inside of a smooth projective surface
+  Usage
+    intersectionProduct(I, M, N)
+  Inputs
+    I:Ideal
+    M:Module
+    N:Module
+  Outputs
+    :ZZ
+  Description
+    Text
+      This function takes two divisors defined on a surface and returns their intersection product.
+    Example
+      I = example "ell.d8.g7";
+      K = canonicalModule I;
+      H = S^1/I**S^{1};
+      intersectionProduct(I,H,K)
+      intersectionProduct(I,K,K)
+  SeeAlso
+    (intersectionMatrix, Ideal, List)
+    (arithmeticGenus, Ideal)
+    (surfaceInvariants, Ideal)
+    (degree, Ideal)
+    (resolution, Ideal)
+ ///
+ 
+ TEST ///
+    I = example "rat.d3.g0.cubicscroll";
+    K = canonicalModule I;
+    H = S^1/I**S^{1};
+    assert(intersectionProduct(I,H,H) == 3)
+    assert(intersectionProduct(I,K,K) == 8)
+///
+
 TEST ///
   I = example "rat.d11.g11.infty-sixsecants";
   betti res I
