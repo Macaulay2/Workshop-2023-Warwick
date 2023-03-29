@@ -925,6 +925,15 @@ tropicalVarietyWithPuiseuxVal = method(
     }
 )
 
+--Temporary code until we get affineImage fixed in Polyhedra
+--input: polyhedron
+tempaffineImage = (A,P) ->(
+    Mv := A*(vertices P);
+    Mr := A*(rays P);
+    zeros:=transpose matrix({apply(rank target A,i->0_QQ)});
+    convexHull(Mv,Mr)+coneFromVData(zeros,A*(linealitySpace P))
+)    
+
 tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     
     --- we expect that we are working over 	QQ{{t}}, where t is the first variable of the poly ring.
@@ -955,7 +964,7 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
 		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
-		newSlicedMaxCone := affineImage(A,slicedMaxCone);
+		newSlicedMaxCone := tempaffineImage(A,slicedMaxCone);
 		if dim(newSlicedMaxCone)>-1 then 
 		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
 		else emptyCones = emptyCones |{i};
