@@ -12,7 +12,12 @@ newPackage(
 export {"LazardProjection",
 "FactorsInList",
 "factors",
-"MultiRootIsolation"}
+"MultiRootIsolation",
+"leadCoefficient",
+"fullProjection",
+"Cell",
+"evalPolyList"
+}
 
 -* Code section *-
 
@@ -87,8 +92,8 @@ fullProjection(List) := (L) -> (
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
-Node = method()
-Node(List, MutableHashTable, Integer) := (S,p,i) -> (
+Cell = method()
+Cell(List, MutableHashTable, Integer) := (S,p,i) -> (
     h = new MutableHashTable;
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
@@ -100,7 +105,7 @@ Node(List, MutableHashTable, Integer) := (S,p,i) -> (
     for samplePoint in samplePoints (
         pNew = p
         pNew#v = samplePoint
-        h#samplePoint = Node(S,pNew,i+1)
+        h#samplePoint = Cell(S,pNew,i+1)
         )
     )
 
