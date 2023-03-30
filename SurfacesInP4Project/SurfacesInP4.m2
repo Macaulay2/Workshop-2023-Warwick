@@ -396,13 +396,12 @@ Description
    It is known that the degrees of smooth projective complex surfaces, not of general type, embedded in P^4,
    are bounded. It is conjectured that the bound is 15, but the known bound is 80; see ***.
   Example
-   P = readExampleFile "P4Surfaces.txt";
-   names P
+   surfacesInP4()
   Text
    Each example has a name consisting of the Enriques classification
-   (ab = Abelian, enr = Enriques, ell = Elliptic, rat = rational etc.)
+   (ab = Abelian, enr = Enriques, ell = Elliptic, rat = rational, bielliptic, k3, ruled)
   Example
-   I = example("enr.d11.g10", P);
+   I = example "enr.d11.g10";
   Text
    This is an enriques surface of degree 11 and sectional genus 10 in P4.
   Example
@@ -414,9 +413,12 @@ Description
    K = canonicalModule I;
    H = S^1/I**S^{1};
    intersectionMatrix(I,{H,K})
-Acknowledgement
+   surfaceInvariants I
 Contributors
+  Add names!
 References
+  Decker, Ein, Schreyer, Constructions of surfaces in $\PP^4$, J. Alg Geom (1993)
+  Decker, Schreyer, non-general type surfaces in $\PP^4$, some remarks on bounds and constructions, J. Symbolic Comp (2000)
 Caveat
  Though these are supposed be examples in characteristic 0, they are actually computed in characteristic p.
  This was done in Macaulay classic, and seemed necessary because of limitations in speed, and because
