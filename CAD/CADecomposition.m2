@@ -9,13 +9,13 @@ newPackage(
     DebuggingMode => true
     )
 
-export {"LazardProjection",
-"FactorsInList",
+export {"lazardProjection",
+"factorsInList",
 "factors",
-"MultiRootIsolation",
+"multiRootIsolation",
 "leadCoefficient",
 "fullProjection",
-"Cell",
+"cell",
 "evalPolyList"
 }
 
@@ -46,8 +46,8 @@ support(List) := (L) -> (
 	Output:
 		List {g_1, \dots , g_m} of unrepeated factors of all polynomials in L
 ///
-FactorsInList = method()
-FactorsInList(List) := (L) -> (
+factorsInList = method()
+factorsInList(List) := (L) -> (
     L0 := apply(L, p -> factors(p));
     -- print("Unflattend list of factors:", L0);
     L1 := flatten(L0);
@@ -63,8 +63,8 @@ leadCoefficient(RingElement, RingElement) := (p, v) -> (
 	)
 
 --    
-LazardProjection = method()
-LazardProjection(List, RingElement) := (L,v) -> (
+lazardProjection = method()
+lazardProjection(List, RingElement) := (L,v) -> (
         L0 := select(L, p -> not member(v,support(p)));
         print L0;
         L = select(L, p -> member(v,support(p)));
@@ -75,7 +75,7 @@ LazardProjection(List, RingElement) := (L,v) -> (
         print L2;
 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);			    
         print L3;
-	FactorsInList(L0|L1|L2|L3)
+	factorsInList(L0|L1|L2|L3)
 	)
 
 -- Creates a full Lazard projection
@@ -84,7 +84,7 @@ fullProjection(List) := (L) -> (
     -- List is list of multivariate polynomials
     S = {L};
     while length(support(L)) > 1 do (
-        L = LazardProjection(L, (support(L))_0);
+        L = lazardProjection(L, (support(L))_0);
         S = append(S,L);
         );
     S
@@ -92,8 +92,8 @@ fullProjection(List) := (L) -> (
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
-Cell = method()
-Cell(List, MutableHashTable, Integer) := (S,p,i) -> (
+cell = method()
+cell(List, MutableHashTable, Number) := (S,p,i) -> (
     h = new MutableHashTable;
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
@@ -105,7 +105,7 @@ Cell(List, MutableHashTable, Integer) := (S,p,i) -> (
     for samplePoint in samplePoints (
         pNew = p
         pNew#v = samplePoint
-        h#samplePoint = Cell(S,pNew,i+1)
+        h#samplePoint = cell(S,pNew,i+1)
         )
     )
 
@@ -116,10 +116,10 @@ Cell(List, MutableHashTable, Integer) := (S,p,i) -> (
 		r: integer, rational or real number
 ///
 
-MultiRootIsolation = method()
+multiRootIsolation = method()
 loadPackage "RealRoots";
 for A in {ZZ,QQ,RR} do
-MultiRootIsolation(List,A) := (L,r) -> (
+multiRootIsolation(List,A) := (L,r) -> (
     h=product L;
     -- print h;
     realRootIsolation(h,r)
@@ -152,12 +152,12 @@ SeeAlso
 
 doc ///
   Key
-    (LazardProjection, List, RingElement)
-    LazardProjection
+    (lazardProjection, List, RingElement)
+    lazardProjection
   Headline
     Computes the Lazard projection with respect to a variable.
   Usage
-    LazardProjection(L,v)
+    lazardProjection(L,v)
   Inputs
     L:List
       of polynomials all in the same ring
@@ -175,7 +175,7 @@ doc ///
       f1=x1^2*x2-x1*x3+x3^3
       f2=x2^2*x3+x3
       L={f0,f1,f2}
-      L2 = LazardProjection(L,x1)
+      L2 = lazardProjection(L,x1)
   SeeAlso
 ///
 
@@ -188,7 +188,7 @@ TEST /// -* [insert short title for this test] *-
   f1=x1^2*x2-x1*x3+x3^3
   f2=x2^2*x3+x3
   L={f0,f1,f2}
-  L2 = LazardProjection(L,x1)
+  L2 = lazardProjection(L,x1)
   answer = {x3,x2,4*x2*x3-1,x2^2+1}
   assert(sort L2 === sort answer)
 ///
