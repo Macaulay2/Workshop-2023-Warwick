@@ -10,7 +10,7 @@ loadPackage "RealRoots";
 for A in {ZZ,QQ,RR} do
 MultiRootIsolation(List,A) := (L,r) -> (
     h=product L;
-    print h;
+    -- print h;
     realRootIsolation(h,r)
     )
 
