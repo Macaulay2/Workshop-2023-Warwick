@@ -588,7 +588,7 @@ doc ///
 
 TEST ///
   I = example "rat.d3.g0.cubicscroll";
-  surfaceInvariants I;
+  assert((surfaceInvariants I)#"degree" == 3);
 ///
 
 doc ///
@@ -624,6 +624,33 @@ doc ///
 TEST ///
   I = example "rat.d3.g0.cubicscroll";
   assert(leBarzN6(3,0,1) == 21);
+///
+
+doc ///
+  Key
+    (omega, Ring, ZZ)
+    omega
+  Headline
+    Constructs $\Omega^i(i)$
+  Usage
+    omega(R,i)
+  Inputs
+    R:Ring
+      homogeneous coordinate ring of projective 4-space
+    i:ZZ
+        exterior power and shift of $\Omega$
+  Outputs
+    M:Module
+  Description
+    Text
+      This function calculates the $i$th exterior power of the cotangent bundle $\Omega$ with a shift of $(i)$.
+    Example
+      R = QQ[x,y,z,t,u];
+      i = 2;
+      M = omega(R,i)
+  SeeAlso
+    (randomMap, Module, Module)
+    (randomVanishingIdeal, Module, Module)
 ///
 
 -* Test section *-
