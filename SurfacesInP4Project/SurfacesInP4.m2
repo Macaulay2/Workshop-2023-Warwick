@@ -32,6 +32,7 @@ export {
     "sectionalGenus",
     "arithmeticGenus",
     "canonicalModule",
+    "canonicalIdeal",
     "intersectionProduct",
     "intersectionMatrix",
     "leBarzN6",
@@ -129,6 +130,53 @@ canonicalModule Ideal := opts ->  I -> (
     -- either the first c gens of I are not a CI, or the user asked to not use that method...
     Ext^(codim I)(S^1/I, S^{-n})
     )
+
+canonicalIdeal = method(Options => {Degree=>null, Limit=>20})
+canonicalIdeal Ideal := opts -> I -> (
+    R := (ring I) / I;
+    K := (canonicalModule I) ** R;
+    H := Hom(K,R);
+    if (zero H) then error("Canonical module does not inject into the homogeneous coordinate ring.");
+
+    deg := if instance(opts.Degree, ZZ) then opts.Degree else min flatten degrees H;
+    phi := homomorphism (basis (deg,H))_{0};
+    tries := 1;
+
+    -- We believe any non-zero element of Hom(K,R) should give the required injection, but we check nonetheless.
+    if (kernel phi != 0) then (
+        << "Warning: found a non-zero element of Hom(K,R) that is not injective"; 
+        while (tries < opts.Limit) do ( 
+        << "Trying random maps, after encountering " << tries << " non-injections.";
+        deg = if instance(opts.Degree, ZZ) then opts.Degree else random flatten degrees H; 
+        basisMap := basis(deg, H); 
+        phi = homomorphism (basisMap * random(source basisMap ,R^{-deg}));
+        if (kernel phi == 0) then break else tries = tries + 1;)); 
+
+    if (tries == opts.Limit) then << "Could not find the canonical ideal after " << tries << " random tries." else
+    (deg, ideal image phi))
+
+canonicalIdeal (Ideal, Module) := opts -> (I,K) -> (
+    R := (ring I) / I;
+    K = K ** R;
+    H := Hom(K,R);
+    if (zero H) then error("Canonical module does not inject into the homogeneous coordinate ring.");
+
+    deg := if instance(opts.Degree, ZZ) then opts.Degree else min flatten degrees H;
+    phi := homomorphism (basis (deg,H))_{0};
+    tries := 1;
+
+    -- We believe any non-zero element of Hom(K,R) should give the required injection, but we check nonetheless.
+    if (kernel phi != 0) then (
+        << "Warning: found a non-zero element of Hom(K,R) that is not injective"; 
+        while (tries < opts.Limit) do ( 
+        << "Trying random maps, after encountering " << tries << " non-injections.";
+        deg = if instance(opts.Degree, ZZ) then opts.Degree else random flatten degrees H; 
+        basisMap := basis(deg, H); 
+        phi = homomorphism (basisMap * random(source basisMap ,R^{-deg}));
+        if (kernel phi == 0) then break else tries = tries + 1;)); 
+
+    if (tries == opts.Limit) then << "Could not find the canonical ideal after " << tries << " random tries." else
+    (deg, ideal image phi))
 
 intersectionProduct = method()
 intersectionProduct (Ideal, Module, Module) := ZZ => (I,M,N) -> (
@@ -1219,3 +1267,11 @@ saturate I5 == I5
 saturate I5 == I -- true
 betti res oo
 
+TEST ///
+  I := example "ell.d8.g7";
+  invts := surfaceInvariants I; 
+  expectedDim := invts#"sectional genus" - invts#"irregularity" + invts#"geometric genus"; 
+  (d, J) = canonicalIdeal I;
+  computedDim = numcols basis(d+1,J);
+  assert (computedDim == expectedDim)
+///

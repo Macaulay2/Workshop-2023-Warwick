@@ -13,18 +13,34 @@ R = S/I
 K = K ** R
 
 basis(1, K)
-Hom(K, R)
 prune oo
 basis(1, oo)
 
 H = Hom(K, R)
+basis H
+degrees H
+peek basis (2,H)
+viewHelp random 
+homomorphism (basis (2,H))_{0}
+source basis (2,H)
+
+M = basis (2,H)
+source M
+random (source M, R^{-2})
 phi = homomorphism H_{0}
 source phi
 target phi
 degree phi
 ker phi == 0
-J = ideal image phi
+J = ideal (image phi)
 betti J
+
+-- Method to return canonical ideal 
+I = example "k3.d8.g6"
+(d, J) = canonicalIdeal(I)
+assert(numcols basis(d+1,J) == 7)
+
+--
 
 Hom(K, R)
 super basis(2, Hom(K, R))
