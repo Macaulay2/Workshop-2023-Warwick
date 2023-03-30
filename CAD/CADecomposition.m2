@@ -16,7 +16,8 @@ export {"lazardProjection",
 "leadCoefficientt",
 "fullProjection",
 "liftingPoint",
-"evalPolyList"
+"evalPolyList",
+"evalPoly"
 }
 
 -* Code section *-
