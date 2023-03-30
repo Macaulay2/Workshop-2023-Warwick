@@ -683,6 +683,7 @@ doc ///
   SeeAlso
     (omega, Ring, ZZ)
     (randomVanishingIdeal, Module, Module)
+    (randomVanishingIdeal, Matrix)
 ///
 
 -* Test section *-
