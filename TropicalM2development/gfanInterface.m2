@@ -2495,7 +2495,7 @@ gfanGroebnerComplex Ideal := opts -> (I) ->(
     if not(K===QQ) then error("Your coefficient field needs to be QQ");
     (ringMap, J):= gfanConvertToNewRing I;
     --create the input string
-    input := gfanRingToString(ringMap R) | gfanIdealToString J;
+    input := gfanRingToString(target ringMap) | gfanIdealToString J;
     output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p
     if(length(output#0)==0) then return "error: this complex is empty";
     gfanParsePolyhedralFan output
