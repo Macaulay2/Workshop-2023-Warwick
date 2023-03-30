@@ -520,7 +520,7 @@ updateComputationIncremental(HashTable) := (compTable) -> (
 
 --------------------------------------------------------------------------
 -- updateComputation using FourTiTwo strategy 
--- The gb computation uses 4ti2  
+-- The gb computation of SIdeal and reduction ideal uses 4ti2  
 -- Does not work for quotient rings
 
 updateComputationFourTiTwo = method();
@@ -580,7 +580,8 @@ updateComputationFourTiTwo(HashTable) := (compTable) -> (
         ];
     -- Could have user specify order on p variables, this will be used by 4ti2 
     pRing := (coefficientRing liftedRing) pVariableMonoid;
-    pInclusion := map(tensorRing, pRing, (vars tensorRing)_{numberVariables..numberGenerators-1});
+    -- pInclusion := map(tensorRing, pRing, (vars tensorRing)_{numberVariables..numberGenerators-1});
+    pInclusion := map(tensorRing, pRing, (vars tensorRing)_{numberVariables .. (numberVariables + numberGenerators-1)});
     exponentMatrix := transpose matrix apply(flatten entries sagbiGens, m -> first exponents leadTerm m);
     pIntersection := toricGroebner(exponentMatrix, pRing); -- to specify term order, create new polynomial ring in p variables
     sIdealGB := pInclusion(gens pIntersection) | (generatingVariables - inclusionLifted(sub(leadTerm sagbiGens, liftedRing)));

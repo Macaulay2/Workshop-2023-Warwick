@@ -88,9 +88,27 @@ J = ideal H
 gens gb J
 
 R = QQ[x,y,z] 
+-- S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}
+benchmark "(S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}; sagbi(S, Strategy=>\"FourTiTwo\"))"
+benchmark "(S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}; sagbi(S))"
+
+-*
+i18 : benchmark "(S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}; sagbi(S, Strategy=>\"FourTiTwo\"))"
+
+o18 = .0443313953488372
+
+o18 : RR (of precision 53)
+
+i19 : benchmark "(S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}; sagbi(S))"
+
+o19 = .044921875
+
+o19 : RR (of precision 53)
+*-
+
 S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}
-SB = sagbi(S, Strategy=>"FourTiTwo")
-SB1 = sagbi S
+time SB = sagbi(S)
+
 
 -- 5. the reduction ideal is equal to the SIdeal when ambient ring is not a quotient
 
@@ -104,3 +122,15 @@ SB1 = sagbi S
 ---------------------------------------------------
 -- Guesses:
 -- I suspect that toricGroebner uses GRevLex
+
+
+-------------------------
+
+path = prepend("./", path)
+needsPackage "SubalgebraBases"
+needsPackage "MatchingFields" -- one day this will exist in M2 (currently on Ollie's github)
+L = diagonalMatchingField(3, 8)
+S = subring L
+time sagbi(S, Strategy => "FourTiTwo", AutoSubduce => false, PrintLevel => 1)
+time sagbi(S, AutoSubduce => false, PrintLevel => 1)
+
