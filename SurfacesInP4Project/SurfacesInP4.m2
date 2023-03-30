@@ -1268,10 +1268,11 @@ saturate I5 == I -- true
 betti res oo
 
 TEST ///
-  I := example "ell.d8.g7";
-  invts := surfaceInvariants I; 
-  expectedDim := invts#"sectional genus" - invts#"irregularity" + invts#"geometric genus"; 
-  (d, J) = canonicalIdeal I;
-  computedDim = numcols basis(d+1,J);
-  assert (computedDim == expectedDim)
+  for surf in {"ab.d10.g6", "bielliptic.d10.g6", "ell.d7.g6", "enr.d11.g10", "k3.d8.g6"} do (
+    I := example surf ;
+    invts := surfaceInvariants I; 
+    expectedDim := invts#"sectional genus" - invts#"irregularity" + invts#"geometric genus"; 
+    (d, J) = canonicalIdeal I;
+    computedDim = numcols basis(d+1,J);
+    assert (computedDim == expectedDim))
 ///
