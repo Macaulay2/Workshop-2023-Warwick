@@ -107,19 +107,15 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     h
     )
 
-///
-	Root Isolation for Several Polynomials:
-	Input:
-		L: List of polynomials,
-		r: integer, rational or real number
-///
-
+-- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
-for A in {ZZ,QQ,RR} do
-samplePoints(List,A) := (L,r) -> (
+-- for A in {ZZ,QQ,RR} do
+-- samplePoints(List,A) := (L,r) -> (
+   -- We consider r=1 for the size of the interval
+samplePoints(List) := (L) -> (
     h:=product L;
     -- print h;
-    L = realRootIsolation(h,r);
+    L = realRootIsolation(h,1);
     print("root isolating intervals", L);
     L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
     L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
@@ -138,15 +134,37 @@ Description
 SeeAlso
 ///
 
- ///
+doc ///
   Key
+    (samplePoints, List)
+    samplePoints
   Headline
+    Computes a list of sample points in each cell that isolate the roots
   Usage
+    samlePoints(L)
   Inputs
+    L:List
+      of polynomials in one variable
   Outputs
+    :List
+      list of points in ZZ/QQ/RR, depending on the defining coefficient field
   Description
     Text
-    Example
+
+    Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
+  Example
+    R=QQ[x]
+    f=x^2-1
+    g=x^3-1
+    L1={f,g}
+    samplePoints(L1,1/2)
+
+    f1=5*x^3+1
+    g1=x^2-1
+    h1=1/2*x^5+3*x-1
+    L2={f1,g1,h1}
+    S:=samplePoints(L2,3)
+   
   SeeAlso
 ///
 
