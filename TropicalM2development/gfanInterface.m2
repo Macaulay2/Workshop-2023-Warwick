@@ -84,7 +84,12 @@ export {
 --	"gfanVectorListListToString", -- to make gfan input
 	"gfanVersion",
 	"toPolymakeFormat",
-	"multiplicitiesReorder"
+	"multiplicitiesReorder",
+	"gfanConvertToNewRing",
+	"gfanRingToString",
+	"gfanIdealToString",
+	"runGfanCommand",
+--	"gfanGroebnerComplex"
 }
 
 gfanVerbose = gfanInterface#Options#Configuration#"verbose"
