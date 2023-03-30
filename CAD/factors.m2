@@ -26,11 +26,13 @@ FactorsInList(List) := (L) -> (
     L2 := L1/first//unique;
     L3 := select(L2, p -> #support p>0 )
     )
+
+/// Test
+    R=QQ[x1,x2,x3]
+    f0=x1*x2
+    f1=x1^2*x2-x1*x3+x3^3
+    f2=x2^2*x3+x3
+    f3=5*x1
+    L={f0,f1,f2,f3}
+   FactorsInList(L)
 ///
-	Test
-	R=QQ[x1,x2,x3]
-	f0=x1*x2
-	f1=x1^2*x2-x1*x3+x3^3
-	f2=x2^2*x3+x3
-	f3=5*x1
-	L={f0,f1,f2,f3}
