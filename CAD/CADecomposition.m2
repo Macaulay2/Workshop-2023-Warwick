@@ -11,7 +11,8 @@ newPackage(
 
 export {"LazardProjection",
 "FactorsInList",
-"factors"}
+"factors",
+"MultiRootIsolation"}
 
 -* Code section *-
 
@@ -65,6 +66,22 @@ LazardProjection(List, RingElement) := (L,v) -> (
         print L3;
 	FactorsInList(L0|L1|L2|L3)
 	)
+
+///
+	Root Isolation for Several Polynomials:
+	Input:
+		L: List of polynomials,
+		r: integer, rational or real number
+///
+
+MultiRootIsolation = method()
+loadPackage "RealRoots";
+for A in {ZZ,QQ,RR} do
+MultiRootIsolation(List,A) := (L,r) -> (
+    h=product L;
+    -- print h;
+    realRootIsolation(h,r)
+    )
 
 -* Documentation section *-
 beginDocumentation()
