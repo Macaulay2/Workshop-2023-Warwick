@@ -4,7 +4,7 @@ newPackage(
     Date => "29/03/2023",
     Headline => "Cylindrical Algebraic Decomposition",
     Authors => {{ Name => "", Email => "", HomePage => ""}},
-    PackageExports => {"Elimination"},
+    PackageExports => {"Elimination", "RealRoots"},
     AuxiliaryFiles => false,
     DebuggingMode => true
     )
@@ -13,7 +13,7 @@ export {"lazardProjection",
 "factorsInList",
 "factors",
 "samplePoints",
-"leadCoefficient",
+"leadCoefficientt",
 "fullProjection",
 "liftingPoint",
 "evalPolyList"
@@ -47,14 +47,15 @@ factorsInList(List) := (L) -> (
     L1 := flatten(L0);
     L2 := L1/first//unique;
     L3 := select(L2, p -> #support p>0 )
-    )
+)
 
 
 -- Finds the lead coefficient of a ring element with respect to a variable
-leadCoefficient(RingElement, RingElement) := (p, v) -> (
-        d := degree(v,p);	
-	contract(v^d,p)
-	)
+leadCoefficientt = method()
+leadCoefficientt(RingElement, RingElement) := (p, v) -> (
+  d := degree(v,p);	
+  contract(v^d,p)
+)
 
 --    
 lazardProjection = method()
@@ -63,7 +64,7 @@ lazardProjection(List, RingElement) := (L,v) -> (
         print L0;
         L = select(L, p -> member(v,support(p)));
         print L;
-        L1 := for p in L list leadCoefficient(p,v);		
+        L1 := for p in L list leadCoefficientt(p,v);		
         print L1;
 	L2 := for p in L list discriminant(p,v);	
         print L2;
@@ -76,7 +77,7 @@ lazardProjection(List, RingElement) := (L,v) -> (
 fullProjection = method()
 fullProjection(List) := (L) -> (
     -- List is list of multivariate polynomials
-    S = {L};
+    S := {L};
     while length(support(L)) > 1 do (
         L = lazardProjection(L, (support(L))_0);
         S = append(S,L);
@@ -88,20 +89,22 @@ fullProjection(List) := (L) -> (
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
 liftingPoint(List, MutableHashTable) := (S,p) -> (
-    h = new MutableHashTable;
-    i = #keys(p);
+    h := new MutableHashTable;
+    i := #keys(p);
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
-    L = evalPolyList(S_i, p); -- S is the list of lists of polynomials
+    L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
     -- This function evaluates the point p into the polynomials of S_i
-    v = support(L);
-    samplePoints = RootIsolation(L);
-    SNew = drop(S,1)
-    for samplePoint in samplePoints (
-        pNew = p
-        pNew#v = samplePoint
-        h#samplePoint = liftingPoint(S,pNew)
-        )
+    if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
+    v := support(L);
+    samplePoints := samplePoints(L);
+    SNew := drop(S,1);
+    for samplePoint in samplePoints do (
+        pNew := p;
+        pNew#v = samplePoint;
+        h#samplePoint = liftingPoint(S,pNew);
+        );
+    h
     )
 
 ///
@@ -112,12 +115,11 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
 ///
 
 samplePoints = method()
-loadPackage "RealRoots";
 for A in {ZZ,QQ,RR} do
 samplePoints(List,A) := (L,r) -> (
-    h=product L;
+    h:=product L;
     -- print h;
-    L  := realRootIsolation(h,r);
+    L = realRootIsolation(h,r);
     print("root isolating intervals", L);
     L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
     L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
@@ -187,7 +189,8 @@ doc ///
   Usage
     factors(p)
   Inputs
-    p:polynomials in a ring
+    p:RingElement
+      polynomial in a ring
   Outputs
     :List
       list of lists of the factors and their exponents, last element is the constant with exponent 1
@@ -230,12 +233,12 @@ doc ///
 
 doc ///
   Key
-    (leadCoefficient, RingElement, RingElement)
-    leadCoefficient
+    (leadCoefficientt, RingElement, RingElement)
+    leadCoefficientt
   Headline
     Finds the lead coefficient of a ring element with respect to a variable.
   Usage
-    leadCoefficient(p,v)
+    leadCoefficientt(p,v)
   Inputs
     p:RingElement
     v:RingElement
