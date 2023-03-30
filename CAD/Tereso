@@ -1,1 +1,7 @@
 This is my file
+
+myfn = method(Options => {Trailing => false})
+myfn Ideal := opts -> (I) -> (
+    usetrailing := opts.Trailing;
+    )
+myfn(I,Trailing=>true)
