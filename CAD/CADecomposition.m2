@@ -171,11 +171,85 @@ doc ///
       Here we will say what the Lazard projection is
     Example
       R=QQ[x1,x2,x3]
-      f0=x1*x2
-      f1=x1^2*x2-x1*x3+x3^3
-      f2=x2^2*x3+x3
-      L={f0,f1,f2}
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
       L2 = lazardProjection(L,x1)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (factors, RingElement)
+    factors
+  Headline
+    Returns a list of two element lists containing its factors and the exponents.
+  Usage
+    factors(p)
+  Inputs
+    p:polynomials in a ring
+  Outputs
+    :List
+      list of lists its factors and its exponents
+  Description
+    Text
+      This function breaks a RingElement into its factors
+    Example
+      R=QQ[x1,x2,x3]
+      p=x1^3x2^3x3-4x1^2x2^3x3-x1^2x2^2x3^2+x1^2x2^2x3+4x1x2^3x3+4x1x2^2x3^2-4x1x2^2x3-4x2^2x3^2+4x2^2x3
+      factors(p)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (factorsInList, List)
+    factorsInList
+  Headline
+    Returns the factors that appear in a list of RingElements
+  Usage
+    factorsInList(L)
+  Inputs
+    L:List
+        list of RingElements
+  Outputs
+    :List
+      list of lists its factors and its exponents
+  Description
+    Text
+      This function returns all the factors that appear in a list of RingElements without considering how many times they appear and ignoring the coefficients.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      factorsInList(L)
+  SeeAlso
+///
+
+///
+  Key
+    (leadCoefficient, RingElement, RingElement)
+    leadCoefficient
+  Headline
+    Finds the lead coefficient of a ring element with respect to a variable.
+  Usage
+    leadCoefficient(p,v)
+  Inputs
+    p:RingElement
+    v:RingElement
+      a variable in the ring
+  Outputs
+    :RingElement
+  Description
+    Text
+      The leading coefficient of a RingElement with respect to a variable is returned.
+    Example
+      R=QQ[x1,x2,x3]
+      p=x1^2*x2-x1*x3+x3^3
+      lazardProjection(p,x1)
   SeeAlso
 ///
 
