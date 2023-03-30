@@ -15,7 +15,7 @@ export {"lazardProjection",
 "samplePoints",
 "leadCoefficient",
 "fullProjection",
-"cell",
+"liftingPoint",
 "evalPolyList"
 }
 
@@ -92,9 +92,10 @@ fullProjection(List) := (L) -> (
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
-cell = method()
-cell(List, MutableHashTable, Number) := (S,p,i) -> (
+liftingPoint = method()
+liftingPoint(List, MutableHashTable) := (S,p) -> (
     h = new MutableHashTable;
+    i = #keys(p);
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
     L = evalPolyList(S_i, p); -- S is the list of lists of polynomials
@@ -105,7 +106,7 @@ cell(List, MutableHashTable, Number) := (S,p,i) -> (
     for samplePoint in samplePoints (
         pNew = p
         pNew#v = samplePoint
-        h#samplePoint = cell(S,pNew,i+1)
+        h#samplePoint = liftingPoint(S,pNew)
         )
     )
 
@@ -259,19 +260,17 @@ doc ///
 
 doc ///
   Key
-    (cell, List, MutableHashTable, Number)
-    cell
+    (liftingPoint, List, MutableHashTable)
+    liftingPoint
   Headline
     Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
   Usage
-    cell(S,p,i)
+    liftingPoint(S,p)
   Inputs
     S:List
       list of lists of RingElements
     p:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
-    i:Number
-      number indicating the level of the CAD we are in
   Outputs
     :MutableHashTable
       MutableHashTable describing an OpenCAD
@@ -284,7 +283,7 @@ doc ///
       p1=x1^2*x2-x1*x3+x3^3
       p2=x2^2*x3+x3
       L={p0,p1,p2}
-      cell(L)
+      liftingPoint(L)
   SeeAlso
 ///
 
