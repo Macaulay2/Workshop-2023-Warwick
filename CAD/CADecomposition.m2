@@ -79,7 +79,7 @@ fullProjection(List) := (L) -> (
     -- List is list of multivariate polynomials
     S := {L};
     while length(support(L)) > 1 do (
-        L = lazardProjection(L, (support(L))_0);
+        L = lazardProjection(L, (support(L))_0); -- ideally doing gmods here
         S = append(S,L);
         );
     S
@@ -89,7 +89,7 @@ fullProjection(List) := (L) -> (
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
 liftingPoint(List, MutableHashTable) := (S,p) -> (
-    h := new MutableHashTable;
+    cell := new MutableHashTable;
     i := #keys(p);
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
@@ -102,9 +102,9 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     for samplePoint in samplePoints do (
         pNew := p;
         pNew#v = samplePoint;
-        h#samplePoint = liftingPoint(S,pNew);
+        cell#samplePoint = liftingPoint(S,pNew);
         );
-    h
+    cell
     )
 
 -- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
@@ -120,6 +120,15 @@ samplePoints(List) := (L) -> (
     L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
     L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
     )
+
+
+-- Does the open CAD
+openCAD = method()
+openCAD(List) := (L) -> (
+  S := fullProjection(L);
+  p = new MutableHashTable;
+  liftingPoint(S,p)
+)
 
 -* Documentation section *-
 beginDocumentation()
@@ -299,6 +308,33 @@ doc ///
       p2=x2^2*x3+x3
       L={p0,p1,p2}
       liftingPoint(L)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (openCAD, List)
+    openCAD
+  Headline
+    Given a list of polynomials, an open CAD of those polynomials is returned.
+  Usage
+    openCAD(L,v)
+  Inputs
+    L:List
+      of polynomials all in the same ring
+  Outputs
+    :MutableHashTable
+      describing an open CAD of the given list of polynomials
+  Description
+    Text
+      An open CAD is a mathematical object that decomposes the space into cells in which the given polynomials are sign invariant.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      openCAD(L)
   SeeAlso
 ///
 
