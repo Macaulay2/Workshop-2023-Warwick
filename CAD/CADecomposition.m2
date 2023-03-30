@@ -30,8 +30,8 @@ export {"lazardProjection",
 ///
 factors = method()
 factors(RingElement) := (p) -> (
-  L := p//factor//toList/toList;
-  print L
+  L := p//factor//toList/toList
+  -- print L
   )
 
 -- finds the support of a list of Polynomials
