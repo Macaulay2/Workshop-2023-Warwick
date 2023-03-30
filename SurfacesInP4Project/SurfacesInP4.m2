@@ -362,7 +362,6 @@ Description
    intersectionMatrix(I,{H,K})
 Acknowledgement
 Contributors
-Patience Ablett, patience.ablett@warwick.ac.uk
 References
 Caveat
  Though these are supposed be examples in characteristic 0, they are actually computed in characteristic p.
