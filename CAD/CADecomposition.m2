@@ -9,9 +9,43 @@ newPackage(
     DebuggingMode => true
     )
 
-export {"LazardProjection"}
+export {"LazardProjection",
+"FactorsInList",
+"factors"}
 
 -* Code section *-
+
+///
+	Factorising (list of) Polynomials into (List of) RingElements
+	Input:
+		p: polynomial
+	Output:
+		{ {g_1,e_1}, \dots,{g_m,e_m},{coeff,1}}, g_i: facotrs, e_i: exponents, last e,ement is the coeff w exponent 1
+///
+factors = method()
+factors(RingElement) := (p) -> (
+  L := p//factor//toList/toList;
+  print L
+  )
+
+///
+	Factorising list of Polynomials into List of RingElements
+	Input:
+		L: List of polynomials,
+	Output:
+		List {g_1, \dots , g_m} of unrepeated factors of all polynomials in L
+///
+FactorsInList = method()
+FactorsInList(List) := (L) -> (
+    L0 := apply(L, p -> factors(p));
+    print("Unflattend list of factors:", L0);
+    L1 := flatten(L0);
+    L2 := L1/first//unique;
+    L3 := select(L2, p -> #support p>0 )
+    )
+///
+
+
 leadCoefficient(RingElement, RingElement) := (p, v) -> (
         d := degree(v,p);	
 	contract(v^d,p)
@@ -29,7 +63,7 @@ LazardProjection(List, RingElement) := (L,v) -> (
         print L2;
 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);			    
         print L3;
-	L0|L1|L2|L3
+	FactorsInList(L0|L1|L2|L3)
 	)
 
 -* Documentation section *-
