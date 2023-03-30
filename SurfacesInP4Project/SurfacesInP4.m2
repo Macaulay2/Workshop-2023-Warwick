@@ -201,16 +201,24 @@ surfaceInvariants Ideal := opts -> I -> (
 	  assert ((eX',h11',K2') == (eX, h11, K2));
 	  );
      
-     << "degree    = " << d << endl;
-     << "sec genus = " << secgenus << endl;
-     << "irreg q   = " << q << endl;
-     << "pg        = " << pg << endl;
-     << "e(X)      = " << eX << endl;
-     << "K^2       = " << K2 << endl;
-     << "h11       = " << h11 << endl;
-     << "chi       = " << chi << endl;
+    -- << "degree    = " << d << endl;
+    -- << "sectional genus = " << secgenus << endl;
+    -- << "irregularity q   = " << q << endl;
+    -- << "pg        = " << pg << endl;
+    -- << "e(X)      = " << eX << endl;
+    -- << "K^2       = " << K2 << endl;
+    -- << "h11       = " << h11 << endl;
+    -- << "chi       = " << chi << endl;
+    -- if n === 5 then (
+    --   << "N6        = " << n6 << endl;
+    --   );
      if n === 5 then (
-       << "N6        = " << n6 << endl;
+       return hashTable{{"degree",d},{"sectional genus",secgenus},
+	   {"irregularity",q},{"geometric genus",pg},{"Euler number",eX},
+	   {"K^2",K2},{"h^1,1",h11},{"chi",chi},{"N6",n6}}
+     else return hashTable{{"degree",d},{"sectional genus",secgenus},
+	   {"irregularity",q},{"geometric genus",g},{"Euler number",eX},
+	   {"K^2",K2},{"h^1,1",h11},{"chi",chi}}
        );
      )
 -*
