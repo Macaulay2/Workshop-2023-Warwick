@@ -138,8 +138,8 @@ intersectionMatrix(Ideal, List) := Matrix=> (I,L) -> (
    matrix for M in L list for N in L list intersectionProduct(I,M,N)
 )
 
-N6 = method()
-N6(ZZ, ZZ, ZZ) := (d, secgenus, chi) -> (
+leBarzN6 = method()
+leBarzN6(ZZ, ZZ, ZZ) := (d, secgenus, chi) -> (
     -- Le Barz 6-secant formula, if X is in P4.
     -- degree of a double curve of a generic projection to P3.
     delta := binomial(d-1,2) - secgenus;
@@ -189,7 +189,7 @@ surfaceInvariants Ideal := opts -> I -> (
 	  K2 := (d^2 - 10*d - 5*HK + 12*chi) // 2;
 	  eX := 12*chi - K2;
 	  h11 := eX - 2 + 4*q - 2*pg;
-	  n6 := N6(d,secgenus,chi);
+	  n6 := leBarzN6(d,secgenus,chi);
 	  );
      if opts.Distrust then (
 	  (eX',h11',K2') := (eX, h11, K2);
@@ -215,7 +215,7 @@ surfaceInvariants Ideal := opts -> I -> (
      if n === 5 then (
        return hashTable{{"degree",d},{"sectional genus",secgenus},
 	   {"irregularity",q},{"geometric genus",pg},{"Euler number",eX},
-	   {"K^2",K2},{"h^1,1",h11},{"chi",chi},{"N6",n6}})
+	   {"K^2",K2},{"h^1,1",h11},{"chi",chi},{"Le Barz N6",n6}})
      else (
         return hashTable{{"degree",d},{"sectional genus",secgenus},
 	   {"irregularity",q},{"geometric genus",pg},{"Euler number",eX},
