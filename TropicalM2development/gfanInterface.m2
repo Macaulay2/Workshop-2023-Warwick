@@ -1148,6 +1148,7 @@ argStrs = hashTable {
 	"vectorinput" => "--vectorinput",
 	"xml" => "--xml",
 	"tropicalbasistest" => "--tropicalbasistest",
+	"groebnerComplex" => "--groebnerComplex",
 	"p" => "-p"
 };
 
@@ -4863,3 +4864,18 @@ gfanResultantFan (A, "special" => {0,1,1,0,1,1,0,1,1})
 QQ[x,y,z]
 A = {x+y+z,x+y+z,x+y+z}
 gfanResultantFan (A, "special" => {0,1,1,0,1,1,0,1,1})
+
+
+R=QQ[x,y,z]
+I=ideal(x+y+2*z)
+
+R := ring I;
+K := coefficientRing R;
+if not(K===QQ) then error("Your coefficient field needs to be QQ");
+(ringMap, J):= gfanConvertToNewRing I;
+      --create the input string                                                                                                                                                 
+input := gfanRingToString(target ringMap) | gfanIdealToString J;
+			    
+opts = new MutableHashTable;
+opts#"groebnerComplex"=true;
+opts#"p"=2
