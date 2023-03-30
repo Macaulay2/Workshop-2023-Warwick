@@ -296,6 +296,38 @@ randomVanishingIdeal(Module, Module) := Ideal => (F,G) -> (
        << "warning: expected syzygy to be a (twisted) ideal" << endl;
      ideal sz)
 
+construction= new MutableHashTable
+construction#"rat.d3.g0.cubicscroll"={{-1,-1},{0,0,0}}
+construction#"rat.d4.g0.veronese"={{-1,-1,-1},{(omega,1)}}
+construction#"rat.d5.g2.castelnuovo"={{-1,-1},{1,0,0}}
+construction#"rat.d6.g3.bordiga"={{-1,-1,-1},{0,0,0,0}}
+construction#"rat.d7.g4"={{-1,-1,-1,-1},{(omega,1),0}}
+construction#"rat.d8.g5"={{(omega,2),(omega,2)},{(omega,1),(omega,1),0,0,0,0,0}}
+construction#"rat.d8.g6"={{(omega,3)},{1,0,0,0,0}}
+construction#"rat.d9.g7"={{(omega,2),(omega,3)},{(omega,1),(omega,1),0,0,0}}
+construction#"rat.d9.g7"={{(omega,3),(omega,3)},{(omega,1),(omega,1),0}}
+construction#"ruled.d5.g1.elliptic-scroll"={{-1,-1,-1,-1,-1},{(omega,2)}}
+construction#"k3.d7.g5"={{-1,-2},{0,0,0}}
+construction#"k3.d8.g6"={{-2,-1,-1},{(omega,1)}}
+construction#"k3.d9.g8"={{(omega,3),-1},{0,0,0,0,0,0}}
+construction#"k3.d11.g12"={{(omega,3),-1},{(omega,2),0,0}}
+construction#"k3.d12.g14"={{(omega,3),(omega,3),(omega,3),(omega,3),-1},{(omega,2),(omega,2),(omega,2)}}
+construction#"ell.d7.g6"={{-2,-2},{-1,-1,1}}
+construction#"ell.d8.g7"={{-1,-1},{0,1,1}}
+construction#"ell.d9.g7"={{(omega,2),(omega,2),-1},{(omega,1),(omega,1),(omega,1),0,0}}
+construction#"ell.d10.g10"={{(omega,3),-1,-1},{(omega,1),0,0,0}}
+construction#"ell.d11.g12"={{(omega,3),(omega,3),-1,-1},{(omega,1),(omega,2),0}}
+
+createModule = method()
+createModule (Ring, String) := List => (R,S) -> (if not construction#?S then error "example not in the database, sorry :(";
+     P := R[x,y,z,u,v];
+     L := construction#S;
+     L0 := L_0;
+     L1 := L_1;
+     M0 := directSum(for a in L0 list(if(instance(a,ZZ)) then(P^{a}) else(omega(P,a_1))));
+     M1 := directSum(for a in L1 list(if(instance(a,ZZ)) then(P^{a}) else(omega(P,a_1))));
+     {M0,M1})
+ 
 -* Documentation section *-
 beginDocumentation()
 
@@ -684,6 +716,42 @@ doc ///
     (omega, Ring, ZZ)
     (randomVanishingIdeal, Module, Module)
     (randomVanishingIdeal, Matrix)
+///
+
+doc ///
+  Key
+    (createModule, Ring, String)
+    createModule
+  Headline
+    the two vector bundles used in the construction of the examples of surfaces over a certain ring R
+  Usage
+    createModule(R,S)
+  Inputs
+    R:Ring
+    S:String
+  Outputs
+    :List
+  Description
+    Text
+      This function takes the string associated to a family of surfaces in P4 and returns the two modules used to construct an example of the family defined over that ring.
+    Example
+      R = ZZ/32003;
+      S = "ell.d11.g12";
+      M = createModule(R,S);
+      X = randomVanishingIdeal(randomMap(M_1,M_0));
+  SeeAlso
+    (surfaceInvariants, Ideal)
+    (randomVanishingIdeal, Module, Module)
+    (randomVanishingIdeal, Matrix)
+    (exampleGenerator, Ring, String)
+ ///
+ 
+ TEST ///
+   R = ZZ/32003;
+   S = "rat.d7.g4";
+   M = createModule(R,S);
+   X = randomVanishingIdeal(randomMap(M_1,M_0));
+   assert((degree X) == 7)
 ///
 
 -* Test section *-
