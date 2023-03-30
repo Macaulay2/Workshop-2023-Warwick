@@ -3,21 +3,21 @@ newPackage(
     Version => "0.1",
     Date => "29/03/2023",
     Headline => "Cylindrical Algebraic Decomposition",
-    Authors => {{ Name => "", Email => "", HomePage => ""}},
+    Authors => {{ Name => "del R\'{i}o, T.", Email => "delriot@uni.coventry.ac.uk", HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},	{ Name => "Rahkooy, H.", Email => "rahkooy@maths.ox.ac.uk", HomePage => "https://people.maths.ox.ac.uk/rahkooy/"},	{ Name => "Lee, C.", Email => "cel34@bath.ac.uk", HomePage => "https://people.bath.ac.uk/cel34/"}},
     PackageExports => {"Elimination", "RealRoots"},
     AuxiliaryFiles => false,
     DebuggingMode => true
     )
 
-export {"lazardProjection",
+export {"factors",
 "factorsInList",
-"factors",
-"samplePoints",
+"evalPoly",
+"evalPolyList",
 "leadCoefficientt",
+"lazardProjection",
 "projectionPhase",
 "liftingPoint",
-"evalPolyList",
-"evalPoly",
+"samplePoints",
 "openCAD"
 }
 
@@ -413,7 +413,7 @@ doc ///
 ///
 
 -* Test section *-
-TEST /// -* [insert short title for this test] *-
+TEST /// -* lazardProjection test *-
 -- test code and assertions here
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
@@ -424,6 +424,38 @@ TEST /// -* [insert short title for this test] *-
   L2 = lazardProjection(L,x1)
   answer = {x3,x2,4*x2*x3-1,x2^2+1}
   assert(sort L2 === sort answer)
+///
+
+TEST /// -* evalPoly test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L={f0,f1,f2}
+  p = new MutableHashTable
+  p#x1 = 1
+  p#x2 = 3
+  E = evalPoly(f1,p)
+  answer = 3-x3+x3^3
+  assert(sort E === sort answer)
+///
+
+TEST /// -* evalPolyList test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L={f0,f1,f2}
+  p = new MutableHashTable
+  p#x1 = 1
+  p#x2 = 3
+  E = evalPolyList(L,p)
+  answer = {3, 3-x3+x3^3, 9*x3+x3}
+  assert(sort E === sort answer)
 ///
 
 end--
