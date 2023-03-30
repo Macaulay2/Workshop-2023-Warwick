@@ -219,7 +219,7 @@ surfaceInvariants Ideal := opts -> I -> (
      else 
         return hashTable{{"degree",d},{"sectional genus",secgenus},
 	   {"irregularity",q},{"geometric genus",g},{"Euler number",eX},
-	   {"K^2",K2},{"h^1,1",h11},{"chi",chi}}
+	   {"K^2",K2},{"h^1,1",h11},{"chi",chi}};
      )
 -*
 surfacesInP4 = method(Options => {Degree=>null,Genus =>null, Type =>null})
