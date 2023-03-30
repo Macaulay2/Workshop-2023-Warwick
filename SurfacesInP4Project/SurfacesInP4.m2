@@ -4,9 +4,11 @@
 -- (from 2nd construction, N = 113..117.  First construction gives one of these)
 -- 1 more example of Abo: elliptic surface, d=12, g=13 (need code from Hiro)
 -- 1 conic bundle, deg=8 conic bundle over elliptic curve (M2 book has this example)
--- HC examples: rational, degree 11, sectinoalGenus?
+-- HC examples: rational, degree 11, sectionalGenus?
 -- Frank's examples of rational surfaces of degree 11? Double check if we have these?
 -- Sorin and Kristian wrote a paper about surfaces of degree 10.
+
+-- need to add test for omega method
 
 newPackage("SurfacesInP4",
     Authors => {{Name => "David Eisenbud", 
@@ -650,6 +652,35 @@ doc ///
       M = omega(R,i)
   SeeAlso
     (randomMap, Module, Module)
+    (randomVanishingIdeal, Module, Module)
+///
+
+
+doc ///
+  Key
+    (randomMap, Module, Module)
+    randomMap
+  Headline
+    Constructs a random graded map of degree 0
+  Usage
+    randomMap(M,N)
+  Inputs
+    M:Module
+      over a ring R
+    N:Module
+        over a ring R
+  Outputs
+    A:Matrix
+  Description
+    Text
+      This function generates a random graded map of degree 0 from N to M.
+    Example
+      R = QQ[x,y,z,t,u];
+      M1 = R^{-1}++R^{-1}++R^{-1};
+      M2 = omega(R,1);
+      randomMap(M2,M1)
+  SeeAlso
+    (omega, Ring, ZZ)
     (randomVanishingIdeal, Module, Module)
 ///
 
