@@ -15,7 +15,7 @@ LazardProjection(List, RingElement) := (L,v) -> (
         print L2;
 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);			
         print L3;
-	L0|L1|L2|L3
+	FactorsInList(L0|L1|L2|L3)
 	)
 
 ---Testing Projection:---
