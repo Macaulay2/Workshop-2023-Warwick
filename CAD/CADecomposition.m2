@@ -12,7 +12,7 @@ newPackage(
 export {"lazardProjection",
 "factorsInList",
 "factors",
-"multiRootIsolation",
+"samplePoints",
 "leadCoefficient",
 "fullProjection",
 "cell",
@@ -116,13 +116,16 @@ cell(List, MutableHashTable, Number) := (S,p,i) -> (
 		r: integer, rational or real number
 ///
 
-multiRootIsolation = method()
+samplePoints = method()
 loadPackage "RealRoots";
 for A in {ZZ,QQ,RR} do
-multiRootIsolation(List,A) := (L,r) -> (
+samplePoints(List,A) := (L,r) -> (
     h=product L;
     -- print h;
-    realRootIsolation(h,r)
+    L  := realRootIsolation(h,r);
+    print("root isolating intervals", L);
+    L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
+    L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
     )
 
 -* Documentation section *-
