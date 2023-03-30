@@ -171,7 +171,8 @@ doc ///
       list of projected polynomials not involving $v$
   Description
     Text
-      Here we will say what the Lazard projection is
+      
+      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials w.r.t $v$. For openCAD, the trailing coefficients are not needed.
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
