@@ -844,6 +844,47 @@ doc ///
    assert((sectionalGenus X) == 4)
 ///
 
+doc ///
+Key
+    (canonicalModule,Ideal)
+    canonicalModule
+Headline
+    The canonical module of the variety corresponding to a homogeneous ideal I in standard graded ring S=k[x_{1},...,x_{n}] with deg(x_{i})=1.  
+Usage 
+    canonicalModule(I)
+Inputs
+    I:Ideal 
+        of a projective variety. 
+Outputs
+    :Module
+Description
+    Text
+       This function calculates the canonical module of the variety corresponding to the homogeneous ideal I in a standard graded ring S. 
+    
+       If the option Ext is not selected, then it will try to express I as a complete intersection. Otherwise, it will use Ext to calculate the canonical module. 
+    Example
+       k=QQ;
+       S=k[x,y,z];
+       I=ideal(y^2*z-x^3-z^3);
+       canonicalModule(I)
+Caveat
+    (1)
+    This function is designed for ideals in standard-graded polynomial rings. For instance, 
+    
+    R = ZZ/101[a,b,c,Degrees=>{{1,2},{2,1},{1,0}}]
+    I=ideal(a^2*c^4-a*b^2*c);
+    canonicalModule(I)
+    
+    will give an error.
+    
+    (2)
+    This function can be applied to non-homogeneous ideals as well, but it might not give the expected output.      
+SeeAlso 
+    cotangentSheaf
+    tangentSheaf
+    ProjectiveVariety 
+///
+
 -* Test section *-
 ///
 -*
