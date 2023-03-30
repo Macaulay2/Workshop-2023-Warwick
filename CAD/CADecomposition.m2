@@ -21,13 +21,7 @@ export {"lazardProjection",
 
 -* Code section *-
 
-///
-	Factorising (list of) Polynomials into (List of) RingElements
-	Input:
-		p: polynomial
-	Output:
-		{ {g_1,e_1}, \dots,{g_m,e_m},{coeff,1}}, g_i: facotrs, e_i: exponents, last e,ement is the coeff w exponent 1
-///
+-- factors a given polynomial
 factors = method()
 factors(RingElement) := (p) -> (
   L := p//factor//toList/toList
@@ -196,7 +190,7 @@ doc ///
     p:polynomials in a ring
   Outputs
     :List
-      list of lists its factors and its exponents
+      list of lists of the factors and their exponents, last element is the constant with exponent 1
   Description
     Text
       This function breaks a RingElement into its factors
