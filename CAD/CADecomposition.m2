@@ -126,7 +126,7 @@ samplePoints(List) := (L) -> (
 openCAD = method()
 openCAD(List) := (L) -> (
   S := fullProjection(L);
-  p = new MutableHashTable;
+  p := new MutableHashTable;
   liftingPoint(S,p)
 )
 
@@ -159,20 +159,19 @@ doc ///
       list of points in ZZ/QQ/RR, depending on the defining coefficient field
   Description
     Text
+      Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
+    Example
+      R=QQ[x]
+      f=x^2-1
+      g=x^3-1
+      L1={f,g}
+      samplePoints(L1,1/2)
 
-    Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
-  Example
-    R=QQ[x]
-    f=x^2-1
-    g=x^3-1
-    L1={f,g}
-    samplePoints(L1,1/2)
-
-    f1=5*x^3+1
-    g1=x^2-1
-    h1=1/2*x^5+3*x-1
-    L2={f1,g1,h1}
-    S:=samplePoints(L2,3)
+      f1=5*x^3+1
+      g1=x^2-1
+      h1=1/2*x^5+3*x-1
+      L2={f1,g1,h1}
+      S:=samplePoints(L2,3)
    
   SeeAlso
 ///
@@ -195,7 +194,6 @@ doc ///
       list of projected polynomials not involving $v$
   Description
     Text
-      
       Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials w.r.t $v$. For openCAD, the trailing coefficients are not needed.
     Example
       R=QQ[x1,x2,x3]
