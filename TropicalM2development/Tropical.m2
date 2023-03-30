@@ -2353,6 +2353,16 @@ assert(rank(source(vertices(fan(T))))==1)
 assert(rank(matrix({flatten(entries(transpose(vertices(fan(T)))-matrix({{1,1,1}}))),{1,2,3}}))==1)
 ///
 
+TEST/// 
+QQ[t,x,y]
+I = ideal(t^3*x^2+t*x*y+t^3*y^2+t*x+t*y+t^3)
+T:= tropicalVarietyWithPuiseuxVal(I)
+assert(rank(source(rays(fan(T))))==3)
+assert(lift(vertices(fan(T)),ZZ)==matrix{{0,-2,0,2},{0,0,-2,2}})
+assert(rank(source(linealitySpace(fan(T))))==0) 
+assert(dim(fan(TT))==1)
+///
+
 
 TEST///
 QQ[t,x,y]
