@@ -14,10 +14,11 @@ export {"lazardProjection",
 "factors",
 "samplePoints",
 "leadCoefficientt",
-"fullProjection",
+"projectionPhase",
 "liftingPoint",
 "evalPolyList",
-"evalPoly"
+"evalPoly",
+"openCAD"
 }
 
 -* Code section *-
@@ -50,25 +51,21 @@ factorsInList(List) := (L) -> (
     L3 := select(L2, p -> #support p>0 )
 )
 
--- Evaluates the given polynomial with respect to the given sample point.
+-- Evaluates the given RingElement in a point given by a MutableHashTable.
 evalPoly = method()
-
 evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
         for k in keys(alpha) do
           p=sub(p, {k => alpha#k});
 	p
       )
 
--- Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
+-- Evaluates a List of RingElement in a point given by a MutableHashTable
 evalPolyList = method()
-
 evalPolyList(List,MutableHashTable) := (S, alpha) -> (
-  S1 = for p in S list
+  S1 := for p in S list
     evalPoly(p,alpha);
   S1
 )
-
-
 
 -- Finds the lead coefficient of a ring element with respect to a variable
 leadCoefficientt = method()
@@ -77,31 +74,27 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
   contract(v^d,p)
 )
 
---    
+-- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
-        L0 := select(L, p -> not member(v,support(p)));
-        print L0;
-        L = select(L, p -> member(v,support(p)));
-        print L;
-        L1 := for p in L list leadCoefficientt(p,v);		
-        print L1;
-	L2 := for p in L list discriminant(p,v);	
-        print L2;
-	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);			    
-        print L3;
+  L0 := select(L, p -> not member(v,support(p)));
+  L = select(L, p -> member(v,support(p)));
+  L1 := for p in L list leadCoefficientt(p,v);
+	L2 := for p in L list discriminant(p,v);
+	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);
 	factorsInList(L0|L1|L2|L3)
 	)
 
 -- Creates a full Lazard projection
-fullProjection = method()
-fullProjection(List) := (L) -> (
+projectionPhase = method()
+projectionPhase(List) := (L) -> (
     -- List is list of multivariate polynomials
     S := {L};
     while length(support(L)) > 1 do (
-        L = lazardProjection(L, (support(L))_0); -- ideally doing gmods here
-        S = append(S,L);
-        );
+      -- print(L);
+      L = lazardProjection(L, (support(L))_0); -- ideally doing gmods here
+      S = prepend(L,S);
+      );
     S
     )
 
@@ -117,9 +110,10 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
     v := support(L);
-    samplePoints := samplePoints(L);
+    print(L);
+    newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
-    for samplePoint in samplePoints do (
+    for samplePoint in newSamplePoints do (
         pNew := p;
         pNew#v = samplePoint;
         cell#samplePoint = liftingPoint(S,pNew);
@@ -134,8 +128,9 @@ samplePoints = method()
    -- We consider r=1 for the size of the interval
 samplePoints(List) := (L) -> (
     h:=product L;
-    -- print h;
-    L = realRootIsolation(h,1);
+    print L;
+    print h;
+    L = realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
     print("root isolating intervals", L);
     L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
     L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
@@ -145,7 +140,7 @@ samplePoints(List) := (L) -> (
 -- Does the open CAD
 openCAD = method()
 openCAD(List) := (L) -> (
-  S := fullProjection(L);
+  S := projectionPhase(L);
   p := new MutableHashTable;
   liftingPoint(S,p)
 )
