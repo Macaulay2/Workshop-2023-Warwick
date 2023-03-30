@@ -34,6 +34,7 @@ export {
     "canonicalModule",
     "intersectionProduct",
     "intersectionMatrix",
+    "leBarzN6",
     "surfaceInvariants",
     "Distrust",
     "surfacesInP4",
@@ -554,6 +555,40 @@ TEST ///
   H = S^1/I**S^{1};
   M = intersectionMatrix(I,{H,K})
   assert(M == matrix{{3,-5},{-5,8}})
+///
+
+doc ///
+  Key
+    (surfaceInvariants, Ideal)
+    surfaceInvariants
+  Headline
+    Invariants of a smooth surface in projective 4-space.
+  Usage
+    surfaceInvariants I
+  Inputs
+    I:Ideal 
+      of a smooth projective surface
+  Outputs
+    H:HashTable
+  Description
+    Text
+      This function calculates the following invariants of a surface in projective 4-space:
+      degree, sectional genus, irregularity, geometric genus, Euler number $e$, $K^2$, $h^{1,1}$,
+      holomorphic Euler characteristic $\chi$ and $N_6$, the number obtained from Le Barz's six-secant formula.
+    Example
+      I = example "k3.d11.g11.1-sixsecant";
+      surfaceInvariants I;
+      arithmeticGenus I;
+  SeeAlso
+    (sectionalGenus, Ideal)
+    (arithmeticGenus, Ideal)
+    (degree, Ideal) 
+    (N6, ZZ, ZZ, ZZ)
+///
+
+TEST ///
+  I = example "rat.d3.g0.cubicscroll";
+  surfaceInvariants I;
 ///
 
 -* Test section *-
