@@ -21,7 +21,7 @@ factors(RingElement) := (p) -> (
 FactorsInList = method()
 FactorsInList(List) := (L) -> (
     L0 := apply(L, p -> factors(p));
-    print("Unflattend list of factors:", L0);
+    -- print("Unflattend list of factors:", L0);
     L1 := flatten(L0);
     L2 := L1/first//unique;
     L3 := select(L2, p -> #support p>0 )
