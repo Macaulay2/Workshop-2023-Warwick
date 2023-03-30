@@ -320,7 +320,7 @@ construction#"ell.d11.g12"={{(omega,3),(omega,3),-1,-1},{(omega,1),(omega,2),0}}
 
 createModule = method()
 createModule (Ring, String) := List => (R,S) -> (if not construction#?S then error "example not in the database, sorry :(";
-     P := R[x,y,z,u,v];
+     P := R(monoid[getSymbol "x",getSymbol "y",getSymbol "z",getSymbol "u",getSymbol "v"]);
      L := construction#S;
      L0 := L_0;
      L1 := L_1;
