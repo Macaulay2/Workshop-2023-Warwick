@@ -328,6 +328,12 @@ createModule (Ring, String) := List => (R,S) -> (if not construction#?S then err
      M1 := directSum(for a in L1 list(if(instance(a,ZZ)) then(P^{a}) else(omega(P,a_1))));
      {M0,M1})
  
+exampleGenerator = method()
+exampleGenerator (Ring, String) := Ideal => (R,S) -> (if not construction#?S then error "example not in the database, sorry :(";
+    M := createModule(R,S);
+    mp:= randomMap(M_1,M_0);
+    randomVanishingIdeal(mp))
+ 
 -* Documentation section *-
 beginDocumentation()
 
@@ -752,6 +758,40 @@ doc ///
    M = createModule(R,S);
    X = randomVanishingIdeal(randomMap(M_1,M_0));
    assert((degree X) == 7)
+///
+
+doc ///
+  Key
+    (exampleGenerator, Ring, String)
+    exampleGenerator
+  Headline
+    generates an example of a surface of the given family
+  Usage
+    exampleGenerator(R,S)
+  Inputs
+    R:Ring
+    S:String
+  Outputs
+    :Ideal
+  Description
+    Text
+      This function takes the string associated to a family of surfaces in P4 and returns an example in that family (defined over the given ring)
+    Example
+      R = ZZ/32003;
+      S = "ell.d11.g12";
+      X = exampleGenerator(R,S);
+  SeeAlso
+    (surfaceInvariants, Ideal)
+    (randomVanishingIdeal, Module, Module)
+    (randomVanishingIdeal, Matrix)
+    (createModule, Ring, String)
+ ///
+ 
+  TEST ///
+   R = ZZ/32003;
+   S = "rat.d7.g4";
+   X = exampleGenerator;
+   assert((sectionalGenus X) == 4)
 ///
 
 -* Test section *-
