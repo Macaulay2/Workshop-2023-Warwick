@@ -29,6 +29,11 @@ factors(RingElement) := (p) -> (
   print L
   )
 
+-- finds the support of a list of Polynomials
+support(List) := (L) -> (
+    unique(flatten(L/support))
+    )
+
 ///
 	Factorising list of Polynomials into List of RingElements
 	Input:
@@ -44,14 +49,15 @@ FactorsInList(List) := (L) -> (
     L2 := L1/first//unique;
     L3 := select(L2, p -> #support p>0 )
     )
-///
 
 
+-- Finds the lead coefficient of a ring element with respect to a variable
 leadCoefficient(RingElement, RingElement) := (p, v) -> (
         d := degree(v,p);	
 	contract(v^d,p)
 	)
-	    
+
+--    
 LazardProjection = method()
 LazardProjection(List, RingElement) := (L,v) -> (
         L0 := select(L, p -> not member(v,support(p)));
@@ -66,6 +72,37 @@ LazardProjection(List, RingElement) := (L,v) -> (
         print L3;
 	FactorsInList(L0|L1|L2|L3)
 	)
+
+-- Creates a full Lazard projection
+fullProjection = method()
+fullProjection(List) := (L) -> (
+    -- List is list of multivariate polynomials
+    S = {L};
+    while length(support(L)) > 1 do (
+        L = LazardProjection(L, (support(L))_0);
+        S = append(S,L);
+        );
+    S
+    )
+
+-- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
+-- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
+Node = method()
+Node(List, MutableHashTable, Integer) := (S,p,i) -> (
+    h = new MutableHashTable;
+    -- HashTable is a point in i variables 
+    -- List is a list of lists of polynomials, the first list of polys with i+1 variables
+    L = evalPolyList(S_i, p); -- S is the list of lists of polynomials
+    -- This function evaluates the point p into the polynomials of S_i
+    v = support(L);
+    samplePoints = RootIsolation(L);
+    SNew = drop(S,1)
+    for samplePoint in samplePoints (
+        pNew = p
+        pNew#v = samplePoint
+        h#samplePoint = Node(S,pNew,i+1)
+        )
+    )
 
 ///
 	Root Isolation for Several Polynomials:
