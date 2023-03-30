@@ -233,7 +233,7 @@ doc ///
   SeeAlso
 ///
 
-///
+doc ///
   Key
     (leadCoefficient, RingElement, RingElement)
     leadCoefficient
@@ -254,6 +254,37 @@ doc ///
       R=QQ[x1,x2,x3]
       p=x1^2*x2-x1*x3+x3^3
       lazardProjection(p,x1)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (cell, List, MutableHashTable, Number)
+    cell
+  Headline
+    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
+  Usage
+    cell(S,p,i)
+  Inputs
+    S:List
+      list of lists of RingElements
+    p:MutableHashTable
+      point described using a hash table where the keys are RingElements (variables)
+    i:Number
+      number indicating the level of the CAD we are in
+  Outputs
+    :MutableHashTable
+      MutableHashTable describing an OpenCAD
+  Description
+    Text
+      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      cell(L)
   SeeAlso
 ///
 
