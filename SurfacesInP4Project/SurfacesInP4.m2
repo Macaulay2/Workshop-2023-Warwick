@@ -653,6 +653,7 @@ doc ///
   SeeAlso
     (randomMap, Module, Module)
     (randomVanishingIdeal, Module, Module)
+    (randomVanishingIdeal, Matrix)
 ///
 
 
