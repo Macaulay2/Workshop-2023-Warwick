@@ -583,7 +583,7 @@ doc ///
     (sectionalGenus, Ideal)
     (arithmeticGenus, Ideal)
     (degree, Ideal) 
-    (N6, ZZ, ZZ, ZZ)
+    (leBarzN6, ZZ, ZZ, ZZ)
 ///
 
 TEST ///
