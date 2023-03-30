@@ -2479,6 +2479,25 @@ gfanVersion  = () -> (
 )
 
 --------------------------------------------------------
+-- gfan_padic
+--------------------------------------------------------
+
+gfanGroebnerComplex = method( Options=> {"p" => 2} )
+
+gfanGroebnerComplex Ideal := opts -> (I) ->(
+    R := ring I;
+    K := coefficientRing R;
+    if not(K==QQ) then error("Your coefficient field needs to be QQ");
+    (ringMap, S):= gfanConvertToNewRing R;
+    
+    
+    
+     
+    
+)	
+
+
+--------------------------------------------------------
 -- Documentation
 --------------------------------------------------------
 
