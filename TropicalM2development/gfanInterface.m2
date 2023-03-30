@@ -88,7 +88,7 @@ export {
 	"gfanConvertToNewRing",
 	"gfanRingToString",
 	"gfanIdealToString",
-	"runGfanCommand",
+	"runGfanCommand"
 --	"gfanGroebnerComplex"
 }
 
@@ -891,7 +891,7 @@ gfanArgumentToString (String, String, Thing) := (cmd, key, value) -> (
 	
 	cmdLineValue := false; -- whether a value is passed on the commandline
 
-	if cmdLineArgs#?cmd and member(key, cmdLineArgs#cmd) then
+        if cmdLineArgs#?cmd and member(key, cmdLineArgs#cmd) then
 		cmdLineValue = true;
 
 	" " | argStrs#key | (if cmdLineValue then " " | value else "")
@@ -1016,12 +1016,9 @@ runGfanCommand = (cmd, opts, data) -> (
 
 runGfanCommandCaptureBoth = (cmd, opts, data) -> (
 	if gfanProgram === null then
-	    gfanProgram = findProgram("gfan", "gfan --help",
-		Verbose => gfanVerbose,
+	    gfanProgram = findProgram("gfan", "gfan --help", Verbose => gfanVerbose, MinimumVersion => ("0.6",  "gfan _version | head -2 | tail -1 | sed 's/gfan//'"));
 		-- version 0.6 is necessary for gfanMixedVolume
 		-- https://github.com/Macaulay2/M2/issues/1962
-		MinimumVersion => ("0.6",
-		    "gfan _version | head -2 | tail -1 | sed 's/gfan//'"));
 	tmpFile := gfanMakeTemporaryFile data;
 
 	args := replace("^gfan ", "", cmd) | concatenate apply(keys opts, key ->
@@ -1150,7 +1147,8 @@ argStrs = hashTable {
 	"unimodular" => "--unimodular",
 	"vectorinput" => "--vectorinput",
 	"xml" => "--xml",
-	"tropicalbasistest" => "--tropicalbasistest"
+	"tropicalbasistest" => "--tropicalbasistest",
+	"p" => "-p"
 };
 
 
@@ -1170,7 +1168,8 @@ cmdLineArgs = hashTable {
 	"gfan _minors" => {"r", "d", "n"},
 	"gfan _mixedvolume" => {"j"},
 	"gfan _tropicallinearspace" => {"n", "d"},
-	"gfan _tropicalhypersurfacereconstruction" => {"i"}
+	"gfan _tropicalhypersurfacereconstruction" => {"i"},
+	"gfan _padic" => {"p"}
 }
 
 
