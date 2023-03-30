@@ -35,13 +35,7 @@ support(List) := (L) -> (
     unique(flatten(L/support))
     )
 
-///
-	Factorising list of Polynomials into List of RingElements
-	Input:
-		L: List of polynomials,
-	Output:
-		List {g_1, \dots , g_m} of unrepeated factors of all polynomials in L
-///
+-- find factors of all polynomials in a list, removing repetition
 factorsInList = method()
 factorsInList(List) := (L) -> (
     L0 := apply(L, p -> factors(p));
