@@ -26,9 +26,7 @@ export {
     "findRegularSequence",
     "Colon",
     "Random",
-    "readExampleFile",
     "example",
-    "names",
     "sectionalGenus",
     "arithmeticGenus",
     "canonicalModule",
@@ -568,6 +566,8 @@ doc ///
   Inputs
     I:Ideal 
       of a smooth projective surface
+    Distrust=>Boolean
+    	added check if you distrust formulas
   Outputs
     H:HashTable
   Description
@@ -589,6 +589,41 @@ doc ///
 TEST ///
   I = example "rat.d3.g0.cubicscroll";
   surfaceInvariants I;
+///
+
+doc ///
+  Key
+    (leBarzN6, ZZ, ZZ, ZZ)
+    leBarzN6
+  Headline
+    Calculates the number obtained from Le Barz's 6-secant formula.
+  Usage
+    leBarzN6(d,secgenus,chi)
+  Inputs
+    d:ZZ 
+      degree of smooth projective surface
+    secgenus:ZZ
+        sectional genus of smooth projective surface
+    chi: ZZ
+        chi of smooth projective surface
+  Outputs
+    :ZZ
+  Description
+    Text
+      This function calculates the number from Le Barz's six-secant formula, using the degree, sectional genus and holomorphic Euler characteristic.
+    Example
+      I = example "k3.d11.g11.1-sixsecant";
+      surfaceInvariants I
+      leBarzN6(11,11,2)
+  SeeAlso
+    (sectionalGenus, Ideal)
+    (degree, Ideal) 
+    (surfaceInvariants, Ideal)
+///
+
+TEST ///
+  I = example "rat.d3.g0.cubicscroll";
+  assert(leBarzN6(3,0,1) == 21);
 ///
 
 -* Test section *-
