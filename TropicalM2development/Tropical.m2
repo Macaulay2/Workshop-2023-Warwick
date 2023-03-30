@@ -864,6 +864,33 @@ tropicalVarietyWithValExternal = method(
     }
 )
 
+--First assume that I is prime
+
+tropicalVarietyWithpadicVal = (I) -> (
+    d:=dim I;
+    prodgens := product( gens ring I, i->i);
+    gfanopt:=(new OptionTable) ++ {"groebnerComplex"=>true,"p"=>2};
+    GC := gfanGroebnerComplex(I,gfanopt);
+    --First throw away cones for which the corresponding intial ideal contains a monomial
+    GC = skeleton(d+1,GC);
+    conesToKeep := {};
+    conesToCheck:=maxCones GC;
+    raysGC:=rays GC;
+    scan(conesToCheck, C->(
+	    --find initial ideal
+	    raysC:=raysGC_C;
+	    w:=flatten entries sum(rank source raysC, i-> raysC_i);
+    	    if w_0>0 then (
+	    	inI := gfanPadicInitialIdeal(I,w);
+		-- worry about which ring this lives in
+    	    	if saturate(inI,prodgens) == ideal(1) then 
+		    conesToKeep = append(conesToKeep,C);
+	    );
+   ));
+    --Then take the height-one slice	
+    --FINISH HERE
+);
+
 --EXPERIMENTAL: Tropicalization with adic valuation and puisseux valuation.
 -- In development. Merge with tropicalVariety method when done.
 tropicalVarietyWithValExternal (Ideal) := o -> (I) ->(
@@ -911,11 +938,9 @@ tropicalVarietyWithValExternal (Ideal) := o -> (I) ->(
 	--- make sure the "t" is the first variable!!
 	---T = TropicalCycleFromPolyhedralComplex (PolyhedralComplexFromSliceOfFan (tropicalVariety (I)));
 	);
-
 --Otherwise, we don't understand the given valuation. (or maybe no valuation was given?)
-
        return "Can't handle the given valuation. Maybe no valuation given? Then use tropicalVariety";
-)
+);
 
 tropicalVarietyWithPuiseuxVal = method(
     TypicalValue => TropicalCycle1,  
@@ -923,7 +948,7 @@ tropicalVarietyWithPuiseuxVal = method(
 	Prime => true,
 	IsHomogeneous => true
     }
-)
+);
 
 --Temporary code until we get affineImage fixed in Polyhedra
 --input: polyhedron

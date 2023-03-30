@@ -88,8 +88,8 @@ export {
 	"gfanConvertToNewRing",
 	"gfanRingToString",
 	"gfanIdealToString",
-	"runGfanCommand"
---	"gfanGroebnerComplex"
+	"runGfanCommand",
+	"gfanGroebnerComplex"
 }
 
 gfanVerbose = gfanInterface#Options#Configuration#"verbose"
@@ -2487,7 +2487,7 @@ gfanVersion  = () -> (
 -- gfan_padic
 --------------------------------------------------------
 
-gfanGroebnerComplex = method( Options=> {"p" => 2} )
+gfanGroebnerComplex = method( Options=> {"groebnerComplex"=>true,"p" => 2} )
 
 gfanGroebnerComplex Ideal := opts -> (I) ->(
     R := ring I;
@@ -2501,7 +2501,21 @@ gfanGroebnerComplex Ideal := opts -> (I) ->(
     gfanParsePolyhedralFan output
 )	
 
+gfanPadicInitialIdeal  = method(Options=> {"p" => 2} )
 
+gfanPadicInitialIdeal (Ideal,List) := opts -> (I,w) ->(
+        R := ring I;
+        K := coefficientRing R;
+        if not(K===QQ) then error("Your coefficient field needs to be QQ");
+        (ringMap, J):= gfanConvertToNewRing I;
+        --create the input string
+	wstring:= replace("{","(",toString w);
+	wstring = replace("}",")",wstring);
+        input := gfanRingToString(target ringMap) | gfanIdealToString J | wstring;
+        output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p			    
+
+--FINISHING HERE
+)
 --------------------------------------------------------
 -- Documentation
 --------------------------------------------------------
