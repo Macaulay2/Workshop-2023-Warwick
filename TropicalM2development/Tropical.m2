@@ -939,9 +939,7 @@ tropicalVarietyWithPuiseuxVal = method(
 -- as a polyhedron in R^{n-1}.
 -- input: polyhedron inside a slice in R^n where the first coordinate is constant
 -- output: polyhedron in R^{n-1}
-projectFromSlice = P -> (
-    return convexHull(submatrix'(vertices P ,{0},),submatrix'(rays P ,{0},), submatrix'(linealitySpace P ,{0},))
-    ) 
+
 
 tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     
@@ -973,7 +971,7 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
 --		A := submatrix'(id_(ZZ^(numgens ring I)), {0}, );
-		newSlicedMaxCone := projectFromSlice(slicedMaxCone);
+		newSlicedMaxCone := convexHull(submatrix'(vertices slicedMaxCone ,{0},),submatrix'(rays slicedMaxCone ,{0},), submatrix'(linealitySpace slicedMaxCone ,{0},));
 		if dim(newSlicedMaxCone)>-1 then 
 		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
 		else emptyCones = emptyCones |{i};
@@ -2384,7 +2382,7 @@ T=tropicalVarietyWithPuiseuxVal(I)
 assert(rank(source(linealitySpace(fan(T))))==1)
 assert(rank(source(vertices(fan(T))))==8)
 --Add more assertions one issues with "polyhedra" get figured out
-//
+///
 
 
 -----------------------
