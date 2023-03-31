@@ -131,7 +131,7 @@ projectionPhase(List) := (L) -> (
     S := {L};
     while length(support(L)) > 1 do (
       -- print(L);
-      var := gmodsHeuristic(support(L))
+      var := gmodsHeuristic(support(L));
       L = lazardProjection(L, var); -- ideally doing gmods here
       S = prepend(L,S);
       );
@@ -567,19 +567,25 @@ TEST /// -* liftingPoint test *-
   pts#x1 = 1
   pts#x2 = 3
   LP = liftingPoint(P,pts)
+  
+  H2 = new MutableHashTable from {x1=>1, x2=>3}
+  H = new MutableHashTable from {"point"=>H2,"polynomials"=>{3,x3^2+3}} 
+  
+  keys(H)
+  keys(LP)
+  values H
+  values LP
+  assert(keys(H) == keys(LP))
+  assert(values(H) === values(LP))
+  assert(keys(LP#"point") == keys(H#"point")) 
+  assert(values(LP#"point") === values(H#"point"))
+  assert(LP#"point" === LP#"point")
+  assert(LP#"polynomials" == H#"polynomials") 
+  peek H
   peek LP
-  
-  
-  H = new MutableHashTable
-  H2 = new MutableHashTable
-  H2#x3 = 0
-  H2#x2 = 3
-  H2#x1 = 1  
-  H#point = H2  
-  
-  
-  answer = H
-  assert(LP == answer)
+  peek H#"point"
+  peek LP#"point"
+  assert(LP === H)
 ///
 
 TEST /// -* samplePoints test *-
