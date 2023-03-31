@@ -433,7 +433,7 @@ TEST /// -* evalPoly test *-
   p#x2 = 3
   E = evalPoly(f1,p)
   answer = 3-x3+x3^3
-  assert(sort E === sort answer)
+  assert(E == answer)
 ///
 
 TEST /// -* evalPolyList test *-
@@ -449,7 +449,7 @@ TEST /// -* evalPolyList test *-
   p#x2 = 3
   E = evalPolyList(L,p)
   answer = {3, 3-x3+x3^3, 9*x3+x3}
-  assert(sort E === sort answer)
+  assert(E == answer)
 ///
 
 end--
