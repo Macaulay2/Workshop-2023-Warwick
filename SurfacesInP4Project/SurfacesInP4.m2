@@ -417,7 +417,7 @@ Description
    intersectionMatrix(I,{H,K})
    surfaceInvariants I
 Contributors
-  Patience Ablett (patience.ablett@warwick.ac.uk), Alvaro Gonzalez Hernandez (alvaro.gonzalez-hernandez@warwick.ac.uk),Paul Alexander Helminck (paul.a.helminck@durham.ac.uk), Marc Truter (marc.truter@warwick.ac.uk)
+  "Patience Ablett (patience.ablett@warwick.ac.uk)", "Alvaro Gonzalez Hernandez (alvaro.gonzalez-hernandez@warwick.ac.uk)", "Paul Alexander Helminck (paul.a.helminck@durham.ac.uk)", "Marc Truter (marc.truter@warwick.ac.uk)"
 References
   Decker, Ein, Schreyer, Constructions of surfaces in $\PP^4$, J. Alg Geom (1993)
   Decker, Schreyer, non-general type surfaces in $\PP^4$, some remarks on bounds and constructions, J. Symbolic Comp (2000)
