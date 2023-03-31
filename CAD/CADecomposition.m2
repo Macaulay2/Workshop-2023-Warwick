@@ -145,7 +145,8 @@ samplePoints = method()
 -- samplePoints(List,A) := (L,r) -> (
    -- We consider r=1 for the size of the interval
 samplePoints(List) := (L) -> (
-    h:=sub(product L, QQ[support(L)]);
+    A := QQ(monoid[support(L)]);
+    h:=sub(product L, A);
     print L;
     print h;
     L = realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
