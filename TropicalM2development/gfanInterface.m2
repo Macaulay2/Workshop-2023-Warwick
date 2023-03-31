@@ -89,7 +89,8 @@ export {
 	"gfanRingToString",
 	"gfanIdealToString",
 	"runGfanCommand",
-	"gfanGroebnerComplex"
+	"gfanGroebnerComplex",
+	"gfanPadicInitialIdeal"
 }
 
 gfanVerbose = gfanInterface#Options#Configuration#"verbose"
