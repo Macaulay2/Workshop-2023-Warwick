@@ -68,7 +68,7 @@ export{
   "isBalancedCurves",
   "BergmanFan",
   "polyhedronFromFace", 
-  heightOneSlice   --temporarily exported
+  "heightOneSlice"   --temporarily exported
   }
 
 -- TropicalCycle1, tropicalVarietyWithPuiseuxVal and tropicalVarietyWithValExternal commented out until fixed.
@@ -870,8 +870,8 @@ heightOneSlice Fan := F ->(
 	if (addsemiringAdd == "Min") then
 		heightCut = 1
 	else heightCut = -1;
-	M := matrix{{join(toSequence{1},(rank target raysMatrix -1): 0)}}; 
-	N := matrix{{(rank target raysMatrix): 0}}; 
+	M := matrix{{join(toSequence{1},(ambDim F -1): 0)}}; 
+	N := matrix{{(ambDim F): 0}}; 
 	slicePlane := polyhedronFromHData(N, matrix{{0}}, M, matrix{{heightCut}});
 	--- for each cone in the fan fan T, slice and append to PC
         emptyCones:={};
@@ -1024,12 +1024,10 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 -- 	M := matrix{{join(toSequence{1},(numgens ring I -1): 0)}}; 
 -- 	N := matrix{{(numgens ring I): 0}}; 
 -- 	slicePlane := polyhedronFromHData(N, matrix{{0}}, M, matrix{{heightCut}});
-
 -- 	--- for each cone in the fan fan T, slice and append to PolyhedralComplexOutput		
 -- 	raysMatrix := rays (T);
 -- 	listOfMaxCones := maxCones(T);
 -- 	numberOfMaxCones := length listOfMaxCones; 
-
 -- 	if (numberOfMaxCones == 0) then (print "The variety is empty!"; return T;)
 -- 	else( 
 --  	    for i from 0 when i < (numberOfMaxCones) do (
@@ -1044,12 +1042,12 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 -- 	);
 --     	conesToKeep := select(numberOfMaxCones,i->(not(member(i,emptyCones))));
 	mults:=(multiplicities(T))_conesToKeep;
-	if (#conesToKeep == 0) then (
-	    print "The variety is empty!"; return null
 --	    Really we should output the empty tropical cycle here, but the command below appears to give null...
 --	    PC := tropicalCycle1(polyhedralComplex({emptyPolyhedron(numgens(ring(I))-1)}),mults)
-	    )
-	else (TC := tropicalCycle1(polyhedralComplex listOfSlicedCones, mults));
+	if (#conesToKeep == 0) then (
+	    print "The variety is empty!"; return null
+	)
+	else (TC := tropicalCycle1(PC, mults));
 	return TC;
 )   
 
