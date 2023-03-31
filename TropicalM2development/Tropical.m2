@@ -856,6 +856,40 @@ tropicalCycle1 (PolyhedralComplex, List) := (PC,mult)->(
 fan TropicalCycle1 := T -> (T#"PolyhedralComplex")
 multiplicities (TropicalCycle1) := T -> (T#"Multiplicities")
 
+
+--Takes the heigh one slice in min convention - height -1 slice in max convention
+heightOneSlice = method(TypicalValue => Fan)
+
+heightOneSlice = (Fan) := F ->(
+    -- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
+	addsemiringAdd := minmax();
+	heightCut := 0;
+	if (addsemiringAdd == "Min") then
+		heightCut = 1
+	else heightCut = -1;
+	M := matrix{{join(toSequence{1},(numgens ring I -1): 0)}}; 
+	N := matrix{{(numgens ring I): 0}}; 
+	slicePlane := polyhedronFromHData(N, matrix{{0}}, M, matrix{{heightCut}});
+	--- for each cone in the fan fan T, slice and append to PC
+	raysMatrix := rays (T);
+	listOfMaxCones := maxCones(T);
+	numberOfMaxCones := length listOfMaxCones; 
+	if (numberOfMaxCones == 0) then (print "The variety is empty!"; return T;)
+	else( 
+ 	    for i from 0 when i < (numberOfMaxCones) do (
+		currentMaxCone := coneFromVData( submatrix(raysMatrix, listOfMaxCones#i), linealitySpace(T));  
+		slicedMaxCone := intersection(currentMaxCone, slicePlane);
+		newSlicedMaxCone := convexHull(submatrix'(vertices slicedMaxCone ,{0},),submatrix'(rays slicedMaxCone ,{0},), submatrix'(linealitySpace slicedMaxCone ,{0},));
+		if dim(newSlicedMaxCone)>-1 then 
+		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
+		else emptyCones = emptyCones |{i};
+            )	
+	);
+    	conesToKeep := select(numberOfMaxCones,i->(not(member(i,emptyCones))));
+    	return(polyhedralComplex(listOfSlicedCones),conesToKeep);
+)	
+
+
 tropicalVarietyWithValExternal = method(
     TypicalValue => TropicalCycle,  
     Options => {
@@ -863,6 +897,7 @@ tropicalVarietyWithValExternal = method(
 	Valuation => false
     }
 )
+
 
 --First assume that I is prime
 
@@ -876,19 +911,23 @@ tropicalVarietyWithpadicVal = (I) -> (
     conesToKeep := {};
     conesToCheck:=maxCones GC;
     raysGC:=rays GC;
+    gfanopt2:=(new OptionTable) ++ {"initialIdeal"=>true,"p"=>2};
     scan(conesToCheck, C->(
 	    --find initial ideal
 	    raysC:=raysGC_C;
 	    w:=flatten entries sum(rank source raysC, i-> raysC_i);
     	    if w_0>0 then (
-	    	inI := gfanPadicInitialIdeal(I,w);
+	    	inI := gfanPadicInitialIdeal(I,w,gfanopt2);
 		-- worry about which ring this lives in
     	    	if saturate(inI,prodgens) == ideal(1) then 
 		    conesToKeep = append(conesToKeep,C);
 	    );
    ));
-    --Then take the height-one slice	
-    --FINISH HERE
+   conesToKeep=sort flatten conesToKeep;
+   (PC,keptCones):= heightOneSlice(fan((rays GC)_conesToKeep,conesToKeep));
+   --Will need to work out the multiplicities later
+   mults:=null
+   return(tropicalCycle1(PC,mults);
 );
 
 --EXPERIMENTAL: Tropicalization with adic valuation and puisseux valuation.
@@ -973,7 +1012,7 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 	listOfSlicedCones := {};
 	T := tropicalVariety(I);
 	emptyCones:={};
-
+    	(conesToKeep,PC):=heightOneSlice(fan T);
     -- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
 	addsemiringAdd := minmax();
 	heightCut := 0;

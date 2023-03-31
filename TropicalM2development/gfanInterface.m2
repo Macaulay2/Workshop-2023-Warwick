@@ -2499,7 +2499,7 @@ gfanGroebnerComplex Ideal := opts -> (I) ->(
     input := gfanRingToString(target ringMap) | gfanIdealToString J;
     output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p
     if(length(output#0)==0) then return "error: this complex is empty";
-    gfanParsePolyhedralFan output
+    gfanParsePolyhedralFan output#0
 )	
 
 gfanPadicInitialIdeal  = method(Options=> {"p" => 2} )
@@ -2513,9 +2513,8 @@ gfanPadicInitialIdeal (Ideal,List) := opts -> (I,w) ->(
 	wstring:= replace("{","(",toString w);
 	wstring = replace("}",")",wstring);
         input := gfanRingToString(target ringMap) | gfanIdealToString J | wstring;
-        output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p
-
---FINISHING HERE
+        output := runGfanCommand("gfan _padic", opts, input);  
+    	gfanParseIdeal(output#0)    	
 )
 --------------------------------------------------------
 -- Documentation
