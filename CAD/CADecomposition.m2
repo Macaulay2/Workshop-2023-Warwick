@@ -147,12 +147,12 @@ samplePoints = method()
 samplePoints(List) := (L) -> (
     A := QQ(monoid[support(L)]);
     h:=sub(product L, A);
-    print L;
+    print("L"); print L;
     print h;
-    L = realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
-    print("root isolating intervals", L);
-    L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
-    L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
+    ourRoots = realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
+    print("root isolating intervals", ourRoots);
+    L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
+    L2:=append(prepend(ourRoots_0_0,L1),ourRoots_(#ourRoots-1)_1)
     )
 
 
