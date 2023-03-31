@@ -67,7 +67,8 @@ export{
   "Valuation",
   "isBalancedCurves",
   "BergmanFan",
-  "polyhedronFromFace"
+  "polyhedronFromFace", 
+  heightOneSlice   --temporarily exported
   }
 
 -- TropicalCycle1, tropicalVarietyWithPuiseuxVal and tropicalVarietyWithValExternal commented out until fixed.
@@ -933,7 +934,7 @@ tropicalVarietyWithpadicVal = (I) -> (
    return(tropicalCycle1(PC,mults));
 );
 
---EXPERIMENTAL: Tropicalization with adic valuation and puisseux valuation.
+--EXPERIMENTAL: Tropicalization with adic valuation and puiseux valuation.
 -- In development. Merge with tropicalVariety method when done.
 tropicalVarietyWithValExternal (Ideal) := o -> (I) ->(
     local T;
@@ -1433,7 +1434,7 @@ doc///
 	  	I = ideal (t*x^2+x*y+t*y^2+x+y+t^2)
       	tropicalVarietyWithPuiseuxVal(I)
 ///
-
+	
 
 doc///
     Key
