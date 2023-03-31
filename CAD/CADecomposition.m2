@@ -18,7 +18,8 @@ export {"factors",
 "projectionPhase",
 "liftingPoint",
 "samplePoints",
-"openCAD"
+"openCAD",
+"gmodsHeuristic"
 }
 
 -* Code section *-
@@ -69,6 +70,24 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
   d := degree(v,p);	
   contract(v^d,p)
 )
+
+-- Choose the next variable to project according to the heuristic gmods
+gmodsHeuristic = method()
+gmodsHeuristic(List) := (L) -> (
+  vars := support(L);
+  print vars;
+  gmodsVar := vars_0;
+  minGmods := sum(for p in L list degree(vars_0, p));
+  for var in vars do (
+    print var;
+    newGmods := sum(for p in L list degree(var, p));
+    if newGmods < minGmods then (
+      gmodsVar = var;
+      minGmods = newGmods;
+      );
+    );
+  gmodsVar
+  )
 
 -- Does one step of the projection phase
 lazardProjection = method()
