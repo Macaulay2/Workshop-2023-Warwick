@@ -1014,7 +1014,7 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
 	listOfSlicedCones := {};
 	T := tropicalVariety(I);
 	emptyCones:={};
-    	(conesToKeep,PC):=heightOneSlice(fan T);
+    	(PC,conesToKeep):=heightOneSlice(fan T);
 --     -- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
 -- 	addsemiringAdd := minmax();
 -- 	heightCut := 0;
