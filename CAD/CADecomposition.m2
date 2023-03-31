@@ -125,10 +125,12 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
     cell := new MutableHashTable;
+    cell#"point" = p;
     i := #keys(p);
     -- we check if all the variables have been given a value already
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
     L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
+    cell#"polynomials"=L;
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
     v := (support(L))_0;
@@ -323,7 +325,7 @@ doc ///
       This function breaks a RingElement into its factors
     Example
       R=QQ[x1,x2,x3]
-      p=x1^3x2^3x3-4x1^2x2^3x3-x1^2x2^2x3^2+x1^2x2^2x3+4x1x2^3x3+4x1x2^2x3^2-4x1x2^2x3-4x2^2x3^2+4x2^2x3
+      p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
       factors(p)
   SeeAlso
 ///
