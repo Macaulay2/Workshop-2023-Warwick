@@ -48,8 +48,10 @@ factorsInList(List) := (L) -> (
 -- Evaluates the given RingElement in a point given by a MutableHashTable.
 evalPoly = method()
 evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
-        for k in keys(alpha) do
+        for k in keys(alpha) do(
+          print("variable", k);
           p=sub(p, {k => alpha#k});
+        );
 	p
       )
 
@@ -127,7 +129,7 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
-    v := support(L);
+    v := (support(L))_0;
     print(L);
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
