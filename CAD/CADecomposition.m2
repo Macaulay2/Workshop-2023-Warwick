@@ -131,7 +131,8 @@ projectionPhase(List) := (L) -> (
     S := {L};
     while length(support(L)) > 1 do (
       -- print(L);
-      L = lazardProjection(L, (support(L))_0); -- ideally doing gmods here
+      var := gmodsHeuristic(support(L))
+      L = lazardProjection(L, var); -- ideally doing gmods here
       S = prepend(L,S);
       );
     S
