@@ -1,20 +1,19 @@
-///
-	Root Isolation for Several Polynomials:
-	Input:
-		L: List of polynomials,
-		r: integer, rational or real number
-///
-
+-- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
-loadPackage "RealRoots";
-for A in {ZZ,QQ,RR} do
-samplePoints(List,A) := (L,r) -> (
-    h=product L;
-    -- print h;
-    L  := realRootIsolation(h,r);
-    print("root isolating intervals", L);
-    L1:=for i from 1 to #L-1 list (L_(i-1)_1+L_i_0)/2;
-    L2:=append(prepend(L_0_0,L1),L_(#L-1)_1)
+samplePoints(List) := (L) -> (
+    A := QQ(monoid[support(L)]);
+    h:=sub(product L, A);
+    print("L"); print L;
+    print h;
+    ourRoots := realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
+    print("root isolating intervals", ourRoots);
+    -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
+    for i from 0 to #ourRoots-1 do
+      if ourRoot_i_1=ourRoot_(i+1)_0 then ourRoots = realRootIsolation(h,1/2);
+    -- Find the mid-points between intervals as cell witnesses:
+    L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
+    -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
+    L2:=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
     )
 
 -- Tests
