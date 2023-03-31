@@ -270,7 +270,7 @@ doc ///
   Headline
     Computes a list of sample points in each cell that isolate the roots
   Usage
-    samlePoints(L)
+    samplePoints(L)
   Inputs
     L:List
       of polynomials in one variable
@@ -285,13 +285,13 @@ doc ///
       f=x^2-1
       g=x^3-1
       L1={f,g}
-      samplePoints(L1,1/2)
+      samplePoints(L1)
 
       f1=5*x^3+1
       g1=x^2-1
       h1=1/2*x^5+3*x-1
       L2={f1,g1,h1}
-      S:=samplePoints(L2,3)
+      S:=samplePoints(L2)
    
   SeeAlso
 ///
@@ -396,7 +396,7 @@ doc ///
     Example
       R=QQ[x1,x2,x3]
       p=x1^2*x2-x1*x3+x3^3
-      lazardProjection(p,x1)
+      leadCoefficientt(p,x1)
   SeeAlso
 ///
 
@@ -425,7 +425,10 @@ doc ///
       p1=x1^2*x2-x1*x3+x3^3
       p2=x2^2*x3+x3
       L={p0,p1,p2}
-      liftingPoint(L)
+      pts = new MutableHashTable
+      pts#x1 = 1
+      pts#x2 = 3
+      liftingPoint(L,pts)
   SeeAlso
 ///
 
@@ -434,9 +437,9 @@ doc ///
     (openCAD, List)
     openCAD
   Headline
-    Given a list of polynomials, an open CAD of those polynomials is returned.
+    Given a list of polynomials, an open CAD of those polynomials is returned. (main algorithm)
   Usage
-    openCAD(L,v)
+    openCAD(L)
   Inputs
     L:List
       of polynomials all in the same ring
@@ -457,17 +460,27 @@ doc ///
 ///
 
 -* Test section *-
-TEST /// -* lazardProjection test *-
+TEST /// -* factors test *-
 -- test code and assertions here
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L={f0,f1,f2}
-  L2 = lazardProjection(L,x1)
-  answer = {x3,x2,4*x2*x3-1,x2^2+1}
-  assert(sort L2 === sort answer)
+  p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
+  F = factors(p)
+  answer = {{x3, 1}, {x2, 2}, {x1 - 2, 2}, {x1*x2 - x3 + 1, 1}}
+  assert(sort F === sort answer)
+///
+
+TEST /// -* factorsInList test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  F = factorsInList(L) 
+  answer = {x2,x1,x1^2*x2+x3^3-x1*x3,x3,x2^2+1}
+  assert(sort F === sort answer)
 ///
 
 TEST /// -* evalPoly test *-
@@ -500,6 +513,83 @@ TEST /// -* evalPolyList test *-
   E = evalPolyList(L,p)
   answer = {3, 3-x3+x3^3, 9*x3+x3}
   assert(E == answer)
+///
+
+TEST /// -* leadCoefficientt test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p=x1^2*x2-x1*x3+x3^3
+  L = leadCoefficientt(p,x1)
+  answer = x2
+  assert(L == answer)
+///
+
+TEST /// -* lazardProjection test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L={f0,f1,f2}
+  L2 = lazardProjection(L,x1)
+  answer = {x3,x2,4*x2*x3-1,x2^2+1}
+  assert(sort L2 === sort answer)
+///
+
+TEST /// -* projectionPhase test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L={f0,f1,f2}
+  P = projectionPhase(L)
+  answer = {{x2^2+1,x2}, {x3,x2^2+1,x2,4*x2*x3-1}, {x1*x2,x1^2*x2+x3^3-x1*x3,x2^2*x3+x3}}
+  assert(sort P === sort answer)
+///
+
+TEST /// -* liftingPoint test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  pts = new MutableHashTable
+  pts#x1 = 1
+  pts#x2 = 3
+  LP = liftingPoint(L,pts)
+  answer = {}
+  assert(LP == answer)
+///
+
+TEST /// -* samplePoints test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x]
+  f=x^2-1
+  g=x^3-1
+  L1={f,g}
+  S = samplePoints(L1,1/2)
+  answer = {}
+  assert(S == answer)
+///
+
+TEST /// -* openCAD test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  openCAD(L)
+  answer = {}
+  assert(S == answer)
 ///
 
 end--
