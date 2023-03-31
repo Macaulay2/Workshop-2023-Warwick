@@ -2512,7 +2512,7 @@ gfanPadicInitialIdeal (Ideal,List) := opts -> (I,w) ->(
 	wstring:= replace("{","(",toString w);
 	wstring = replace("}",")",wstring);
         input := gfanRingToString(target ringMap) | gfanIdealToString J | wstring;
-        output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p			    
+        output := runGfanCommand("gfan _padic", opts, input);  --need to understand how to give p
 
 --FINISHING HERE
 )
