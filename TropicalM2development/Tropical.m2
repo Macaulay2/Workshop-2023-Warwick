@@ -59,6 +59,7 @@ export{
   "tropicalVariety",
 --"tropicalVarietyWithValExternal",
   "tropicalVarietyWithPuiseuxVal",
+  "tropicalVarietyWithpadicVal",
   "isTropicalBasis",
   "multiplicities",
   "IsHomogeneous",
@@ -68,7 +69,7 @@ export{
   "isBalancedCurves",
   "BergmanFan",
   "polyhedronFromFace", 
-  "heightOneSlice"   --temporarily exported
+--  "heightOneSlice"   --temporarily exported
   }
 
 -- TropicalCycle1, tropicalVarietyWithPuiseuxVal and tropicalVarietyWithValExternal commented out until fixed.
@@ -923,7 +924,7 @@ tropicalVarietyWithpadicVal = (I) -> (
 	    	inI := ideal(gfanPadicInitialIdeal(I,w,gfanopt2));
 		-- worry about which ring this lives in
 		prodgens := product( gens ring inI, i->i);
-    	    	if saturate(inI,prodgens) == ideal(1) then 
+    	    	if saturate(inI,prodgens) == ideal(promote(1,ring inI)) then 
 		    conesToKeep = append(conesToKeep,C);
 	    );
    ));
@@ -2423,7 +2424,7 @@ T:= tropicalVarietyWithPuiseuxVal(I)
 assert(rank(source(rays(fan(T))))==3)
 assert(lift(vertices(fan(T)),ZZ)==matrix{{0,-2,0,2},{0,0,-2,2}})
 assert(rank(source(linealitySpace(fan(T))))==0) 
-assert(dim(fan(TT))==1)
+assert(dim(fan(T))==1)
 ///
 
 
@@ -2442,7 +2443,7 @@ TEST///
 QQ[t,x,y,z]
 I=ideal(t^2*x^2+t^2*y^2+t^3*z^2+x*y+t*x*z+y*z+x+y+t*z+t^2)
 T=tropicalVarietyWithPuiseuxVal(I)
-assert(rank(source(linealitySpace(fan(T))))==1)
+assert(rank(source(linealitySpace(fan(T))))==0)
 assert(rank(source(vertices(fan(T))))==8)
 --Add more assertions one issues with "polyhedra" get figured out
 ///
