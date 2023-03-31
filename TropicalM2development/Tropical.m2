@@ -72,7 +72,7 @@ export{
 --  "heightOneSlice"   --temporarily exported
   }
 
--- TropicalCycle1, tropicalVarietyWithPuiseuxVal and tropicalVarietyWithValExternal commented out until fixed.
+-- TropicalCycle1,  and tropicalVarietyWithValExternal commented out until fixed.
 
 
 polymakeCommand = (options Tropical)#Configuration#"polymakeCommand"
@@ -905,9 +905,9 @@ tropicalVarietyWithValExternal = method(
 
 --First assume that I is prime
 
+--This installs, but still has a bug!
 tropicalVarietyWithpadicVal = (I) -> (
     d:=dim I;
-    
     gfanopt:=(new OptionTable) ++ {"groebnerComplex"=>true,"p"=>2};
     GC := gfanGroebnerComplex(I,gfanopt);
     --First throw away cones for which the corresponding intial ideal contains a monomial
@@ -924,14 +924,14 @@ tropicalVarietyWithpadicVal = (I) -> (
 	    	inI := ideal(gfanPadicInitialIdeal(I,w,gfanopt2));
 		-- worry about which ring this lives in
 		prodgens := product( gens ring inI, i->i);
-    	    	if saturate(inI,prodgens) == ideal(promote(1,ring inI)) then 
+    	    	if saturate(inI,prodgens) != ideal(promote(1,ring inI)) then 
 		    conesToKeep = append(conesToKeep,C);
 	    );
    ));
-   conesToKeep=sort flatten conesToKeep;
+   conesToKeep=sort unique flatten conesToKeep;
    (PC,keptCones):= heightOneSlice(fan((rays GC)_conesToKeep,conesToKeep));
    --Will need to work out the multiplicities later
-   mults:=null;
+   mults:={};
    return(tropicalCycle1(PC,mults));
 );
 
