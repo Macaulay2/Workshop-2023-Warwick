@@ -903,7 +903,7 @@ tropicalVarietyWithValExternal = method(
 
 tropicalVarietyWithpadicVal = (I) -> (
     d:=dim I;
-    prodgens := product( gens ring I, i->i);
+    
     gfanopt:=(new OptionTable) ++ {"groebnerComplex"=>true,"p"=>2};
     GC := gfanGroebnerComplex(I,gfanopt);
     --First throw away cones for which the corresponding intial ideal contains a monomial
@@ -917,8 +917,9 @@ tropicalVarietyWithpadicVal = (I) -> (
 	    raysC:=raysGC_C;
 	    w:=flatten entries sum(rank source raysC, i-> raysC_i);
     	    if w_0>0 then (
-	    	inI := gfanPadicInitialIdeal(I,w,gfanopt2);
+	    	inI := ideal(gfanPadicInitialIdeal(I,w,gfanopt2));
 		-- worry about which ring this lives in
+		prodgens := product( gens ring inI, i->i);
     	    	if saturate(inI,prodgens) == ideal(1) then 
 		    conesToKeep = append(conesToKeep,C);
 	    );
