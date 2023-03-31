@@ -7,7 +7,6 @@
 -- HC examples: rational, degree 11, sectionalGenus?
 -- Frank's examples of rational surfaces of degree 11? Double check if we have these?
 -- Sorin and Kristian wrote a paper about surfaces of degree 10.
-
 -- need to add test for omega method
 
 newPackage("SurfacesInP4",
@@ -416,9 +415,18 @@ Description
    H = S^1/I**S^{1};
    intersectionMatrix(I,{H,K})
    surfaceInvariants I
-Contributors
-  {{Name => "Alvaro Gonzalez Hernandez", Email => "alvaro.gonzalez-hernandez@warwick.ac.uk", 
-                 HomePage => "https://warwick.ac.uk/fac/sci/maths/people/staff/gonzalez-hernandez/"}}
+  Text
+   @SUBSECTION "Contributors"@
+  Text
+   The following people have also contributed to the package:
+  Text
+    @UL {{HREF("https://sites.google.com/view/patience-ablett/home/","Patience Ablett")},
+         {HREF("https://warwick.ac.uk/fac/sci/maths/people/staff/gonzalez-hernandez","Alvaro Gonzalez Hernandez")},
+         {HREF("https://paulhelminck.wordpress.com","Paul Alexander Helminck")},
+	 {HREF("https://sites.google.com/view/fatemehrezaee/home", "Fatemeh Rezaee")},
+	 {HREF("https://pas201.user.srcf.net/", "Parth Shimpi")},
+         {HREF("https://marctruter.com/", "Marc Truter")},
+      }@
 References
   Decker, Ein, Schreyer, Constructions of surfaces in $\PP^4$, J. Alg Geom (1993)
   Decker, Schreyer, non-general type surfaces in $\PP^4$, some remarks on bounds and constructions, J. Symbolic Comp (2000)
