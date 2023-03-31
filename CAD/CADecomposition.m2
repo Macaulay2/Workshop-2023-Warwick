@@ -153,7 +153,7 @@ samplePoints(List) := (L) -> (
     h:=sub(product L, A);
     print("L"); print L;
     print h;
-    ourRoots = realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
+    ourRoots := realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
     print("root isolating intervals", ourRoots);
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     L2:=append(prepend(ourRoots_0_0,L1),ourRoots_(#ourRoots-1)_1)
