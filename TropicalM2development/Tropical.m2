@@ -68,7 +68,7 @@ export{
   "Valuation",
   "isBalancedCurves",
   "BergmanFan",
-  "polyhedronFromFace", 
+  "polyhedronFromFace"
 --  "heightOneSlice"   --temporarily exported
   }
 
