@@ -176,6 +176,7 @@ samplePoints(List) := (L) -> (
     print "root isolating intervals";
     print ourRoots;
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
+<<<<<<< HEAD
     for i from 0 to #ourRoots-2 do(
       if ourRoots_i_1 == ourRoots_(i+1)_0 then(
        ourRoots = realRootIsolation(h,1/2);
@@ -183,12 +184,22 @@ samplePoints(List) := (L) -> (
        print ourRoots;
 	);
       );
+=======
+    for i from 0 to #ourRoots-1 do (
+      while ourRoots_i_1=ourRoots_(i+1)_0 do ourRoots = realRootIsolation(h,1/2);
+    );
+>>>>>>> bf06465f08100bcc176d68491054583788ac50bc
     -- Find the mid-points between intervals as cell witnesses:
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
+<<<<<<< HEAD
     print "final cell points:";
     L2:=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
+=======
+    if length(ourRoots)>0 then L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1) else L1 = {0};
+    L1
+>>>>>>> bf06465f08100bcc176d68491054583788ac50bc
     )
 
 
