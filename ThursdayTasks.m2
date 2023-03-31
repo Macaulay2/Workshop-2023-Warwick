@@ -85,6 +85,11 @@ T#Symb
 
 
 
+
+
+-------------------------------------------------
+-- TASK maps between subrings / subring and ring
+
 ----------------
 -- Discussion --
 -- What should a subring be?
@@ -147,3 +152,123 @@ peek memoizeValues g -- running g again will just look up the answer
 -- sanitise and uniformise the user's inputs.
 --
 
+
+
+
+------------------------------------------
+S = QQ[z_1, z_2, z_3, Degrees => {2,2,2}]
+I = ideal(z_1*z_3 - z_2^2)
+Q = S/I
+peek res I
+hilbertSeries I
+betti I
+------------------------------------------
+
+hilbertPolynomial(Subring) := opts -> S -> (
+    -- check the gens are homogenous
+    assert(isHomogeneous gens S);
+    
+    M := leadTerm S;
+    exponentMatrix := transpose matrix flatten (first entries M / exponents);
+    columnSums := for column from 0 to (numgens source exponentMatrix)-1 list (
+        sumValue := (matrix {toList(numgens target exponentMatrix : 1)} * exponentMatrix_{column})_(0,0);
+	1/sumValue
+	);
+    V := exponentMatrix*diagonalMatrix(columnSums);
+    basisLattice := (mingens image exponentMatrix);
+
+    -- extend to a basis
+    currentIndex := 0;
+    while numrows basisLattice > numcols basisLattice do (
+	newCol := transpose matrix {for j from 0 to numrows basisLattice -1 list (
+		if j == currentIndex then 1 else 0
+		)};
+	if rank (basisLattice | newCol) == numcols basisLattice + 1 then (
+	    basisLattice = basisLattice | newCol;
+	    );
+	currentIndex = currentIndex + 1;
+	);
+        
+    --print basisLattice;
+    assert(det basisLattice == 1);
+    
+    -- project the vertices down to the lower-dimensional lattice
+    NOBodyVertices := transpose compress transpose (basisLattice^(-1)*V);
+    NOBody := convexHull(NOBodyVertices);
+    --print vertices NOBody;
+    ehrhart NOBody    
+    )
+
+
+hilbertPolynomial(Subring, ZZ) := opts -> (S, i) -> (
+    M := leadTerm S;
+    exponentMatrix := transpose matrix flatten (first entries M / exponents);
+    columnSums := for column from 0 to (numgens source exponentMatrix)-1 list 1/exponentMatrix_(i, column);
+    V := exponentMatrix*diagonalMatrix(columnSums);
+    basisLattice := (mingens image exponentMatrix);
+    
+    -- extend to a basis
+    currentIndex := 0;
+    while numrows basisLattice > numcols basisLattice do (
+	newCol := transpose matrix {for j from 0 to numrows basisLattice -1 list (
+		if j == currentIndex then 1 else 0
+		)};
+	if rank (basisLattice | newCol) == numcols basisLattice + 1 then (
+	    basisLattice = basisLattice | newCol;
+	    );
+	currentIndex = currentIndex + 1;
+	);
+        
+    --print basisLattice;
+    assert(det basisLattice == 1);
+    
+    -- project the vertices down to the lower-dimensional lattice
+    NOBodyVertices := transpose compress transpose (basisLattice^(-1)*V);    
+    NOBody := convexHull(NOBodyVertices);
+    --print vertices NOBody;
+    ehrhart NOBody    
+    )
+-----------------------
+restart
+path = prepend("./", path)
+needsPackage "SubalgebraBases"
+needsPackage "Polyhedra"
+
+-- needsPackage "Polyhedra"
+R = QQ[x,y,z]
+S = subring matrix {{x^3, y^2, x^5, y^5, z^10, z*y}}
+hilbertPolynomial S
+vertices NObody S
+
+R = QQ[t, x, y, z]
+i = 0
+S = subring matrix {{t*x^2, t*x*y, t*z^3, t*x*z}}
+hilbertPolynomial(S, 0)
+vertices NObody(S, 0)
+
+---------------------
+-- See Ollie's github (special weight orders on the Pleucker algebra)
+needsPackage "MatchingFields" 
+k = 2
+n = 5
+S = subring diagonalMatchingField(k, n)
+transpose gens S --2x2 minors of a 2x5 matrix (as a subring)
+
+R = ambient S
+W = {100} | (options R).MonomialOrder#1#1 -- new weight for t
+R' = QQ[t, 
+    (x := symbol x; x_(1,1) .. x_(k,n)), 
+    MonomialOrder => {Weights => W}
+    ]
+m = map(R', R, (vars R')_{1 .. k*n})
+
+-- t-graded Pleucker Algebra
+S' = subring ((R')_0 * (m gens S))
+transpose gens S'
+
+hilbertPolynomial(S', 0)
+
+d = k*(n-k) -- dimension = degree of hilbert polynomial
+degree Grassmannian(k-1, n-1) / d! -- leading coefficient
+
+vertices NObody(S', 0)

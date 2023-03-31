@@ -30,7 +30,7 @@ newPackage(
     	Headline => "Canonical subalgebra bases (aka SAGBI/Khovanskii bases)",
 	AuxiliaryFiles => true, -- set to true if package comes with auxiliary files
   	DebuggingMode => true, -- set to true only during development
-        PackageImports => {"FourTiTwo"}
+        PackageImports => {"FourTiTwo", "Polyhedra"}
 	)
 exportMutable {}
 

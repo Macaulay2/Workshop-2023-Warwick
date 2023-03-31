@@ -38,7 +38,8 @@ export {
     "UseSubringGens",
     "IntersectedSubring",
     "isFullIntersection",
-    "originalSubringGens"
+    "originalSubringGens",
+    "NObody"
     }
 
 protect symbol quotientRing

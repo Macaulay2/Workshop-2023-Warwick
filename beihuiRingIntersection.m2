@@ -25,30 +25,42 @@ intersectSubs = (f, g) -> (
     gens S12
     )
 
-
-
-
 end --
 
+restart
+load "beihuiRingIntersection.m2"
 f = -y_2
 g = x_2 - y_2*(x_2-1)^2
 intersectSubs(f, g)
 gens sagbi oo
-leadTerm I
-gens I
-transpose gens I
-transpose gens gb I
+
+I = ideal(x_1^2,  y_2^2, x_1 - f, y_1 - g);
 transpose leadTerm I
+
+-- compute a basis for degree up to 6
+-- the sagbi basis is monomial so we can just take these
+L = monomials (y_2 + x_2 + y_1 + 1)^6
+M = L % (leadTerm I)
+compress oo
+transpose oo -- k-vectorspace basis for G_d
+
 
 -- count the number of monomials 
 use R
 
--- the sagbi basis is monomial so we can just take these
-L = monomials (y_2 + x_2 + y_1 + 1)^6
-M = L % (leadTerm I)
-help compress
+for i from 1 to 15 do (
+    L := monomials (y_2 + x_2 + y_1 + 1)^i;
+    M := L % (leadTerm I);
+    print(i, numcols compress M);
+    )
 
-transpose oo
+
+
+
+
+
+
+
 
 -- initial subring 
 -- S subring of R/I
@@ -56,3 +68,4 @@ transpose oo
 
 -- we should write substitute for subrings
 -- we should write a leadTerm Subring function
+
