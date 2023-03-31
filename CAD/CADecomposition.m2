@@ -50,7 +50,7 @@ factorsInList(List) := (L) -> (
 evalPoly = method()
 evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
         for k in keys(alpha) do(
-          print("variable", k);
+          -- print("variable", k);
           p=sub(p, {k => alpha#k});
         );
 	p
@@ -75,11 +75,11 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
 gmodsHeuristic = method()
 gmodsHeuristic(List) := (L) -> (
   vars := support(L);
-  print vars;
+  -- print vars;
   gmodsVar := vars_0;
   minGmods := sum(for p in L list degree(vars_0, p));
   for var in vars do (
-    print var;
+    -- print var;
     newGmods := sum(for p in L list degree(var, p));
     if newGmods < minGmods then (
       gmodsVar = var;
@@ -153,7 +153,7 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
     v := (support(L))_0;
-    print(L);
+    -- print(L);
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
     for samplePoint in newSamplePoints do (
@@ -172,12 +172,15 @@ samplePoints = method()
 samplePoints(List) := (L) -> (
     A := QQ(monoid[support(L)]);
     h:=sub(product L, A);
-    print("L"); print L;
-    print h;
+    -- print("L"); print L;
+    -- print h;
     ourRoots := realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
-    print("root isolating intervals", ourRoots);
+    -- print("root isolating intervals", ourRoots);
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
-    L2:=append(prepend(ourRoots_0_0,L1),ourRoots_(#ourRoots-1)_1)
+    if #ourRoots>=1 then (
+      L2:=append(prepend(ourRoots_0_0,L1),ourRoots_(#ourRoots-1)_1);
+      return L2 );
+    return L1
     )
 
 
@@ -556,14 +559,25 @@ TEST /// -* liftingPoint test *-
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
   p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,p2}
+  p1=x1*x2+x3^2
+  L={p0,p1}
+  P = projectionPhase(L)
   pts = new MutableHashTable
   pts#x1 = 1
   pts#x2 = 3
-  LP = liftingPoint(L,pts)
-  answer = {}
+  LP = liftingPoint(P,pts)
+  peek LP
+  
+  
+  H = new MutableHashTable
+  H2 = new MutableHashTable
+  H2#x3 = 0
+  H2#x2 = 3
+  H2#x1 = 1  
+  H#point = H2  
+  
+  
+  answer = H
   assert(LP == answer)
 ///
 
@@ -574,8 +588,8 @@ TEST /// -* samplePoints test *-
   f=x^2-1
   g=x^3-1
   L1={f,g}
-  S = samplePoints(L1,1/2)
-  answer = {}
+  S = samplePoints(L1)
+  answer = {-2, -1/2, 1}
   assert(S == answer)
 ///
 
