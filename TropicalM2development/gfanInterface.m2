@@ -2502,7 +2502,7 @@ gfanGroebnerComplex Ideal := opts -> (I) ->(
     gfanParsePolyhedralFan output#0
 )	
 
-gfanPadicInitialIdeal  = method(Options=> {"p" => 2} )
+gfanPadicInitialIdeal  = method(Options=> {"initialIdeal"=>true,"p" => 2} )
 
 gfanPadicInitialIdeal (Ideal,List) := opts -> (I,w) ->(
         R := ring I;
