@@ -175,12 +175,14 @@ samplePoints(List) := (L) -> (
     ourRoots := realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
     print("root isolating intervals", ourRoots);
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
-    for i from 0 to #ourRoots-1 do
-      if ourRoot_i_1=ourRoot_(i+1)_0 then ourRoots = realRootIsolation(h,1/2);
+    for i from 0 to #ourRoots-1 do (
+      while ourRoots_i_1=ourRoots_(i+1)_0 do ourRoots = realRootIsolation(h,1/2);
+    );
     -- Find the mid-points between intervals as cell witnesses:
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
-    L2:=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
+    if length(ourRoots)>0 then L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1) else L1 = {0};
+    L1
     )
 
 
