@@ -122,10 +122,12 @@ projectionPhase(List) := (L) -> (
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
 liftingPoint(List, MutableHashTable) := (S,p) -> (
-    cell := new MutableHashTable;
-    i := #keys(p);
     -- HashTable is a point in i variables 
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables
+    cell := new MutableHashTable;
+    i := #keys(p);
+    -- we check if all the variables have been given a value already
+    if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
     L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
