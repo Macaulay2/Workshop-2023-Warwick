@@ -19,7 +19,8 @@ export {"factors",
 "liftingPoint",
 "samplePoints",
 "openCAD",
-"gmodsHeuristic"
+"gmodsHeuristic",
+"latterContainsFormer"
 }
 
 -* Code section *-
@@ -158,7 +159,7 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
     for samplePoint in newSamplePoints do (
-        pNew := p;
+        pNew := copy p;
         pNew#v = samplePoint;
         cell#samplePoint = liftingPoint(S,pNew);
         );
@@ -172,34 +173,26 @@ samplePoints(List) := (L) -> (
     h:=sub(product L, A);
     print("List of Pols:"); print L;
     -- print h;
-    ourRoots := realRootIsolation(h,1); -- when RealRoots is evaluating h they get an element of R, not a number
+    intervalSize := 1;
+    ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number
     print "root isolating intervals";
     print ourRoots;
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
-<<<<<<< HEAD
-    for i from 0 to #ourRoots-2 do(
-      if ourRoots_i_1 == ourRoots_(i+1)_0 then(
-       ourRoots = realRootIsolation(h,1/2);
-       print "Previous intervals intersect; New intervalrs:";
-       print ourRoots;
-	);
-      );
-=======
     for i from 0 to #ourRoots-1 do (
-      while ourRoots_i_1=ourRoots_(i+1)_0 do ourRoots = realRootIsolation(h,1/2);
+      while ourRoots_i_1=ourRoots_(i+1)_0 do (
+        intervalSize = intervalSize/2;
+        ourRoots = realRootIsolation(h,intervalSize);
+      );
     );
->>>>>>> bf06465f08100bcc176d68491054583788ac50bc
     -- Find the mid-points between intervals as cell witnesses:
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
-<<<<<<< HEAD
-    print "final cell points:";
-    L2:=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
-=======
-    if length(ourRoots)>0 then L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1) else L1 = {0};
+    if length(ourRoots)>0 then (
+      L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
+     )
+     else L1 = {0};
     L1
->>>>>>> bf06465f08100bcc176d68491054583788ac50bc
     )
 
 
@@ -209,6 +202,27 @@ openCAD(List) := (L) -> (
   S := projectionPhase(L);
   p := new MutableHashTable;
   liftingPoint(S,p)
+)
+
+-- Checks if an object contains all the information the other has
+-- I've created it for my purpose, but if it is useful it should be possible to generalise
+latterContainsFormer = method()
+latterContainsFormer(Thing, Thing) := (former, latter) -> (
+  assert(instance(former, class(latter))); -- maybe I want to use ancestor here
+  if instance(latter, MutableHashTable) then (
+    for key in keys(latter) do (
+      print(keys(latter));
+      print(key);
+      if not former#?key then print("Here");
+      latterContainsFormer(former#key, latter#key);
+    )
+  )
+  else if instance(latter, List) then (
+    for elemLatter in latter do (
+      assert(any(former, elem->elem==(elemLatter)));
+    )
+  )
+  else assert(former==latter);
 )
 
 -* Documentation section *-
@@ -586,24 +600,29 @@ TEST /// -* liftingPoint test *-
   pts#x2 = 3
   LP = liftingPoint(P,pts)
   
-  H2 = new MutableHashTable from {x1=>1, x2=>3}
-  H = new MutableHashTable from {"point"=>H2,"polynomials"=>{3,x3^2+3}} 
+  pLevelThree = new MutableHashTable from {x3=>0, x1=>1, x2=>3}
+  cellLevelThree = new MutableHashTable from {"point"=>pLevelThree}
+  pLevelTwo = new MutableHashTable from {x1=>1, x2=>3}
+  cellLevelTwo = new MutableHashTable from {0=>cellLevelThree, "point"=>pLevelTwo, "polynomials"=>{3,x3^2+3}} 
   
-  keys(H)
+  latterContainsFormer(cellLevelTwo , LP)
+  
+  for key in keys(LP) do assert(cellLevelTwo#?key)
+  keys(cellLevelTwo)
   keys(LP)
   values H
   values LP
-  assert(keys(H) == keys(LP))
-  assert(values(H) === values(LP))
+  assert(sort(keys(H)) == sort(keys(LP)))
+  assert(values(H) == values(LP))
   assert(keys(LP#"point") == keys(H#"point")) 
-  assert(values(LP#"point") === values(H#"point"))
-  assert(LP#"point" === LP#"point")
+  assert(values(LP#"point") == values(H#"point"))
+  assert(LP#"point" == LP#"point")
   assert(LP#"polynomials" == H#"polynomials") 
   peek H
   peek LP
   peek H#"point"
   peek LP#"point"
-  assert(LP === H)
+  assert(LP == H)
 ///
 
 TEST /// -* samplePoints test *-
