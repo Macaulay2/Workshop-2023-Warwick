@@ -178,8 +178,9 @@ samplePoints(List) := (L) -> (
     print "root isolating intervals";
     print ourRoots;
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
-    for i from 0 to #ourRoots-1 do (
-      while ourRoots_i_1=ourRoots_(i+1)_0 do (
+    for i from 0 to #ourRoots-2 do (
+      print("Roots", ourRoots);
+      while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
         intervalSize = intervalSize/2;
         ourRoots = realRootIsolation(h,intervalSize);
       );
@@ -208,21 +209,36 @@ openCAD(List) := (L) -> (
 -- I've created it for my purpose, but if it is useful it should be possible to generalise
 latterContainsFormer = method()
 latterContainsFormer(Thing, Thing) := (former, latter) -> (
-  assert(instance(former, class(latter))); -- maybe I want to use ancestor here
-  if instance(latter, MutableHashTable) then (
-    for key in keys(latter) do (
-      print(keys(latter));
-      print(key);
-      if not former#?key then print("Here");
-      latterContainsFormer(former#key, latter#key);
+  if not instance(former, class(latter)) then (
+    print("The Things sent are not of the same class.");
+    return false
+  ); -- maybe I want to use ancestor here
+  if instance(former, MutableHashTable) then (
+    for key in keys(former) do (
+      if not latter#?key then(
+        print("Latter MutableHashTable doesnt have that key.");
+        return false
+      );
+      boolean := latterContainsFormer(former#key, latter#key);
+      if not boolean then(
+        print("The objects store in former and latter under key are not the same");
+        return false
+      )
     )
   )
-  else if instance(latter, List) then (
-    for elemLatter in latter do (
-      assert(any(former, elem->elem==(elemLatter)));
+  else if instance(former, List) then (
+    for elemFormer in former do (
+      if not any(latter, elem->elem==(elemFormer)) then (
+        print("elemFormer is not in latter.");
+        return false
+      )
     )
   )
-  else assert(former==latter);
+  else if former!=latter then (
+    print("former and latter are not the same");
+    return false
+  );
+  return true
 )
 
 -* Documentation section *-
@@ -605,9 +621,9 @@ TEST /// -* liftingPoint test *-
   pLevelTwo = new MutableHashTable from {x1=>1, x2=>3}
   cellLevelTwo = new MutableHashTable from {0=>cellLevelThree, "point"=>pLevelTwo, "polynomials"=>{3,x3^2+3}} 
   
-  latterContainsFormer(cellLevelTwo , LP)
-  latterContainsFormer(LP , cellLevelTwo)
-  
+  assert(latterContainsFormer(cellLevelTwo , LP))
+  assert(latterContainsFormer(LP , cellLevelTwo))
+
   -- for key in keys(LP) do assert(cellLevelTwo#?key)
   -- keys(cellLevelTwo)
   -- keys(LP)
@@ -634,7 +650,7 @@ TEST /// -* samplePoints test *-
   g=x^3-1
   L1={f,g}
   S = samplePoints(L1)
-  answer = {-2, -1/2, 1}
+  answer = {-3, -1/2, 2}
   assert(S == answer)
 ///
 
