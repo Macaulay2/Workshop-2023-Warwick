@@ -169,6 +169,7 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
 -- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
 samplePoints(List) := (L) -> (
+    if L=={} then error "Error: Expected non-empty list";
     A := QQ(monoid[support(L)]);
     h:=sub(product L, A);
     print("List of Pols:"); print L;
@@ -177,6 +178,7 @@ samplePoints(List) := (L) -> (
     ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number
     print "root isolating intervals";
     print ourRoots;
+    if ourRoots == {} then error "List has no roots";
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
     for i from 0 to #ourRoots-2 do (
       print("Roots", ourRoots);
@@ -344,6 +346,13 @@ doc ///
       h1=1/2*x^5+3*x-1
       L2={f1,g1,h1}
       S:=samplePoints(L2)
+
+      L3 ={}
+      samplePoints L3
+
+      L4 ={x^2+1}
+      samplePoints L4
+
    
   SeeAlso
 ///
