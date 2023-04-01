@@ -675,6 +675,7 @@ debug needsPackage "CADecomposition"
 needsPackage "CADecomposition"
 check "CADecomposition"
 
+
 uninstallPackage "CADecomposition"
 restart
 installPackage "CADecomposition"
