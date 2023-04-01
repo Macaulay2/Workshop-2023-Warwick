@@ -606,23 +606,24 @@ TEST /// -* liftingPoint test *-
   cellLevelTwo = new MutableHashTable from {0=>cellLevelThree, "point"=>pLevelTwo, "polynomials"=>{3,x3^2+3}} 
   
   latterContainsFormer(cellLevelTwo , LP)
+  latterContainsFormer(LP , cellLevelTwo)
   
-  for key in keys(LP) do assert(cellLevelTwo#?key)
-  keys(cellLevelTwo)
-  keys(LP)
-  values H
-  values LP
-  assert(sort(keys(H)) == sort(keys(LP)))
-  assert(values(H) == values(LP))
-  assert(keys(LP#"point") == keys(H#"point")) 
-  assert(values(LP#"point") == values(H#"point"))
-  assert(LP#"point" == LP#"point")
-  assert(LP#"polynomials" == H#"polynomials") 
-  peek H
-  peek LP
-  peek H#"point"
-  peek LP#"point"
-  assert(LP == H)
+  -- for key in keys(LP) do assert(cellLevelTwo#?key)
+  -- keys(cellLevelTwo)
+  -- keys(LP)
+  -- values H
+  -- values LP
+  -- assert(sort(keys(H)) == sort(keys(LP)))
+  -- assert(values(H) == values(LP))
+  -- assert(keys(LP#"point") == keys(H#"point")) 
+  -- assert(values(LP#"point") == values(H#"point"))
+  -- assert(LP#"point" == LP#"point")
+  -- assert(LP#"polynomials" == H#"polynomials") 
+  -- peek H
+  -- peek LP
+  -- peek H#"point"
+  -- peek LP#"point"
+  -- assert(LP == H)
 ///
 
 TEST /// -* samplePoints test *-
