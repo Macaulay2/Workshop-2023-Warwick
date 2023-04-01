@@ -20,7 +20,9 @@ export {"factors",
 "samplePoints",
 "openCAD",
 "gmodsHeuristic",
-"latterContainsFormer"
+"latterContainsFormer",
+"findSolution",
+"positivePoint"
 }
 
 -* Code section *-
@@ -241,6 +243,38 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
     return false
   );
   return true
+)
+
+-- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
+positivePoint := method()
+positivePoint(List, MutableHashTable) := (L, cell) -> (
+    if sort(keys(cell#"point"))!=support(L) then (
+        for key in keys(cell) do(
+            -- if the key is not "points" or "polynomials"
+            if not instance(key,String) then(
+                result := positivePoint(L, cell#key);
+                -- if the answer is a point (something different from null)
+                if result!=null then(
+                    return result
+                )
+            )
+        )
+    ) else (
+        evaluations := evalPolyList(L,cell#"point");
+        if all(evaluations, elem->elem>0) 
+        then return cell#"point"
+        else return null;
+    )
+)
+-- Checks if there is a point in which all the polynomials given in the list are strictly positive
+findSolution := method()
+findSolution(List) := (L) -> (
+    cad := openCAD(L);
+    result := positivePoint(L, cad);
+    if result == null
+    then print("There is no solution")
+    else print("There are solutions");
+    return result
 )
 
 -* Documentation section *-
