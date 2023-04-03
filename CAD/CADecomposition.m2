@@ -21,8 +21,8 @@ export {"factors",
 "openCAD",
 "gmodsHeuristic",
 "latterContainsFormer",
-"findSolution",
-"positivePoint"
+"positivePoint",
+"findSolution"
 }
 
 -* Code section *-
@@ -174,16 +174,16 @@ samplePoints(List) := (L) -> (
     if L=={} then error "Error: Expected non-empty list";
     A := QQ(monoid[support(L)]);
     h:=sub(product L, A);
-    print("List of Pols:"); print L;
+    -- print("List of Pols:"); print L;
     -- print h;
     intervalSize := 1;
     ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number
-    print "root isolating intervals";
-    print ourRoots;
+    -- print "root isolating intervals";
+    -- print ourRoots;
     if ourRoots == {} then error "List has no roots";
     -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
     for i from 0 to #ourRoots-2 do (
-      print("Roots", ourRoots);
+      -- print("Roots", ourRoots);
       while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
         intervalSize = intervalSize/2;
         ourRoots = realRootIsolation(h,intervalSize);
@@ -191,7 +191,7 @@ samplePoints(List) := (L) -> (
     );
     -- Find the mid-points between intervals as cell witnesses:
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
-    print "Mid Points:"; print L1;
+    -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
     if length(ourRoots)>0 then (
       L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
@@ -248,33 +248,43 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
 positivePoint := method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
-    if sort(keys(cell#"point"))!=support(L) then (
+    print(support(L));print(keys(cell#"point"));
+    if length(keys(cell#"point"))!=length(support(L)) then (
         for key in keys(cell) do(
             -- if the key is not "points" or "polynomials"
             if not instance(key,String) then(
+                print(key); print("key");
                 result := positivePoint(L, cell#key);
                 -- if the answer is a point (something different from null)
-                if result!=null then(
+                if instance(result, HashTable) then(
                     return result
-                )
-            )
+                );
+            );
+            print("Here again")
         )
     ) else (
         evaluations := evalPolyList(L,cell#"point");
-        if all(evaluations, elem->elem>0) 
-        then return cell#"point"
-        else return null;
+        if all(evaluations, elem->(elem>0)) then (
+            print("evaluations");print(evaluations); -- somehow it is entering here even when some evaluations are negative
+            return cell#"point"
+        )
+        else return null
     )
 )
+
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive
 findSolution := method()
 findSolution(List) := (L) -> (
     cad := openCAD(L);
     result := positivePoint(L, cad);
-    if result == null
-    then print("There is no solution")
-    else print("There are solutions");
-    return result
+    print("Arrived here");
+    if instance(result, HashTable)
+    then (
+      print("There are solutions");
+      return true)
+    else (
+      print("There is no solution");
+      return false)
 )
 
 -* Documentation section *-
@@ -708,6 +718,29 @@ TEST /// -* openCAD test *-
   openCAD(L)
   answer = {}
   assert(S == answer)
+///
+
+TEST /// -* findSolution test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  assert(findSolution(L) == true)
+///
+
+TEST /// -* findSolution test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}
+  assert(findSolution(L) == false)
 ///
 
 end--
