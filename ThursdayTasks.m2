@@ -228,16 +228,23 @@ hilbertPolynomial(Subring, ZZ) := opts -> (S, i) -> (
     --print vertices NOBody;
     ehrhart NOBody    
     )
------------------------
+---------------------------------
+---------------------------------
+
 restart
-path = prepend("./", path)
+path = prepend("./", path);
 needsPackage "SubalgebraBases"
 needsPackage "Polyhedra"
 
 -- needsPackage "Polyhedra"
 R = QQ[x,y,z]
 S = subring matrix {{x^3, y^2, x^5, y^5, z^10, z*y}}
-hilbertPolynomial S
+U = QQ[u_1 .. u_6, Degrees => {3,2,5,5,10,2}]
+gens S
+m = map(R, U, gens S)
+I = ker m
+time hilbertPolynomial S
+time hilbertPolynomial I -- uh oh
 vertices NObody S
 
 R = QQ[t, x, y, z]
@@ -272,3 +279,4 @@ d = k*(n-k) -- dimension = degree of hilbert polynomial
 degree Grassmannian(k-1, n-1) / d! -- leading coefficient
 
 vertices NObody(S', 0)
+

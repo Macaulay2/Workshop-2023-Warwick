@@ -106,8 +106,9 @@ o19 = .044921875
 o19 : RR (of precision 53)
 *-
 
+R = QQ[x,y,z] 
 S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}
-time SB = sagbi(S)
+SB = sagbi(S)
 
 
 -- 5. the reduction ideal is equal to the SIdeal when ambient ring is not a quotient
@@ -126,11 +127,71 @@ time SB = sagbi(S)
 
 -------------------------
 
+
+
+
+
+
+
+
+
+
+
 path = prepend("./", path)
 needsPackage "SubalgebraBases"
+
+R = QQ[x,y,z] 
+S = subring {x^2-y, y^3-2*x+z^3, x^3-z^7}
+SB = sagbi(S)
+gens SB
+leadTerm S
+
+sagbi(S, Strategy => "FourTiTwo")
+gens oo
+
 needsPackage "MatchingFields" -- one day this will exist in M2 (currently on Ollie's github)
-L = diagonalMatchingField(3, 8)
+L = diagonalMatchingField(3, 6)
 S = subring L
-time sagbi(S, Strategy => "FourTiTwo", AutoSubduce => false, PrintLevel => 1)
-time sagbi(S, AutoSubduce => false, PrintLevel => 1)
+transpose gens oo 
+sagbi S
+k = 3
+n = 6
+
+time (
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    sagbi(S, Strategy => "FourTiTwo", AutoSubduce => false, PrintLevel => 0)
+    )
+
+time ( -- current strategy
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    sagbi(S, Strategy => "Master", AutoSubduce => false, PrintLevel => 0)
+    )
+
+time (
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    sagbi(S, Strategy => "DegreeByDegree", AutoSubduce => false, PrintLevel => 0)
+    )
+
+time (
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    sagbi(S, Strategy => "Incremental", AutoSubduce => false, PrintLevel => 0)
+    )
+-------------
+
+time (
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    isSAGBI(S, Strategy => "FourTiTwo", PrintLevel => 1)
+    )
+
+time (
+    L := diagonalMatchingField(k, n);
+    S := subring L;
+    isSAGBI(S, Strategy => "Master", PrintLevel => 1)
+    )
+
 
