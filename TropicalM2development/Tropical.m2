@@ -885,7 +885,7 @@ heightOneSlice Fan := F ->(
 		slicedMaxCone := intersection(currentMaxCone, slicePlane);
 		newSlicedMaxCone := convexHull(submatrix'(vertices slicedMaxCone ,{0},),submatrix'(rays slicedMaxCone ,{0},), submatrix'(linealitySpace slicedMaxCone ,{0},));
 		if dim(newSlicedMaxCone)>-1 then 
-		         listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone}
+		         (listOfSlicedCones = listOfSlicedCones | {newSlicedMaxCone})
 		else emptyCones = emptyCones |{i};
             )	
 	);
@@ -905,7 +905,7 @@ tropicalVarietyWithValExternal = method(
 
 --First assume that I is prime
 
---This installs, but still has a bug!
+--still need to add the multiplicities - currently they are empty
 tropicalVarietyWithpadicVal = (I) -> (
     d:=dim I;
     gfanopt:=(new OptionTable) ++ {"groebnerComplex"=>true,"p"=>2};
@@ -928,8 +928,8 @@ tropicalVarietyWithpadicVal = (I) -> (
 		    conesToKeep = append(conesToKeep,C);
 	    );
    ));
-   conesToKeep=sort unique flatten conesToKeep;
-   (PC,keptCones):= heightOneSlice(fan((rays GC)_conesToKeep,conesToKeep));
+   raysToKeep:=sort unique flatten conesToKeep;
+   (PC,keptCones):= heightOneSlice(fan((rays GC)_raysToKeep,linealitySpace(GC), conesToKeep));
    --Will need to work out the multiplicities later
    mults:={};
    return(tropicalCycle1(PC,mults));
@@ -1014,7 +1014,6 @@ tropicalVarietyWithPuiseuxVal (Ideal) := o -> (I) ->(
     --- we expect that we are working over 	QQ{{t}}, where t is the first variable of the poly ring.
 	listOfSlicedCones := {};
 	T := tropicalVariety(I);
-	emptyCones:={};
     	(PC,conesToKeep):=heightOneSlice(fan T);
 --     -- now slice the fan with a plane at height 1 for min convention (or -1) for max convention
 -- 	addsemiringAdd := minmax();
@@ -2435,6 +2434,7 @@ T=tropicalVarietyWithPuiseuxVal(I)
 --Add after making tropicalCycle1 behave better with empty input:
 --assert(rank(source(vertices(T)))==0)
 --assert(rank(source(rays(T)))==0)
+--This test fails now
 ///
 
 
@@ -2445,8 +2445,22 @@ I=ideal(t^2*x^2+t^2*y^2+t^3*z^2+x*y+t*x*z+y*z+x+y+t*z+t^2)
 T=tropicalVarietyWithPuiseuxVal(I)
 assert(rank(source(linealitySpace(fan(T))))==0)
 assert(rank(source(vertices(fan(T))))==8)
---Add more assertions one issues with "polyhedra" get figured out
+--Add more assertions once issues with "polyhedra" get figured out
 ///
+
+-----------------------
+--tropicalVarietyWithpadicVal
+-----------------------
+
+TEST///
+R=QQ[x,y,z]
+I=ideal(x+y+2*z)
+T=tropicalVarietyWithpadicVal(I)
+F=fan T
+assert(rank(linealitySpace(F))==1)
+assert(#(vertices(F))==1)
+assert(#maxPolyhedra(F)==3)
+
 
 
 -----------------------
