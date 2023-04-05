@@ -1123,6 +1123,7 @@ doc ///
 	       {HREF("https://alessioborzi.github.io/", "Alessio Borzì")},
 	       {HREF("https://www.linkedin.com/in/timothyxu/", "Timothy Xu")},
 	       {HREF{"publish.uwo.ca/~aashra9/","Ahmed Umer Ashraf"}}
+	       {HREF("https://victoriaschleis.github.io/", "Victoria Schleis")},
     	     }@
 ///
 
