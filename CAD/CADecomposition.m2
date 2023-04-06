@@ -1,3 +1,10 @@
+-- To do
+--
+--Issue with positivePoint and findSolution - don't load properly, giving wrong output
+--test(s) #7, 9, 10, 11 failing
+--Add documentation for gmodsHeuristic, projectionPhase, samplePoints, latterContainsFormer, positivePoint, findSolution
+--Add tests for latterContainsFormer, positivePoint, findSolution
+
 newPackage(
     "CADecomposition",
     Version => "0.1",
@@ -14,12 +21,12 @@ export {"factors",
 "evalPoly",
 "evalPolyList",
 "leadCoefficientt",
+"gmodsHeuristic",
 "lazardProjection",
 "projectionPhase",
 "liftingPoint",
 "samplePoints",
 "openCAD",
-"gmodsHeuristic",
 "latterContainsFormer",
 "positivePoint",
 "findSolution"
@@ -743,6 +750,54 @@ TEST /// -* findSolution test *-
   assert(findSolution(L) == false)
 ///
 
+TEST /// -* gmodsHeuristic test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}  
+  assert(gmodsHeuristic(L) == x1)
+///
+
+--TEST /// -* latterContainsFormer test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+--  R=QQ[x1,x2,x3]
+--  p0=x1*x2
+--  p1=x1^2*x2-x1*x3+x3^3
+--  p2=x2^2*x3+x3
+--  p3=-x1*x2
+--  L={p0,p1,p2,p3}
+--  assert(gmodsHeuristic(L) == x1)
+--///
+
+--TEST /// -* positivePoint test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+--  R=QQ[x1,x2,x3]
+--  p0=x1*x2
+--  p1=x1^2*x2-x1*x3+x3^3
+--  p2=x2^2*x3+x3
+--  p3=-x1*x2
+--  L={p0,p1,p2,p3}
+--  assert(gmodsHeuristic(L) == x1)
+--///
+
+--TEST /// -* findSolution test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+--  R=QQ[x1,x2,x3]
+--  p0=x1*x2
+--  p1=x1^2*x2-x1*x3+x3^3
+--  p2=x2^2*x3+x3
+--  p3=-x1*x2
+--  L={p0,p1,p2,p3}
+--  assert(gmodsHeuristic(L) == x1)
+--///
+
 end--
 
 -* Development section *-
@@ -752,7 +807,7 @@ needsPackage "CADecomposition"
 check "CADecomposition"
 
 
-uninstallPackage "CADecomposition"
+uninstallPackage "CADecomposition"2
 restart
 installPackage "CADecomposition"
 viewHelp "CADecomposition"
