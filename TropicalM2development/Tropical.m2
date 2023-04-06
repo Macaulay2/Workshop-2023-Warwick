@@ -1122,8 +1122,9 @@ doc ///
 	       {HREF("https://math.berkeley.edu/~yelena/", "Yelena Mandelshtam")},
 	       {HREF("https://alessioborzi.github.io/", "Alessio Borzì")},
 	       {HREF("https://www.linkedin.com/in/timothyxu/", "Timothy Xu")},
-	       {HREF{"publish.uwo.ca/~aashra9/","Ahmed Umer Ashraf"}}
+	       {HREF{"publish.uwo.ca/~aashra9/","Ahmed Umer Ashraf"}},
 	       {HREF("https://victoriaschleis.github.io/", "Victoria Schleis")},
+	       {HREF("https://sites.google.com/view/rob-silversmith/", "Rob Silversmith")}
     	     }@
 ///
 
@@ -2461,7 +2462,7 @@ F=fan T
 assert(rank(linealitySpace(F))==1)
 assert(#(vertices(F))==1)
 assert(#maxPolyhedra(F)==3)
-
+///
 
 
 -----------------------
