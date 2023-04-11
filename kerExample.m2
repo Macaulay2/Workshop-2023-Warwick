@@ -76,3 +76,6 @@ piMap = map(T, TtildeQuot, vars T)
 piMap gensKerPhiTilde
 
 ideal T + kerPhiTilde
+
+-- ker m
+gens gb ((ker m) + kerPhiTilde)

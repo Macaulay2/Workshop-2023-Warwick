@@ -35,6 +35,7 @@ export {
     "groebnerMembershipTest",
     "groebnerSubductionQuotient",
     "subringIntersection",
+    "subringIntersection1",
     "UseSubringGens",
     "IntersectedSubring",
     "isFullIntersection",

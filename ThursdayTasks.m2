@@ -245,14 +245,63 @@ m = map(R, U, gens S)
 I = ker m
 time hilbertPolynomial S
 time hilbertPolynomial I -- uh oh
+res I
+hilbertSeries I
 vertices NObody S
 
-R = QQ[t, x, y, z]
+R = QQ[t, x, y, z] -- Degrees => {1,0,0,0} (??)
 i = 0
 S = subring matrix {{t*x^2, t*x*y, t*z^3, t*x*z}}
 hilbertPolynomial(S, 0)
 vertices NObody(S, 0)
 
+U = QQ[u_1 .. u_4, Degrees => {{1,2,0,0}, {1,1,1,0}, {1,0,0,3},{1,1,0,1}}]
+gens S
+m = map(R, U, gens S)
+I = ker m
+time hilbertPolynomial S
+time hilbertPolynomial I -- uh oh
+res I
+hilbertSeries I
+-- Question: how to go back between Hilbert series to polyomial? -- let's recall it!
+-- Check how this compares 
+
+
+R = QQ[t, x, y] -- Degrees => {1,0,0,0} (??)
+S = subring matrix {{t*(x+y), t*x*y, t*x*y^2, t}}
+hilbertPolynomial(S, 0)
+vertices NObody(S, 0) -- didn't raise an error on incomplete sagbi basis (raise error unless told not to)
+-- TODO: add a warning if it is a rational polyhedron
+
+gens sagbi S
+peek sagbi S
+U = QQ[u_1 .. u_4, Degrees => {{1,1,0},{1,1,1},{1,1,2},{1,0,0}}]
+gens S
+m = map(R, U, gens S)
+I = ker m
+time hilbertPolynomial S
+time hilbertPolynomial I -- uh oh
+res I
+hilbertSeries I
+
+
+
+
+-- Reference: Newton-Okounkov bodies, semigroups of integral points, graded algebras and intersection theory (Kaveh-Khovanskii)
+-- TODO:
+-- res / hilbert series for subrings
+-- --> Define a presentation ideal / (pres ring)
+-- document these functions
+-- TESTS!!
+-- use Hilbert Series of the pres ideal and compare with the Hilbert polynomial of NO body
+
+-- Something wrong with the Hilbert polynomial from NO body
+-- in the above example, pure powers of z exist only in degrees of a multiple of 10
+-- So Hilbert polynomial should be a quasi polynomial
+--
+-- [One day: have some way to work with quasi polynomials] 
+
+--
 ---------------------
 -- See Ollie's github (special weight orders on the Pleucker algebra)
 needsPackage "MatchingFields" 
