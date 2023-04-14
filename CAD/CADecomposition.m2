@@ -253,7 +253,7 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
 )
 
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
-positivePoint := method()
+positivePoint = method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
     print(support(L));print(keys(cell#"point"));
     if length(keys(cell#"point"))!=length(support(L)) then (
@@ -280,7 +280,7 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
 )
 
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive
-findSolution := method()
+findSolution = method()
 findSolution(List) := (L) -> (
     cad := openCAD(L);
     result := positivePoint(L, cad);
