@@ -272,7 +272,9 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
     ) else (
         evaluations := evalPolyList(L,cell#"point");
         if all(evaluations, elem->(elem>0)) then (
+            print(instance(evaluations, List));
             print("evaluations");print(evaluations); -- somehow it is entering here even when some evaluations are negative
+            print("all(evaluations, elem->(elem>0))"); print(all(evaluations, elem->(elem>0)));
             return cell#"point"
         )
         else return null
