@@ -2,7 +2,7 @@
 --
 --Issue with positivePoint and findSolution - don't load properly, giving wrong output
 --test(s) #7, 9, 10, 11 failing
---Add documentation for gmodsHeuristic, projectionPhase, samplePoints, latterContainsFormer, positivePoint, findSolution
+--Add documentation for latterContainsFormer, positivePoint, findSolution
 --Add tests for latterContainsFormer, positivePoint, findSolution
 
 newPackage(
@@ -188,7 +188,7 @@ samplePoints(List) := (L) -> (
     -- print "root isolating intervals";
     -- print ourRoots;
     if ourRoots == {} then error "List has no roots";
-    -- if two consecutive intervals have a shared start/end point tha tis a root then refine intervals:
+    -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
     for i from 0 to #ourRoots-2 do (
       -- print("Roots", ourRoots);
       while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
@@ -199,7 +199,7 @@ samplePoints(List) := (L) -> (
     -- Find the mid-points between intervals as cell witnesses:
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
-    -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoind them being a root:
+    -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
     if length(ourRoots)>0 then (
       L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
      )
@@ -311,6 +311,57 @@ SeeAlso
 
 doc ///
   Key
+    (factors, RingElement)
+    factors
+  Headline
+    Returns a list of two element lists containing its factors and the exponents.
+  Usage
+    factors(p)
+  Inputs
+    p:RingElement
+      polynomial in a ring
+  Outputs
+    :List
+      list of lists of the factors and their exponents, last element is the constant with exponent 1
+  Description
+    Text
+      This function breaks a RingElement into its factors
+    Example
+      R=QQ[x1,x2,x3]
+      p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
+      factors(p)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (factorsInList, List)
+    factorsInList
+  Headline
+    Returns the factors that appear in a list of RingElements
+  Usage
+    factorsInList(L)
+  Inputs
+    L:List
+        list of RingElements
+  Outputs
+    :List
+      list of lists its factors and its exponents
+  Description
+    Text
+      This function returns all the factors that appear in a list of RingElements without considering how many times they appear and ignoring the coefficients.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      factorsInList(L)
+  SeeAlso
+///
+
+doc ///
+  Key
     (evalPoly, RingElement, MutableHashTable)
     evalPoly
   Headline
@@ -369,6 +420,147 @@ doc ///
   SeeAlso
 ///
 
+doc ///
+  Key
+    (leadCoefficientt, RingElement, RingElement)
+    leadCoefficientt
+  Headline
+    Finds the lead coefficient of a ring element with respect to a variable.
+  Usage
+    leadCoefficientt(p,v)
+  Inputs
+    p:RingElement
+    v:RingElement
+      a variable in the ring
+  Outputs
+    :RingElement
+  Description
+    Text
+      The leading coefficient of a RingElement with respect to a variable is returned.
+    Example
+      R=QQ[x1,x2,x3]
+      p=x1^2*x2-x1*x3+x3^3
+      leadCoefficientt(p,x1)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (gmodsHeuristic, List)
+    gmodsHeuristic
+  Headline
+    Uses the gmods heuristic to determine the next variable to project.
+  Usage
+    gmodsHeuristic(L)
+  Inputs
+    L:List
+      of polynomials in several variables
+  Outputs
+    :RingElement
+      RingElement giving the next variable
+  Description
+    Text
+      Given a list (L) of polynomials in one or more variables, the first variable in the list is set as the variable to project, and the sum of its degrees in each polynomial is compared to the sum of degrees for each other variable. If another variable has lower total degree, then this variable is taken instead as the next variable to project.
+    Example
+	
+	  R=QQ[x1,x2,x3]
+	  p0=x1*x2
+	  p1=x1^2*x2-x1*x3+x3^3
+	  p2=x2^2*x3+x3
+	  p3=-x1*x2
+	  L={p0,p1,p2,p3}  
+	  gmodsHeuristic(L)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (lazardProjection, List, RingElement)
+    lazardProjection
+  Headline
+    Computes the Lazard projection with respect to a variable.
+  Usage
+    lazardProjection(L,v)
+  Inputs
+    L:List
+      of polynomials all in the same ring
+    v:RingElement
+      a variable in the ring
+  Outputs
+    :List
+      list of projected polynomials not involving $v$
+  Description
+    Text
+      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials w.r.t $v$. For openCAD, the trailing coefficients are not needed.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      L2 = lazardProjection(L,x1)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (projectionPhase, List)
+    projectionPhase
+  Headline
+    Creates a full Lazard projection of a given list of polynomials
+  Usage
+    projectionPhase(L)
+  Inputs
+    L:List
+      of lists of polynomials
+  Outputs
+    :List
+      of lists of projection polynomials in decreasing numbers of variables
+  Description
+    Text
+      Given a list (L) of polynomials or a list of lists of polynomials, these are stored, then a variable is selected using gmods, and the Lazard projection is done on the polynomials. This new list in one fewer variables is also stored, and the process is repeated on this new list until only polynomials in one variable remain.
+    Example
+      R=QQ[x]
+	  R=QQ[x1,x2,x3]
+	  f0=x1*x2
+	  f1=x1^2*x2-x1*x3+x3^3
+	  f2=x2^2*x3+x3
+	  L={f0,f1,f2}
+	  projectionPhase(L)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (liftingPoint, List, MutableHashTable)
+    liftingPoint
+  Headline
+    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
+  Usage
+    liftingPoint(S,p)
+  Inputs
+    S:List
+      list of lists of RingElements
+    p:MutableHashTable
+      point described using a hash table where the keys are RingElements (variables)
+  Outputs
+    :MutableHashTable
+      MutableHashTable describing an OpenCAD
+  Description
+    Text
+      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      pts = new MutableHashTable
+      pts#x1 = 1
+      pts#x2 = 3
+      liftingPoint(L,pts)
+  SeeAlso
+///
 
 doc ///
   Key
@@ -405,144 +597,6 @@ doc ///
 
       L4 ={x^2+1}
       samplePoints L4
-
-   
-  SeeAlso
-///
-
-doc ///
-  Key
-    (lazardProjection, List, RingElement)
-    lazardProjection
-  Headline
-    Computes the Lazard projection with respect to a variable.
-  Usage
-    lazardProjection(L,v)
-  Inputs
-    L:List
-      of polynomials all in the same ring
-    v:RingElement
-      a variable in the ring
-  Outputs
-    :List
-      list of projected polynomials not involving $v$
-  Description
-    Text
-      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials w.r.t $v$. For openCAD, the trailing coefficients are not needed.
-    Example
-      R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
-      L={p0,p1,p2}
-      L2 = lazardProjection(L,x1)
-  SeeAlso
-///
-
-doc ///
-  Key
-    (factors, RingElement)
-    factors
-  Headline
-    Returns a list of two element lists containing its factors and the exponents.
-  Usage
-    factors(p)
-  Inputs
-    p:RingElement
-      polynomial in a ring
-  Outputs
-    :List
-      list of lists of the factors and their exponents, last element is the constant with exponent 1
-  Description
-    Text
-      This function breaks a RingElement into its factors
-    Example
-      R=QQ[x1,x2,x3]
-      p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
-      factors(p)
-  SeeAlso
-///
-
-doc ///
-  Key
-    (factorsInList, List)
-    factorsInList
-  Headline
-    Returns the factors that appear in a list of RingElements
-  Usage
-    factorsInList(L)
-  Inputs
-    L:List
-        list of RingElements
-  Outputs
-    :List
-      list of lists its factors and its exponents
-  Description
-    Text
-      This function returns all the factors that appear in a list of RingElements without considering how many times they appear and ignoring the coefficients.
-    Example
-      R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
-      L={p0,p1,p2}
-      factorsInList(L)
-  SeeAlso
-///
-
-doc ///
-  Key
-    (leadCoefficientt, RingElement, RingElement)
-    leadCoefficientt
-  Headline
-    Finds the lead coefficient of a ring element with respect to a variable.
-  Usage
-    leadCoefficientt(p,v)
-  Inputs
-    p:RingElement
-    v:RingElement
-      a variable in the ring
-  Outputs
-    :RingElement
-  Description
-    Text
-      The leading coefficient of a RingElement with respect to a variable is returned.
-    Example
-      R=QQ[x1,x2,x3]
-      p=x1^2*x2-x1*x3+x3^3
-      leadCoefficientt(p,x1)
-  SeeAlso
-///
-
-doc ///
-  Key
-    (liftingPoint, List, MutableHashTable)
-    liftingPoint
-  Headline
-    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
-  Usage
-    liftingPoint(S,p)
-  Inputs
-    S:List
-      list of lists of RingElements
-    p:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables)
-  Outputs
-    :MutableHashTable
-      MutableHashTable describing an OpenCAD
-  Description
-    Text
-      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
-    Example
-      R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
-      L={p0,p1,p2}
-      pts = new MutableHashTable
-      pts#x1 = 1
-      pts#x2 = 3
-      liftingPoint(L,pts)
   SeeAlso
 ///
 
