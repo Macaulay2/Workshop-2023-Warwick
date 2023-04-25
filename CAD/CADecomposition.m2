@@ -252,6 +252,89 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
   return true
 )
 
+--To do:
+-- gives an error if both are lists containing different types of elements, i.e. list of polys vs list of lists.
+ 
+ --classListFormer = {}
+ --classListLatter = {}
+ --
+ --for elt in former do (
+ --    classListFormer = unique(append(classListFormer,class(elt)))
+ --  );
+ --  classListFormer
+   
+ --for elt in latter do (
+ --    classListLatter = unique(append(classListLatter,class(elt)))
+ --  );
+ --  classListLatter
+ 
+ -- check latter contains all of former's types
+
+ --if not unique(join(classListFormer,classListLatter)) === classListLatter then (
+ --    print ("former contains element(s) of a different type!");
+ --    return false
+ --)
+ 
+--if it does, check each element of that type is in latter
+
+--else for elt in classListLatter do (
+--    ofTypeInLatter=select(latter,elt); 
+--    ofTypeInFormer=select(former,elt);
+--    --print ofTypeInLatter;
+--    --print ofTypeInFormer;
+--    for elemTFormer in ofTypeInFormer do (
+--	if not any(ofTypeInLatter, elem->elem==(elemTFormer)) then (
+--	    print (concatenate("elemTFormer of type ",toString(elt)," is not in latter"));
+--	    return false
+--	    );
+--	);
+--    );
+
+-------------------------------------------------------------------
+ --example
+  
+--  LX0={f0,f1,f2}
+--  LX1={f0,f1,f2,L1}
+--  LX2={f0,f1,f2,L1,L2}
+--  J0 = {}
+--  J1 = {} 
+
+
+-- get list of types for both
+  
+--  for elt in LX0 do (
+--      J0 = unique(append(J0,class(elt)))
+--   );
+--   J0
+   
+  
+--  for elt in LX1 do (
+--      J1 = unique(append(J1,class(elt)))
+--   );
+--   J1
+
+--if not unique(join(J0,J1)) === J0 then (
+--    print ("former contains element(s) of a different type!");
+--    return false
+--)
+
+--if it does, check each element of that type is in latter
+
+--for elt in J1 do (
+--    ofTypeInLatter=select(LX0,elt); --these are wrong way round (swap LX0 and LX1) once finished testing
+--    ofTypeInFormer=select(LX1,elt);
+--    print ofTypeInLatter;
+--    print ofTypeInFormer;
+--    for elemTFormer in ofTypeInFormer do (
+--	if not any(ofTypeInLatter, elem->elem==(elemTFormer)) then (
+--	    print (concatenate("elemTFormer of type ",toString(elt)," is not in latter"));
+--	    return false
+--	    );
+--	);
+--    );
+
+--------------------------------------------------------------------------
+
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
 positivePoint = method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
@@ -271,10 +354,11 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
         )
     ) else (
         evaluations := evalPolyList(L,cell#"point");
-        if all(evaluations, elem->(elem>0)) then (
+--        if all(evaluations, elem->(elem>0)) then ( --old value
+        if not any(evaluations, elem->(abs(elem) == -1*elem)) then ( --it's dirty but this works
             print(instance(evaluations, List));
             print("evaluations");print(evaluations); -- somehow it is entering here even when some evaluations are negative
-            print("all(evaluations, elem->(elem>0))"); print(all(evaluations, elem->(elem>0)));
+            print("all(evaluations, elem->(elem>0))"); print(not any(evaluations, elem->(abs(elem) == -1*elem))); --print(all(evaluations, elem->(elem>0)));
             return cell#"point"
         )
         else return null
@@ -627,6 +711,38 @@ doc ///
   SeeAlso
 ///
 
+doc ///
+  Key
+    (latterContainsFormer, Thing, Thing)
+    latterContainsFormer
+  Headline
+    Checks if an object contains all the information the other has
+  Usage
+    latterContainsFormer(former, latter)
+  Inputs
+    former:Thing
+		a thing
+    latter:Thing
+		a thing	
+  Outputs
+    :Boolean
+      true or false
+  Description
+    Text
+      This function first checks two objects are of the same class, then if they are of type MutableHashTable, it checks they both contain the keys from former and that these keys contain the same objects. If they are lists, it checks they contain the elements from former, and for any other type it checks if they are the the same, returning false if it fails any of these and true otherwise.
+    Example
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L1={f0,f1}
+  L2={f1,f2} 
+  P1 = projectionPhase(L1)
+  P2 = projectionPhase(L2)
+  latterContainsFormer(P1, P2)
+  SeeAlso
+///
+
 -* Test section *-
 TEST /// -* factors test *-
 -- test code and assertions here
@@ -818,17 +934,24 @@ TEST /// -* gmodsHeuristic test *-
   assert(gmodsHeuristic(L) == x1)
 ///
 
---TEST /// -* latterContainsFormer test *-
+TEST /// -* latterContainsFormer test *-
 -- test code and assertions here
 -- may have as many TEST sections as needed
---  R=QQ[x1,x2,x3]
---  p0=x1*x2
---  p1=x1^2*x2-x1*x3+x3^3
---  p2=x2^2*x3+x3
---  p3=-x1*x2
---  L={p0,p1,p2,p3}
---  assert(gmodsHeuristic(L) == x1)
---///
+  R=QQ[x1,x2,x3]
+  f0=x1*x2
+  f1=x1^2*x2-x1*x3+x3^3
+  f2=x2^2*x3+x3
+  L1={f0,f1}
+  L2={f1,f2} 
+  P1 = projectionPhase(L1)
+  P2 = projectionPhase(L2)
+  lcf1 = latterContainsFormer(P1, P2)
+  lcf2 = latterContainsFormer(P1, P1)  
+  --lcf3 = latterContainsFormer(L1, P1)  
+  assert(lcf1 == false)
+  assert(lcf2 == true)
+ -- assert(lcf3 == false)
+///
 
 --TEST /// -* positivePoint test *-
 -- test code and assertions here
