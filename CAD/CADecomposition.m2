@@ -302,13 +302,14 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
             print(instance(evaluations, List));
             print("evaluations");print(evaluations); -- should be fixed now. old:somehow it is entering here even when some evaluations are negative
             print("all(evaluations, elem->(elem>0))"); print(all(evaluations, elem->(elem>0))); -- print(not any(evaluations, elem->(abs(elem) == -1*elem)));
-            return cell#"point"
+	    print cell#"point";
+	    return cell#"point"
         )
         else (
 	    print "fail";
-	    return null
 	    )
-    )
+    );
+    return "no point exists"
 )
 
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive
@@ -676,15 +677,15 @@ doc ///
     Text
       This function first checks two objects are of the same class, then if they are of type MutableHashTable, it checks they both contain the keys from former and that these keys contain the same objects. If they are lists, it checks they contain the elements from former, and for any other type it checks if they are the the same, returning false if it fails any of these and true otherwise.
     Example
-  R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L1={f0,f1}
-  L2={f1,f2} 
-  P1 = projectionPhase(L1)
-  P2 = projectionPhase(L2)
-  latterContainsFormer(P1, P2)
+      R=QQ[x1,x2,x3]
+      f0=x1*x2
+      f1=x1^2*x2-x1*x3+x3^3
+      f2=x2^2*x3+x3
+      L1={f0,f1}
+      L2={f1,f2} 
+      P1 = projectionPhase(L1)
+      P2 = projectionPhase(L2)
+      latterContainsFormer(P1, P2)
   SeeAlso
 ///
 
@@ -981,7 +982,7 @@ TEST /// -* latterContainsFormer test *-
 --  assert(gmodsHeuristic(L) == x1)
 --///
 
---TEST /// -* findSolution test 1*-
+TEST /// -* positivePoint test 1*-
 -- test code and assertions here
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
@@ -991,8 +992,24 @@ TEST /// -* latterContainsFormer test *-
   p3=-x1*x2
   L={p0,p1,p2,p3}
   C=openCAD(L)
-  positivePoint(L,C)
---///
+  PP=positivePoint(L,C)
+  PP
+  assert(PP == "no point exists")
+/// 
+  
+TEST /// -* positivePoint test 2*-
+-- test code and assertions here
+-- may have as many TEST sections as needed  
+  R=QQ[x]
+  p0=x^2-1
+  p1=x
+  L={p0,p1}
+  C=openCAD(L)
+  PP=positivePoint(L,C)
+  answer = new MutableHashTable from {
+      x => 2}
+  assert(peek PP == peek answer)
+///
 
 end--
 
@@ -1003,7 +1020,7 @@ needsPackage "CADecomposition"
 check "CADecomposition"
 
 
-uninstallPackage "CADecomposition"2
+uninstallPackage "CADecomposition"
 restart
 installPackage "CADecomposition"
 viewHelp "CADecomposition"
