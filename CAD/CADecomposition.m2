@@ -232,17 +232,40 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
       );
       boolean := latterContainsFormer(former#key, latter#key);
       if not boolean then(
-        print("The objects store in former and latter under key are not the same");
+        print("The objects stored in former and latter under key are not the same");
         return false
       )
     )
   )
   else if instance(former, List) then (
-    for elemFormer in former do (
-      if not any(latter, elem->elem==(elemFormer)) then (
-        print("elemFormer is not in latter.");
-        return false
-      )
+    -- gives an error if both are lists containing different types of elements, i.e. list of polys vs list of lists, so below check may also be needed.
+    classListFormer = {}; 
+    classListLatter = {};
+    for elt in former do (
+      classListFormer = unique(append(classListFormer,class(elt)))
+    );
+    classListFormer;
+    for elt in latter do (
+      classListLatter = unique(append(classListLatter,class(elt)))
+    );
+    classListLatter;
+    -- check latter contains all of former's types
+    if not unique(join(classListFormer,classListLatter)) === classListLatter then (
+      print ("former contains element(s) of a different type!");
+      return false
+    )
+    --if it does, check each element of that type is in latter
+    else for elt in classListLatter do (
+      ofTypeInLatter=select(latter,elt); 
+      ofTypeInFormer=select(former,elt);
+      --print ofTypeInLatter;
+      --print ofTypeInFormer;
+      for elemFormer in ofTypeInFormer do (
+	    if not any(ofTypeInLatter, elem->elem==(elemFormer)) then (
+	      print (concatenate("elemFormer of type ",toString(elt)," is not in latter"));
+	      return false
+	    )
+	  )
     )
   )
   else if former!=latter then (
@@ -251,89 +274,6 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
   );
   return true
 )
-
---To do:
--- gives an error if both are lists containing different types of elements, i.e. list of polys vs list of lists.
- 
- --classListFormer = {}
- --classListLatter = {}
- --
- --for elt in former do (
- --    classListFormer = unique(append(classListFormer,class(elt)))
- --  );
- --  classListFormer
-   
- --for elt in latter do (
- --    classListLatter = unique(append(classListLatter,class(elt)))
- --  );
- --  classListLatter
- 
- -- check latter contains all of former's types
-
- --if not unique(join(classListFormer,classListLatter)) === classListLatter then (
- --    print ("former contains element(s) of a different type!");
- --    return false
- --)
- 
---if it does, check each element of that type is in latter
-
---else for elt in classListLatter do (
---    ofTypeInLatter=select(latter,elt); 
---    ofTypeInFormer=select(former,elt);
---    --print ofTypeInLatter;
---    --print ofTypeInFormer;
---    for elemTFormer in ofTypeInFormer do (
---	if not any(ofTypeInLatter, elem->elem==(elemTFormer)) then (
---	    print (concatenate("elemTFormer of type ",toString(elt)," is not in latter"));
---	    return false
---	    );
---	);
---    );
-
--------------------------------------------------------------------
- --example
-  
---  LX0={f0,f1,f2}
---  LX1={f0,f1,f2,L1}
---  LX2={f0,f1,f2,L1,L2}
---  J0 = {}
---  J1 = {} 
-
-
--- get list of types for both
-  
---  for elt in LX0 do (
---      J0 = unique(append(J0,class(elt)))
---   );
---   J0
-   
-  
---  for elt in LX1 do (
---      J1 = unique(append(J1,class(elt)))
---   );
---   J1
-
---if not unique(join(J0,J1)) === J0 then (
---    print ("former contains element(s) of a different type!");
---    return false
---)
-
---if it does, check each element of that type is in latter
-
---for elt in J1 do (
---    ofTypeInLatter=select(LX0,elt); --these are wrong way round (swap LX0 and LX1) once finished testing
---    ofTypeInFormer=select(LX1,elt);
---    print ofTypeInLatter;
---    print ofTypeInFormer;
---    for elemTFormer in ofTypeInFormer do (
---	if not any(ofTypeInLatter, elem->elem==(elemTFormer)) then (
---	    print (concatenate("elemTFormer of type ",toString(elt)," is not in latter"));
---	    return false
---	    );
---	);
---    );
-
---------------------------------------------------------------------------
 
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
 positivePoint = method()
@@ -546,14 +486,13 @@ doc ///
     Text
       Given a list (L) of polynomials in one or more variables, the first variable in the list is set as the variable to project, and the sum of its degrees in each polynomial is compared to the sum of degrees for each other variable. If another variable has lower total degree, then this variable is taken instead as the next variable to project.
     Example
-	
-	  R=QQ[x1,x2,x3]
-	  p0=x1*x2
-	  p1=x1^2*x2-x1*x3+x3^3
-	  p2=x2^2*x3+x3
-	  p3=-x1*x2
-	  L={p0,p1,p2,p3}  
-	  gmodsHeuristic(L)
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      p3=-x1*x2
+      L={p0,p1,p2,p3}  
+      gmodsHeuristic(L)
   SeeAlso
 ///
 
@@ -886,20 +825,91 @@ TEST /// -* samplePoints test *-
   assert(S == answer)
 ///
 
-TEST /// -* openCAD test *-
+--TEST /// -* openCAD test *-
+---- test code and assertions here
+---- may have as many TEST sections as needed
+--  R=QQ[x1,x2,x3]
+--  p0=x1*x2
+--  p1=x1^2*x2-x1*x3+x3^3
+--  p2=x2^2*x3+x3
+--  L={p0,p1,p2}
+--  C=openCAD(L)
+--  answer = {}
+--  assert(C == answer)
+--  peek C
+--///
+
+TEST /// -* openCAD test smaller *-
 -- test code and assertions here
 -- may have as many TEST sections as needed
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,p2}
-  openCAD(L)
-  answer = {}
-  assert(S == answer)
+  R=QQ[x1,x2]
+  p0=x1^2+x2
+  p1=x1^3*x2^2
+  L={p0,p1}
+  C=openCAD(L)
+ 
+ --really not sure how to construct an answer to check C is equal to it. Below is a partial attempt
+ --but I don't really know how to compare MutableHashTables.
+  
+--  Cpol = new MutableHashTable from {
+--      "polynomials" => {x2}
+--      }
+  
+--  n = new MutableHashTable
+  
+--  Cpoint = new MutableHashTable from {
+--      "point" => n
+--      }
+
+--  C1x11 = new MutableHashTable from {
+--      x2 => 1
+--     }  
+
+--  C1x1 = new MutableHashTable from {
+--      "point" => C11
+--      }
+
+--  C1x211 = new MutableHashTable from {
+--      x1 => 1,
+--      x2 => 1
+--      }
+
+--  C1x21 = new MutableHashTable from {
+--      "point" => C211
+--      }
+  
+--  C1x2 = new MutableHashTable from {
+--      1 => C21
+--      }
+
+--  C1x221 = new MutableHashTable from {
+--      x1 => -2,
+--      x2 => 1
+--      }
+  
+--  C1x22 = new MutableHashTable from {
+--      "point" => C221
+--      }
+  
+--  C1x3 = new MutableHashTable from {
+--      -2 => C22
+--      }
+  
+--  C1 = new MutableHashTable from {
+--      -2 => C1x22,
+--      1 => C1x21,
+--      "point" => C11,
+--      "polynomials" => {x1^2+1,x1^3}
+--      }
+      
+  assert(C == answer)
+  peek C
 ///
 
-TEST /// -* findSolution test *-
+
+
+
+TEST /// -* findSolution test 1*-
 -- test code and assertions here
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
@@ -910,7 +920,7 @@ TEST /// -* findSolution test *-
   assert(findSolution(L) == true)
 ///
 
-TEST /// -* findSolution test *-
+TEST /// -* findSolution test 2*-
 -- test code and assertions here
 -- may have as many TEST sections as needed
   R=QQ[x1,x2,x3]
@@ -947,10 +957,10 @@ TEST /// -* latterContainsFormer test *-
   P2 = projectionPhase(L2)
   lcf1 = latterContainsFormer(P1, P2)
   lcf2 = latterContainsFormer(P1, P1)  
-  --lcf3 = latterContainsFormer(L1, P1)  
+  lcf3 = latterContainsFormer(L1, P1)  
   assert(lcf1 == false)
   assert(lcf2 == true)
- -- assert(lcf3 == false)
+  assert(lcf3 == false)
 ///
 
 --TEST /// -* positivePoint test *-
