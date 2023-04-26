@@ -294,14 +294,20 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
         )
     ) else (
         evaluations := evalPolyList(L,cell#"point");
---        if all(evaluations, elem->(elem>0)) then ( --old value
-        if not any(evaluations, elem->(abs(elem) == -1*elem)) then ( --it's dirty but this works
+	evaluations = for e in evaluations list value(toString(e)); --elements in list were in R and not treated as numbers, this fixes that.
+	print evaluations; --check these values
+	print for e in evaluations list e>0; --see if positive or not
+        if all(evaluations, elem->(elem>0)) then (
+--        if not any(evaluations, elem->(abs(elem) == -1*elem)) then ( --it's dirty but this works
             print(instance(evaluations, List));
-            print("evaluations");print(evaluations); -- somehow it is entering here even when some evaluations are negative
-            print("all(evaluations, elem->(elem>0))"); print(not any(evaluations, elem->(abs(elem) == -1*elem))); --print(all(evaluations, elem->(elem>0)));
+            print("evaluations");print(evaluations); -- should be fixed now. old:somehow it is entering here even when some evaluations are negative
+            print("all(evaluations, elem->(elem>0))"); print(all(evaluations, elem->(elem>0))); -- print(not any(evaluations, elem->(abs(elem) == -1*elem)));
             return cell#"point"
         )
-        else return null
+        else (
+	    print "fail";
+	    return null
+	    )
     )
 )
 
@@ -975,16 +981,17 @@ TEST /// -* latterContainsFormer test *-
 --  assert(gmodsHeuristic(L) == x1)
 --///
 
---TEST /// -* findSolution test *-
+--TEST /// -* findSolution test 1*-
 -- test code and assertions here
 -- may have as many TEST sections as needed
---  R=QQ[x1,x2,x3]
---  p0=x1*x2
---  p1=x1^2*x2-x1*x3+x3^3
---  p2=x2^2*x3+x3
---  p3=-x1*x2
---  L={p0,p1,p2,p3}
---  assert(gmodsHeuristic(L) == x1)
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}
+  C=openCAD(L)
+  positivePoint(L,C)
 --///
 
 end--
