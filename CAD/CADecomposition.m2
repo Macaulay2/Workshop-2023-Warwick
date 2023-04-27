@@ -24,8 +24,8 @@ export {"factors",
 "gmodsHeuristic",
 "lazardProjection",
 "projectionPhase",
-"liftingPoint",
 "samplePoints",
+"liftingPoint",
 "openCAD",
 "latterContainsFormer",
 "positivePoint",
@@ -148,33 +148,6 @@ projectionPhase(List) := (L) -> (
     S
     )
 
--- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
--- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
-liftingPoint = method()
-liftingPoint(List, MutableHashTable) := (S,p) -> (
-    -- HashTable is a point in i variables 
-    -- List is a list of lists of polynomials, the first list of polys with i+1 variables
-    cell := new MutableHashTable;
-    cell#"point" = p;
-    i := #keys(p);
-    -- we check if all the variables have been given a value already
-    if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
-    L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
-    cell#"polynomials"=L;
-    -- This function evaluates the point p into the polynomials of S_i
-    if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
-    v := (support(L))_0;
-    -- print(L);
-    newSamplePoints := samplePoints(L);
-    SNew := drop(S,1);
-    for samplePoint in newSamplePoints do (
-        pNew := copy p;
-        pNew#v = samplePoint;
-        cell#samplePoint = liftingPoint(S,pNew);
-        );
-    cell
-    )
-
 -- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
 samplePoints(List) := (L) -> (
@@ -207,6 +180,32 @@ samplePoints(List) := (L) -> (
     L1
     )
 
+-- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
+-- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
+liftingPoint = method()
+liftingPoint(List, MutableHashTable) := (S,p) -> (
+    -- HashTable is a point in i variables 
+    -- List is a list of lists of polynomials, the first list of polys with i+1 variables
+    cell := new MutableHashTable;
+    cell#"point" = p;
+    i := #keys(p);
+    -- we check if all the variables have been given a value already
+    if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
+    L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
+    cell#"polynomials"=L;
+    -- This function evaluates the point p into the polynomials of S_i
+    if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
+    v := (support(L))_0;
+    -- print(L);
+    newSamplePoints := samplePoints(L);
+    SNew := drop(S,1);
+    for samplePoint in newSamplePoints do (
+        pNew := copy p;
+        pNew#v = samplePoint;
+        cell#samplePoint = liftingPoint(S,pNew);
+        );
+    cell
+    )
 
 -- Does the open CAD
 openCAD = method()
@@ -562,38 +561,6 @@ doc ///
 
 doc ///
   Key
-    (liftingPoint, List, MutableHashTable)
-    liftingPoint
-  Headline
-    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
-  Usage
-    liftingPoint(S,p)
-  Inputs
-    S:List
-      list of lists of RingElements
-    p:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables)
-  Outputs
-    :MutableHashTable
-      MutableHashTable describing an OpenCAD
-  Description
-    Text
-      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
-    Example
-      R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
-      L={p0,p1,p2}
-      pts = new MutableHashTable
-      pts#x1 = 1
-      pts#x2 = 3
-      liftingPoint(L,pts)
-  SeeAlso
-///
-
-doc ///
-  Key
     (samplePoints, List)
     samplePoints
   Headline
@@ -627,6 +594,38 @@ doc ///
 
       L4 ={x^2+1}
       samplePoints L4
+  SeeAlso
+///
+
+doc ///
+  Key
+    (liftingPoint, List, MutableHashTable)
+    liftingPoint
+  Headline
+    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
+  Usage
+    liftingPoint(S,p)
+  Inputs
+    S:List
+      list of lists of RingElements
+    p:MutableHashTable
+      point described using a hash table where the keys are RingElements (variables)
+  Outputs
+    :MutableHashTable
+      MutableHashTable describing an OpenCAD
+  Description
+    Text
+      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
+    Example
+      R=QQ[x1,x2,x3]
+      p0=x1*x2
+      p1=x1^2*x2-x1*x3+x3^3
+      p2=x2^2*x3+x3
+      L={p0,p1,p2}
+      pts = new MutableHashTable
+      pts#x1 = 1
+      pts#x2 = 3
+      liftingPoint(L,pts)
   SeeAlso
 ///
 
@@ -667,9 +666,9 @@ doc ///
     latterContainsFormer(former, latter)
   Inputs
     former:Thing
-		a thing
+      a thing
     latter:Thing
-		a thing	
+      a thing	
   Outputs
     :Boolean
       true or false
@@ -686,6 +685,61 @@ doc ///
       P1 = projectionPhase(L1)
       P2 = projectionPhase(L2)
       latterContainsFormer(P1, P2)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (positivePoint, List, MutableHashTable)
+    positivePoint
+  Headline
+    Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
+  Usage
+    positivePoint(L,cell)
+  Inputs
+    L:List
+      list of polynomials
+    cell:MutableHashTable
+      cell of the CAD
+  Outputs
+    :MutableHashTable
+      MutableHashTable describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive
+  Description
+    Text
+      Given the a list of polynomials and a cell of a CAD, it checks if a point exists where all polynomials are strictly positive, or returns "no point exists" otherwise.
+    Example
+      R=QQ[x]
+      p0=x^2-1
+      p1=x
+      L={p0,p1}
+      C=openCAD(L)
+      PP=positivePoint(L,C)
+  SeeAlso
+///
+
+doc ///
+  Key
+    (findSolution, List)
+    findSolution
+  Headline
+    Checks if there is a point in which all the polynomials given in the list are strictly positive
+  Usage
+    findSolution(L)
+  Inputs
+    L:List
+      list of polynomials
+  Outputs
+    :Boolean
+      Whether the CAD of L of has a point where all of the polynomials in the list are strictly positive
+  Description
+    Text
+      Given a list of polynomials L, this checks if the CAD of L contains a point where each of the polynomials in L are strictly positive.
+    Example
+      R=QQ[x]
+      p0=x^2-1
+      p1=x
+      L={p0,p1}
+      FS=findSolution(L)
   SeeAlso
 ///
 
@@ -781,6 +835,18 @@ TEST /// -* projectionPhase test *-
   assert(sort P === sort answer)
 ///
 
+TEST /// -* samplePoints test *-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x]
+  f=x^2-1
+  g=x^3-1
+  L1={f,g}
+  S = samplePoints(L1)
+  answer = {-3, -1/2, 2}
+  assert(S == answer)
+///
+
 TEST /// -* liftingPoint test *-
 -- test code and assertions here
 -- may have as many TEST sections as needed
@@ -790,17 +856,44 @@ TEST /// -* liftingPoint test *-
   L={p0,p1}
   P = projectionPhase(L)
   pts = new MutableHashTable
-  pts#x1 = 1
+  pts#x1 = -1
   pts#x2 = 3
   LP = liftingPoint(P,pts)
+
+  --PLP=pairs LP
+  --peek pairs PLP#1#1
+  --peek values PLP#1#1  -- 3
+  --peek values PLP#2#1  -- -3
+
+  pLevelThreeA = new MutableHashTable from {x3=>3, x1=>-1, x2=>3}
+  pLevelThreeB = new MutableHashTable from {x3=>3, x1=>-1, x2=>-3}  
+  pLevelTwo = new MutableHashTable from {x1=>-1, x2=>3}
   
-  pLevelThree = new MutableHashTable from {x3=>0, x1=>1, x2=>3}
-  cellLevelThree = new MutableHashTable from {"point"=>pLevelThree}
-  pLevelTwo = new MutableHashTable from {x1=>1, x2=>3}
-  cellLevelTwo = new MutableHashTable from {0=>cellLevelThree, "point"=>pLevelTwo, "polynomials"=>{3,x3^2+3}} 
+  cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
+  cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
+
+  cellLevelTwo = new MutableHashTable from {3=>cellLevelThreeA, -3=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{-3,x3^2-3}} 
   
-  assert(latterContainsFormer(cellLevelTwo , LP))
-  assert(latterContainsFormer(LP , cellLevelTwo))
+  --peek cellLevelTwo
+  --peek LP
+
+  --peek pairs cellLevelTwo    -- I think the issue here is the -3 in the last pair is in R in LP
+  --peek pairs LP	       	     -- but not cellLevelTwo
+  
+  --peek cellLevelTwo == peek LP -- not sure this is enough, it's just checking at top level they 'look' the same
+  -- would a recursive function checking they match all the way down work?
+  
+  --PP1=pairs LP
+  --PP2=pairs cellLevelTwo
+
+  --PP1#3
+  --PP2#3
+
+  --PP1#3#1==PP2#3#1
+
+  assert(peek cellLevelTwo == peek LP)
+  assert(latterContainsFormer(peek cellLevelTwo, peek LP))
+  assert(latterContainsFormer(peek LP, peek cellLevelTwo))
 
   -- for key in keys(LP) do assert(cellLevelTwo#?key)
   -- keys(cellLevelTwo)
@@ -818,18 +911,6 @@ TEST /// -* liftingPoint test *-
   -- peek H#"point"
   -- peek LP#"point"
   -- assert(LP == H)
-///
-
-TEST /// -* samplePoints test *-
--- test code and assertions here
--- may have as many TEST sections as needed
-  R=QQ[x]
-  f=x^2-1
-  g=x^3-1
-  L1={f,g}
-  S = samplePoints(L1)
-  answer = {-3, -1/2, 2}
-  assert(S == answer)
 ///
 
 --TEST /// -* openCAD test *-
@@ -854,67 +935,37 @@ TEST /// -* openCAD test smaller *-
   p1=x1^3*x2^2
   L={p0,p1}
   C=openCAD(L)
- 
- --really not sure how to construct an answer to check C is equal to it. Below is a partial attempt
- --but I don't really know how to compare MutableHashTables.
-  
---  Cpol = new MutableHashTable from {
---      "polynomials" => {x2}
---      }
-  
---  n = new MutableHashTable
-  
---  Cpoint = new MutableHashTable from {
---      "point" => n
---      }
 
---  C1x11 = new MutableHashTable from {
---      x2 => 1
---     }  
-
---  C1x1 = new MutableHashTable from {
---      "point" => C11
---      }
-
---  C1x211 = new MutableHashTable from {
---      x1 => 1,
---      x2 => 1
---      }
-
---  C1x21 = new MutableHashTable from {
---      "point" => C211
---      }
+  pLevelFourA = new MutableHashTable from {x1=>-3/4, x2=>-2}
+  pLevelFourB = new MutableHashTable from {x1=>-5/2, x2=>-2} 
+  pLevelFourC = new MutableHashTable from {x1=>9/16, x2=>-2} 
+  pLevelFourD = new MutableHashTable from {x1=>5/2, x2=>-2}
+  pLevelFourE = new MutableHashTable from {x1=>-2, x2=>1}
+  pLevelFourF = new MutableHashTable from {x1=>1, x2=>1}
   
---  C1x2 = new MutableHashTable from {
---      1 => C21
---      }
+  cellLevelThreeA = new MutableHashTable from {"point"=>pLevelFourA}
+  cellLevelThreeB = new MutableHashTable from {"point"=>pLevelFourB}
+  cellLevelThreeC = new MutableHashTable from {"point"=>pLevelFourC}
+  cellLevelThreeD = new MutableHashTable from {"point"=>pLevelFourD}
+  cellLevelThreeE = new MutableHashTable from {"point"=>pLevelFourE}
+  cellLevelThreeF = new MutableHashTable from {"point"=>pLevelFourF}
 
---  C1x221 = new MutableHashTable from {
---      x1 => -2,
---      x2 => 1
---      }
+  pLevelThreeA = new MutableHashTable from {x2=>-2}
+  pLevelThreeB = new MutableHashTable from {x2=>1}
   
---  C1x22 = new MutableHashTable from {
---      "point" => C221
---      }
+  pLevelTwoA = new MutableHashTable from {-3/4=>cellLevelThreeA, -5/2=>cellLevelThreeB, 9/16=>cellLevelThreeC, 5/2=>cellLevelThreeD, "point"=>pLevelThreeA, "polynomials"=>{x1^2-2,4*x1^3}}
+  pLevelTwoB = new MutableHashTable from {-2=>cellLevelThreeE, 1=>cellLevelThreeF, "point"=>pLevelThreeB, "polynomials"=>{x1^2+1,x1^3}}  
+  pLevelTwoC = new MutableHashTable
   
---  C1x3 = new MutableHashTable from {
---      -2 => C22
---      }
-  
---  C1 = new MutableHashTable from {
---      -2 => C1x22,
---      1 => C1x21,
---      "point" => C11,
---      "polynomials" => {x1^2+1,x1^3}
---      }
-      
-  assert(C == answer)
+  cellLevelOne = new MutableHashTable from {-2=>pLevelTwoA, 1=>pLevelTwoB, "point"=>pLevelTwoC, "polynomials"=>{x2}}
+
+  peek cellLevelOne
   peek C
+
+  assert(peek cellLevelOne == peek C)
+  assert(latterContainsFormer(peek cellLevelOne, peek C))
+  assert(latterContainsFormer(peek C, peek cellLevelOne))
 ///
-
-
-
 
 TEST /// -* findSolution test 1*-
 -- test code and assertions here
@@ -970,18 +1021,6 @@ TEST /// -* latterContainsFormer test *-
   assert(lcf3 == false)
 ///
 
---TEST /// -* positivePoint test *-
--- test code and assertions here
--- may have as many TEST sections as needed
---  R=QQ[x1,x2,x3]
---  p0=x1*x2
---  p1=x1^2*x2-x1*x3+x3^3
---  p2=x2^2*x3+x3
---  p3=-x1*x2
---  L={p0,p1,p2,p3}
---  assert(gmodsHeuristic(L) == x1)
---///
-
 TEST /// -* positivePoint test 1*-
 -- test code and assertions here
 -- may have as many TEST sections as needed
@@ -1010,6 +1049,33 @@ TEST /// -* positivePoint test 2*-
       x => 2}
   assert(peek PP == peek answer)
 ///
+
+TEST /// -* findSolution test 1*-
+-- test code and assertions here
+-- may have as many TEST sections as needed
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}
+  FS=findSolution(L)
+  assert(FS == false)
+/// 
+  
+TEST /// -* findSolution test 2*-
+-- test code and assertions here
+-- may have as many TEST sections as needed  
+  R=QQ[x]
+  p0=x^2-1
+  p1=x
+  L={p0,p1}
+  FS=findSolution(L)
+  assert(FS == true)
+///
+
+
+
 
 end--
 
