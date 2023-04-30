@@ -238,8 +238,8 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
   )
   else if instance(former, List) then (
     -- gives an error if both are lists containing different types of elements, i.e. list of polys vs list of lists, so below check may also be needed.
-    classListFormer = {}; 
-    classListLatter = {};
+    classListFormer := {}; 
+    classListLatter := {};
     for elt in former do (
       classListFormer = unique(append(classListFormer,class(elt)))
     );
@@ -255,8 +255,8 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
     )
     --if it does, check each element of that type is in latter
     else for elt in classListLatter do (
-      ofTypeInLatter=select(latter,elt); 
-      ofTypeInFormer=select(former,elt);
+      ofTypeInLatter:=select(latter,elt); 
+      ofTypeInFormer:=select(former,elt);
       --print ofTypeInLatter;
       --print ofTypeInFormer;
       for elemFormer in ofTypeInFormer do (
