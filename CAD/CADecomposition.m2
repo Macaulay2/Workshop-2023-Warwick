@@ -277,36 +277,24 @@ latterContainsFormer(Thing, Thing) := (former, latter) -> (
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
 positivePoint = method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
-    print(support(L));print(keys(cell#"point"));
     if length(keys(cell#"point"))!=length(support(L)) then (
         for key in keys(cell) do(
             -- if the key is not "points" or "polynomials"
             if not instance(key,String) then(
-                print(key); print("key");
                 result := positivePoint(L, cell#key);
                 -- if the answer is a point (something different from null)
                 if instance(result, HashTable) then(
                     return result
                 );
             );
-            print("Here again")
         )
     ) else (
         evaluations := evalPolyList(L,cell#"point");
 	evaluations = for e in evaluations list value(toString(e)); --elements in list were in R and not treated as numbers, this fixes that.
-	print evaluations; --check these values
-	print for e in evaluations list e>0; --see if positive or not
+	for e in evaluations list e>0; --see if positive or not
         if all(evaluations, elem->(elem>0)) then (
---        if not any(evaluations, elem->(abs(elem) == -1*elem)) then ( --it's dirty but this works
-            print(instance(evaluations, List));
-            print("evaluations");print(evaluations); -- should be fixed now. old:somehow it is entering here even when some evaluations are negative
-            print("all(evaluations, elem->(elem>0))"); print(all(evaluations, elem->(elem>0))); -- print(not any(evaluations, elem->(abs(elem) == -1*elem)));
-	    print cell#"point";
-	    return cell#"point"
+          return cell#"point"
         )
-        else (
-	    print "fail";
-	    )
     );
     return "no point exists"
 )
@@ -316,9 +304,9 @@ findSolution = method()
 findSolution(List) := (L) -> (
     cad := openCAD(L);
     result := positivePoint(L, cad);
-    print("Arrived here");
     if instance(result, HashTable)
     then (
+      print(peek(result));
       print("There are solutions");
       return true)
     else (
