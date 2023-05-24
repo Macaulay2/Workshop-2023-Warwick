@@ -54,18 +54,43 @@ for i from 1 to 15 do (
     print(i, numcols compress M);
     )
 
-
-
-
-
-
-
-
-
 -- initial subring 
 -- S subring of R/I
 -- in(S) subring of R/in(I)
 
 -- we should write substitute for subrings
 -- we should write a leadTerm Subring function
+
+needsPackage "AlgebraicSplines"
+
+-- R+R --> R/I
+
+load "beihuiRingIntersection.m2"
+f = -y_2
+g = x_2 - y_2*(x_2-1)^2
+--intersectSubs(f, g)
+--gens sagbi oo
+
+I = ideal(x_1^2,  y_2^2, x_1 - f, y_1 - g);
+
+L = R^2
+C = comodule I
+
+phi = map(C, L, {{1, -1}})
+k = ker phi
+
+
+R' = QQ[x_1, y_1, x_2, y_2, e_1, e_2]
+Q = R'/ideal(e_1^2 - e_1, e_2^2 - e_2, e_1*e_2, e_1+e_2-1)
+
+mapGens = sub(gens k, Q)
+subringGens = matrix {{e_1, e_2}} * mapGens 
+
+S = subring subringGens -- generators of phi as an algebra
+T = subring {x_1*e_1, y_1*e_1, x_2*e_2, y_2*e_2} -- algebra representing the elimination
+
+ST = subringIntersection(S, T, PrintLevel => 1, Limit => 6)
+ST = subringIntersection1(S, T, PrintLevel => 1)
+ST = subringIntersection1(T, S, PrintLevel => 1, Limit => 10)
+
 
