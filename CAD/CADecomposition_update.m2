@@ -733,7 +733,7 @@ doc ///
 
 -* Test section *-
 TEST /// -* factors test *-
--- Test 1
+-- Test 0
   R=QQ[x1,x2,x3]
   p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
   F = factors(p)
@@ -742,7 +742,7 @@ TEST /// -* factors test *-
 ///
 
 TEST /// -* factorsInList test *-
--- Test 2
+-- Test 1
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -754,7 +754,7 @@ TEST /// -* factorsInList test *-
 ///
 
 TEST /// -* evalPoly test *-
--- Test 3
+-- Test 2
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -769,7 +769,7 @@ TEST /// -* evalPoly test *-
 ///
 
 TEST /// -* evalPolyList test *-
--- Test 4
+-- Test 3
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -784,12 +784,23 @@ TEST /// -* evalPolyList test *-
 ///
 
 TEST /// -* leadCoefficientt test *-
--- Test 5
+-- Test 4
   R=QQ[x1,x2,x3]
   p=x1^2*x2-x1*x3+x3^3
   L = leadCoefficientt(p,x1)
   answer = x2
   assert(L == answer)
+///
+
+TEST /// -* gmodsHeuristic test *-
+-- Test 5
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}  
+  assert(gmodsHeuristic(L) == x1)
 ///
 
 TEST /// -* lazardProjection test *-
@@ -998,40 +1009,8 @@ TEST /// -* openCAD test smaller *-
   assert(latterContainsFormer(peek C, peek cellLevelOne))
 ///
 
-TEST /// -* findSolution test 1*-
--- Test 11
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,p2}
-  assert(findSolution(L) == true)
-///
-
-TEST /// -* findSolution test 2*-
--- Test 12
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
-  L={p0,p1,p2,p3}
-  assert(findSolution(L) == false)
-///
-
-TEST /// -* gmodsHeuristic test *-
--- Test 13
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
-  L={p0,p1,p2,p3}  
-  assert(gmodsHeuristic(L) == x1)
-///
-
 TEST /// -* latterContainsFormer test *-
--- Test 14
+-- Test 11
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -1049,7 +1028,7 @@ TEST /// -* latterContainsFormer test *-
 ///
 
 TEST /// -* positivePoint test 1*-
--- Test 15
+-- Test 12
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1063,7 +1042,7 @@ TEST /// -* positivePoint test 1*-
 /// 
   
 TEST /// -* positivePoint test 2*-
--- Test 16
+-- Test 13
   R=QQ[x]
   p0=x^2-1
   p1=x
@@ -1084,7 +1063,28 @@ TEST /// -* positivePoint test 2*-
 ///
 
 TEST /// -* findSolution test 1*-
--- Test 17
+-- Test 14
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  assert(findSolution(L) == true)
+///
+
+TEST /// -* findSolution test 2*-
+-- Test 15
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}
+  assert(findSolution(L) == false)
+///
+
+TEST /// -* findSolution test 3*-
+-- Test 16
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1095,8 +1095,8 @@ TEST /// -* findSolution test 1*-
   assert(FS == false)
 /// 
   
-TEST /// -* findSolution test 2*-
--- Test 18 
+TEST /// -* findSolution test 4*-
+-- Test 17 
   R=QQ[x]
   p0=x^2-1
   p1=x
