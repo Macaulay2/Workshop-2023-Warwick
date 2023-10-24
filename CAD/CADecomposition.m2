@@ -733,8 +733,7 @@ doc ///
 
 -* Test section *-
 TEST /// -* factors test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 0
   R=QQ[x1,x2,x3]
   p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
   F = factors(p)
@@ -743,8 +742,7 @@ TEST /// -* factors test *-
 ///
 
 TEST /// -* factorsInList test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 1
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -756,8 +754,7 @@ TEST /// -* factorsInList test *-
 ///
 
 TEST /// -* evalPoly test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 2
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -772,8 +769,7 @@ TEST /// -* evalPoly test *-
 ///
 
 TEST /// -* evalPolyList test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 3
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -788,8 +784,7 @@ TEST /// -* evalPolyList test *-
 ///
 
 TEST /// -* leadCoefficientt test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 4
   R=QQ[x1,x2,x3]
   p=x1^2*x2-x1*x3+x3^3
   L = leadCoefficientt(p,x1)
@@ -797,9 +792,19 @@ TEST /// -* leadCoefficientt test *-
   assert(L == answer)
 ///
 
+TEST /// -* gmodsHeuristic test *-
+-- Test 5
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}  
+  assert(gmodsHeuristic(L) == x1)
+///
+
 TEST /// -* lazardProjection test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 6
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -811,8 +816,7 @@ TEST /// -* lazardProjection test *-
 ///
 
 TEST /// -* projectionPhase test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 7
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -824,8 +828,7 @@ TEST /// -* projectionPhase test *-
 ///
 
 TEST /// -* samplePoints test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 8
   R=QQ[x]
   f=x^2-1
   g=x^3-1
@@ -836,8 +839,7 @@ TEST /// -* samplePoints test *-
 ///
 
 TEST /// -* liftingPoint test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 9
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1*x2+x3^2
@@ -848,10 +850,9 @@ TEST /// -* liftingPoint test *-
   pts#x2 = 3
   LP = liftingPoint(P,pts)
 
-  --PLP=pairs LP
-  --peek pairs PLP#1#1
-  --peek values PLP#1#1  -- 3
-  --peek values PLP#2#1  -- -3
+  --peek pairs (pairs LP)#1#1
+  --peek values (pairs LP)#1#1  -- 3
+  --peek values (pairs LP)#2#1  -- -3
 
   pLevelThreeA = new MutableHashTable from {x3=>3, x1=>-1, x2=>3}
   pLevelThreeB = new MutableHashTable from {x3=>3, x1=>-1, x2=>-3}  
@@ -860,13 +861,24 @@ TEST /// -* liftingPoint test *-
   cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
   cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
 
-  cellLevelTwo = new MutableHashTable from {3=>cellLevelThreeA, -3=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{-3,x3^2-3}} 
+  cellLevelTwo = new MutableHashTable from {3=>cellLevelThreeA, -3=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{0*x3-3,x3^2-3}} --this last part is another ugly fix to ensure that "-3" is in R
   
   --peek cellLevelTwo
   --peek LP
 
-  --peek pairs cellLevelTwo    -- I think the issue here is the -3 in the last pair is in R in LP
-  --peek pairs LP	       	     -- but not cellLevelTwo
+  peek pairs cellLevelTwo    -- I think the issue here is the -3 in the last pair is in R in LP
+  peek pairs LP	       	     -- but not cellLevelTwo
+  
+  --tex peek pairs cellLevelTwo
+  --tex peek pairs LP
+
+
+
+
+  assert(latterContainsFormer(cellLevelTwo, LP))
+
+  (keys LP)#1
+  (keys cellLevelTwo)#1
   
   --peek cellLevelTwo == peek LP -- not sure this is enough, it's just checking at top level they 'look' the same
   -- would a recursive function checking they match all the way down work?
@@ -879,9 +891,54 @@ TEST /// -* liftingPoint test *-
 
   --PP1#3#1==PP2#3#1
 
-  assert(peek cellLevelTwo == peek LP)
-  assert(latterContainsFormer(peek cellLevelTwo, peek LP))
-  assert(latterContainsFormer(peek LP, peek cellLevelTwo))
+  --assert(peek cellLevelTwo == peek LP)
+  --assert(latterContainsFormer(peek cellLevelTwo, peek LP))
+  --assert(latterContainsFormer(peek LP, peek cellLevelTwo))
+
+  PP1#3
+  LP#"polynomials"
+  cellLevelTwo#"polynomials"
+
+  assert(LP#"polynomials" == cellLevelTwo#"polynomials")
+  assert(latterContainsFormer(cellLevelTwo#"point", LP#"point"))
+  assert(latterContainsFormer(LP#"point", cellLevelTwo#"point"))
+  
+  assert(latterContainsFormer(cellLevelTwo#(-3), LP#(-3)))
+  assert(latterContainsFormer(LP#(-3), cellLevelTwo#(-3)))
+
+  assert(latterContainsFormer(cellLevelTwo#(3), LP#(3)))
+  assert(latterContainsFormer(LP#(3), cellLevelTwo#(3)))
+
+
+LP#((keys LP)#1)
+
+(keys LP)#1
+LP#"(-3)"
+
+LP#"R(3)"
+
+keys cellLevelTwo#(-3)
+  cellLevelTwo#(3)
+
+  assert(latterContainsFormer(cellLevelTwo#((keys cellLevelTwo)#1), LP#((keys LP)#1)))
+  assert(latterContainsFormer(LP#((keys LP)#1), cellLevelTwo#((keys cellLevelTwo)#1)))
+ 
+  cellLevelTwo#((keys cellLevelTwo)#1)
+  LP#((keys LP)#1)
+
+  keys cellLevelTwo
+  keys LP
+
+  (keys cellLevelTwo)#1
+  (keys LP)#1
+
+
+
+  assert(cellLevelTwo == LP)
+  assert(latterContainsFormer(cellLevelTwo, LP))
+  assert(latterContainsFormer(LP, cellLevelTwo))
+
+
 
   -- for key in keys(LP) do assert(cellLevelTwo#?key)
   -- keys(cellLevelTwo)
@@ -902,8 +959,6 @@ TEST /// -* liftingPoint test *-
 ///
 
 --TEST /// -* openCAD test *-
----- test code and assertions here
----- may have as many TEST sections as needed
 --  R=QQ[x1,x2,x3]
 --  p0=x1*x2
 --  p1=x1^2*x2-x1*x3+x3^3
@@ -916,8 +971,7 @@ TEST /// -* liftingPoint test *-
 --///
 
 TEST /// -* openCAD test smaller *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 10
   R=QQ[x1,x2]
   p0=x1^2+x2
   p1=x1^3*x2^2
@@ -955,44 +1009,8 @@ TEST /// -* openCAD test smaller *-
   assert(latterContainsFormer(peek C, peek cellLevelOne))
 ///
 
-TEST /// -* findSolution test 1*-
--- test code and assertions here
--- may have as many TEST sections as needed
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,p2}
-  assert(findSolution(L) == true)
-///
-
-TEST /// -* findSolution test 2*-
--- test code and assertions here
--- may have as many TEST sections as needed
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
-  L={p0,p1,p2,p3}
-  assert(findSolution(L) == false)
-///
-
-TEST /// -* gmodsHeuristic test *-
--- test code and assertions here
--- may have as many TEST sections as needed
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
-  L={p0,p1,p2,p3}  
-  assert(gmodsHeuristic(L) == x1)
-///
-
 TEST /// -* latterContainsFormer test *-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 11
   R=QQ[x1,x2,x3]
   f0=x1*x2
   f1=x1^2*x2-x1*x3+x3^3
@@ -1010,8 +1028,7 @@ TEST /// -* latterContainsFormer test *-
 ///
 
 TEST /// -* positivePoint test 1*-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 12
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1025,8 +1042,7 @@ TEST /// -* positivePoint test 1*-
 /// 
   
 TEST /// -* positivePoint test 2*-
--- test code and assertions here
--- may have as many TEST sections as needed  
+-- Test 13
   R=QQ[x]
   p0=x^2-1
   p1=x
@@ -1036,11 +1052,39 @@ TEST /// -* positivePoint test 2*-
   answer = new MutableHashTable from {
       x => 2}
   assert(peek PP == peek answer)
+  assert(latterContainsFormer(PP,answer))
+  assert(latterContainsFormer(answer,PP))
+  
+  peek pairs PP
+  peek pairs answer
+  
+  assert((peek pairs answer) == (peek pairs PP))
+  latterContainsFormer(peek pairs answer, peek pairs PP)
 ///
 
 TEST /// -* findSolution test 1*-
--- test code and assertions here
--- may have as many TEST sections as needed
+-- Test 14
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,p2}
+  assert(findSolution(L) == true)
+///
+
+TEST /// -* findSolution test 2*-
+-- Test 15
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  p3=-x1*x2
+  L={p0,p1,p2,p3}
+  assert(findSolution(L) == false)
+///
+
+TEST /// -* findSolution test 3*-
+-- Test 16
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1051,9 +1095,8 @@ TEST /// -* findSolution test 1*-
   assert(FS == false)
 /// 
   
-TEST /// -* findSolution test 2*-
--- test code and assertions here
--- may have as many TEST sections as needed  
+TEST /// -* findSolution test 4*-
+-- Test 17 
   R=QQ[x]
   p0=x^2-1
   p1=x
