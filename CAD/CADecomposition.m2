@@ -43,6 +43,8 @@ factors(RingElement) := (p) -> (
 
 -- finds the support of a list of Polynomials
 support(List) := (L) -> (
+    for p in L do
+      if liftable(p,QQ) == true then L = delete(p,L); --added to catch new output from evalPoly
     unique(flatten(L/support))
     )
 
@@ -63,7 +65,9 @@ evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
           -- print("variable", k);
           p=sub(p, {k => alpha#k});
         );
-	p
+	if liftable(p,QQ) == true then p = lift(p,QQ);
+-- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
+        p
       )
 
 -- Evaluates a List of RingElement in a point given by a MutableHashTable
@@ -102,11 +106,11 @@ gmodsHeuristic(List) := (L) -> (
 -- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
-  L0 := select(L, p -> not member(v,support(p)));
+  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients(?)
   L = select(L, p -> member(v,support(p)));
-  L1 := for p in L list leadCoefficientt(p,v);
-	L2 := for p in L list discriminant(p,v);
-	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);
+  L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
+	L2 := for p in L list discriminant(p,v); --discriminants
+	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
 	factorsInList(L0|L1|L2|L3)
 	)
 
@@ -148,7 +152,7 @@ projectionPhase(List) := (L) -> (
     S
     )
 
--- Given a list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
+-- Given a nonempty list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
 samplePoints(List) := (L) -> (
     if L=={} then error "Error: Expected non-empty list";
@@ -406,6 +410,18 @@ doc ///
 	  alpha#x2 = 1
 	  p=x1^2*x0-2*x3*x2
 	  evalPoly(p,alpha)
+          
+ 
+	  R=QQ[x0,x1,x2,x3]
+	  alpha = new MutableHashTable
+	  alpha#x0 = 3
+	  alpha#x1 = 4
+	  alpha#x2 = 1
+	  alpha#x3 = -2
+	  p=x1^2*x0-2*x3*x2
+	  evalPoly(p,alpha)
+
+         
   SeeAlso
 ///
 
