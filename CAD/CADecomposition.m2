@@ -376,6 +376,7 @@ doc ///
       L={p0,p1,p2}
       factorsInList(L)
   SeeAlso
+    factors
 ///
 
 doc ///
@@ -436,6 +437,7 @@ doc ///
 	  S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
 	  evalPolyList(S,alpha)
   SeeAlso
+    evalPoly
 ///
 
 doc ///
@@ -517,6 +519,8 @@ doc ///
       L={p0,p1,p2}
       L2 = lazardProjection(L,x1)
   SeeAlso
+    leadCoefficientt
+    factorsInList
 ///
 
 doc ///
@@ -545,6 +549,8 @@ doc ///
 	  L={f0,f1,f2}
 	  projectionPhase(L)
   SeeAlso
+    gmodsHeuristic
+    lazardProjection
 ///
 
 doc ///
@@ -612,6 +618,8 @@ doc ///
       pts#x2 = 3
       liftingPoint(L,pts)
   SeeAlso
+    evalPolyList
+    samplePoints
 ///
 
 doc ///
@@ -639,6 +647,8 @@ doc ///
       L={p0,p1,p2}
       openCAD(L)
   SeeAlso
+    projectionPhase
+    liftingPoint
 ///
 
 doc ///
@@ -700,6 +710,7 @@ doc ///
       C=openCAD(L)
       PP=positivePoint(L,C)
   SeeAlso
+    evalPolyList
 ///
 
 doc ///
@@ -726,6 +737,8 @@ doc ///
       L={p0,p1}
       FS=findSolution(L)
   SeeAlso
+    openCAD
+    positivePoint
 ///
 
 -* Test section *-
