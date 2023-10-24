@@ -557,7 +557,7 @@ doc ///
     samplePoints(L)
   Inputs
     L:List
-      of polynomials in one variable
+      nonempty, of polynomials in one variable
   Outputs
     :List
       list of points in ZZ/QQ/RR, depending on the defining coefficient field
@@ -577,11 +577,8 @@ doc ///
       L2={f1,g1,h1}
       S:=samplePoints(L2)
 
-      L3 ={}
+      L3={x^2+1}
       samplePoints L3
-
-      L4 ={x^2+1}
-      samplePoints L4
   SeeAlso
 ///
 
@@ -1116,8 +1113,21 @@ debug needsPackage "CADecomposition"
 needsPackage "CADecomposition"
 check "CADecomposition"
 
-
+restart
 uninstallPackage "CADecomposition"
 restart
 installPackage "CADecomposition"
 viewHelp "CADecomposition"
+
+  R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1^2*x2-x1*x3+x3^3
+  p2=x2^2*x3+x3
+  L={p0,p1,-p2}
+  assert(findSolution(L) == true)
+
+  H = openCAD {p0,p1,-p2}
+  keys H
+  peek oo
+  peek H#(-2_QQ)
+  
