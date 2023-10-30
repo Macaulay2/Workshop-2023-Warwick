@@ -1,7 +1,7 @@
 -- To do
 --
 --Issue with positivePoint and findSolution - don't load properly, giving wrong output
---test(s) #7, 9, 10, 11 failing
+--test(s) #9, 10, 13 failing
 --Add documentation for latterContainsFormer, positivePoint, findSolution
 --Add tests for latterContainsFormer, positivePoint, findSolution
 
@@ -113,30 +113,6 @@ lazardProjection(List, RingElement) := (L,v) -> (
 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
 	factorsInList(L0|L1|L2|L3)
 	)
-
--------
--- Creating optional argument, add later
--------
-
--- -- Does one step of the projection phase
--- lazardProjection = method(Options => {Trailing => false})
--- lazardProjection(List, RingElement) := opts -> (L,v) -> (
---     usetrailing := opts.Trailing;
---     L0 := select(L, p -> not member(v,support(p)));
---     L = select(L, p -> member(v,support(p)));
---     L1 := for p in L list leadCoefficientt(p,v);
--- 	L2 := for p in L list discriminant(p,v);
--- 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v);
---     if usetrailing do (
---         -- compute trailing coefficient
---         L4 := for p in L list contract(v^0,p);
---         allProj := L0|L1|L2|L3|L4;
---     )
---     else do (
---         allProj := L0|L1|L2|L3;
---     )
--- 	allProj
--- )
 
 -- Creates a full Lazard projection
 projectionPhase = method()
