@@ -473,7 +473,7 @@ doc ///
       RingElement giving the next variable
   Description
     Text
-      Given a list (L) of polynomials in one or more variables, the first variable in the list is set as the variable to project, and the sum of its degrees in each polynomial is compared to the sum of degrees for each other variable. If another variable has lower total degree, then this variable is taken instead as the next variable to project.
+      Given a list (L) of polynomials in one or more variables, returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
