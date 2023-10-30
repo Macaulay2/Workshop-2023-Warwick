@@ -2,8 +2,7 @@
 --
 --Issue with positivePoint and findSolution - don't load properly, giving wrong output
 --test(s) #9, 10, 13 failing
---Add documentation for latterContainsFormer, positivePoint, findSolution
---Add tests for latterContainsFormer, positivePoint, findSolution
+--Trying to lift to QQ in evalPoly where possible, but this seems to break many other checks.
 
 newPackage(
     "CADecomposition",
@@ -173,6 +172,10 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
     L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
     cell#"polynomials"=L;
+    
+    -- I want this to ensure that values are returned as values, but including it also breaks tests #12,14,15,16,17.
+    --if liftable(L,QQ) == true then L = lift(p,QQ); -- if a value, return as a value.
+    
     -- This function evaluates the point p into the polynomials of S_i
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
     v := (support(L))_0;
@@ -387,7 +390,6 @@ doc ///
 	  p=x1^2*x0-2*x3*x2
 	  evalPoly(p,alpha)
           
- 
 	  R=QQ[x0,x1,x2,x3]
 	  alpha = new MutableHashTable
 	  alpha#x0 = 3
@@ -397,7 +399,6 @@ doc ///
 	  p=x1^2*x0-2*x3*x2
 	  evalPoly(p,alpha)
 
-         
   SeeAlso
 ///
 
@@ -574,9 +575,6 @@ doc ///
       h1=1/2*x^5+3*x-1
       L2={f1,g1,h1}
       S:=samplePoints(L2)
-
-      L3={x^2+1}
-      samplePoints L3
   SeeAlso
 ///
 
