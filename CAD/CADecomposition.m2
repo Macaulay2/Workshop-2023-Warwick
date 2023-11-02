@@ -86,10 +86,8 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
 
 -- Choose the next variable to project according to the heuristic gmods
 gmodsHeuristic = method()
-gmodsHeuristic(List) := (L) -> (
-  vars := support(L);
-  -- print vars;
-  gmodsVar := vars_0;
+gmodsHeuristic(List, List) := (L, variables) -> (
+  gmodsVar := variables_0;
   minGmods := sum(for p in L list degree(vars_0, p));
   for var in vars do (
     -- print var;
@@ -118,19 +116,25 @@ projectionPhase = method()
 projectionPhase(List) := (L) -> (
     -- List is list of multivariate polynomials
     S := {L};
-    while length(support(L)) > 1 do (
+    variables := support(L); --initial variables, the ones chosen already will be dropped
+    ordering := {}; -- this will contain the variable ordering chosen
+    while length(variables) > 1 do (
       -- print(L);
-      var := gmodsHeuristic(support(L));
-      L = lazardProjection(L, var); -- ideally doing gmods here
-      S = prepend(L,S);
+    --   var := gmodsHeuristic(support(L)); (Line commnented out because the following felt more reasonable, if no errors were created remove this line)
+      var := gmodsHeuristic(L, variables);
+      L = lazardProjection(L, var);
+      variables = select(n -> n != var, variables); -- variable chosen is dropped
+      S = prepend(L, S);
+      ordering = prepend(var, ordering)
       );
-    S
+    ordering = prepend(variables_0, ordering) -- the variable left is added
+    (S, ordering)
     )
 
 -- Given a nonempty list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
 samplePoints(List) := (L) -> (
-    if L=={} then error "Error: Expected non-empty list";
+    -- if L=={} then error "Error: Expected non-empty list";
     A := QQ(monoid[support(L)]);
     h:=sub(product L, A);
     -- print("List of Pols:"); print L;
@@ -139,7 +143,11 @@ samplePoints(List) := (L) -> (
     ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number
     -- print "root isolating intervals";
     -- print ourRoots;
-    if ourRoots == {} then error "List has no roots";
+    -- if ourRoots == {} then error "List has no roots";
+    if length(ourRoots)=0 then (
+        L1 = {0};
+      )
+      else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
     for i from 0 to #ourRoots-2 do (
       -- print("Roots", ourRoots);
@@ -152,19 +160,17 @@ samplePoints(List) := (L) -> (
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
-    if length(ourRoots)>0 then (
-      L1=append(prepend(ourRoots_0_0-1,L1),ourRoots_(#ourRoots-1)_1+1)
-     )
-     else L1 = {0};
+    )
     L1
     )
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
-liftingPoint(List, MutableHashTable) := (S,p) -> (
+liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
     -- List is a list of lists of polynomials, the first list of polys with i+1 variables (up to n variables, where n is the number of variables in the initial polynomials)
-    -- HashTable is a point in i variables 
+    -- HashTable is a point in i variables
+    -- List is the variable ordering followed in the projection
     cell := new MutableHashTable;
     cell#"point" = p;
     i := #keys(p);
@@ -182,14 +188,15 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     
     -- This function evaluates the point p into the polynomials of S_i
     
-    if (#support(L)!=1 and #support(L)!=0) then error ("Expected list of polynomials to have a single variable as support. The value of L is " | toString(L));
-    v := (support(L))_0;
+    if #support(L) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of L is " | toString(L));
+    -- v := (support(L))_0;
+    v := ordering_i
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
     for samplePoint in newSamplePoints do (
         pNew := copy p;
         pNew#v = samplePoint;
-        cell#samplePoint = liftingPoint(S,pNew);
+        cell#samplePoint = liftingPoint(S, pNew, ordering);
         );
     cell
     )
@@ -197,9 +204,9 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
 -- Does the open CAD
 openCAD = method()
 openCAD(List) := (L) -> (
-  S := projectionPhase(L);
+  (S, ordering) := projectionPhase(L);
   p := new MutableHashTable;
-  liftingPoint(S,p)
+  liftingPoint(S, p, ordering)
 )
 
 -- Checks if an object contains all the information the other has
