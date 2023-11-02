@@ -64,7 +64,7 @@ evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
           -- print("variable", k);
           p=sub(p, {k => alpha#k});
         );
-	if liftable(p,QQ) == true then p = lift(p,QQ);
+	if liftable(p,QQ) then p = lift(p,QQ);
 -- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
         p
       )
@@ -76,6 +76,31 @@ evalPolyList(List,MutableHashTable) := (S, alpha) -> (
     evalPoly(p,alpha);
   S1
 )
+
+-- Evaluates the given RingElement or List of RingElement in a point given by a MutableHashTable.
+evalPolys = method()
+evalPolys(RingElement,MutableHashTable) := (p, alpha) -> (
+        for k in keys(alpha) do(
+          -- print("variable", k);
+          p=sub(p, {k => alpha#k});
+        );
+	if liftable(p,QQ) then p = lift(p,QQ);
+-- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
+        p
+      )
+evalPolys = method()
+evalPolys(List,MutableHashTable) := (S, alpha) -> (
+  S1 := for p in S list
+    evalPolys(p,alpha);
+  S1
+)
+
+
+
+
+
+
+
 
 -- Finds the lead coefficient of a ring element with respect to a variable
 leadCoefficientt = method()
@@ -163,8 +188,8 @@ samplePoints(List) := (L) -> (
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
 liftingPoint(List, MutableHashTable) := (S,p) -> (
+    -- List is a list of lists of polynomials, the first list of polys with i+1 variables (up to n variables, where n is the number of variables in the initial polynomials)
     -- HashTable is a point in i variables 
-    -- List is a list of lists of polynomials, the first list of polys with i+1 variables
     cell := new MutableHashTable;
     cell#"point" = p;
     i := #keys(p);
@@ -172,14 +197,18 @@ liftingPoint(List, MutableHashTable) := (S,p) -> (
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
     L := evalPolyList(S_i, p); -- S is the list of lists of polynomials
     cell#"polynomials"=L;
+    print L;
+    print S_i;
+    print p;
+    
     
     -- I want this to ensure that values are returned as values, but including it also breaks tests #12,14,15,16,17.
     --if liftable(L,QQ) == true then L = lift(p,QQ); -- if a value, return as a value.
     
     -- This function evaluates the point p into the polynomials of S_i
+    
     if #support(L)!=1 then error "Expected list of polynomials to have a single variable as support";
     v := (support(L))_0;
-    -- print(L);
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
     for samplePoint in newSamplePoints do (
@@ -297,6 +326,19 @@ findSolution(List) := (L) -> (
       return false)
 )
 
+hashify = method()
+hashify(MutableHashTable) := (H) -> (
+   hashTable for KV in pairs H list KV#0 => hashify(KV#1)
+    )
+hashify(Thing) := (H) -> (H)
+hashify(List) := (H) -> (
+    for x in H list hashify x
+    )
+hashify(MutableList) := (H) -> (
+    for x in H list hashify x
+    )
+
+    
 -* Documentation section *-
 beginDocumentation()
 
@@ -637,6 +679,16 @@ doc ///
       p2=x2^2*x3+x3
       L={p0,p1,p2}
       openCAD(L)
+      hashify openCAD(L)
+      
+      R=QQ[x1,x2]
+      p0=x1-x2
+      --p1=x1^32+x2^2
+      --L={p0,p1}
+      L={p0}
+      liftingPoint(L)
+      openCAD(L)
+      hashify openCAD(L)
   SeeAlso
     projectionPhase
     liftingPoint
@@ -985,12 +1037,12 @@ TEST /// -* openCAD test smaller *-
   L={p0,p1}
   C=openCAD(L)
 
-  pLevelFourA = new MutableHashTable from {x1=>-3/4, x2=>-2}
-  pLevelFourB = new MutableHashTable from {x1=>-5/2, x2=>-2} 
-  pLevelFourC = new MutableHashTable from {x1=>9/16, x2=>-2} 
-  pLevelFourD = new MutableHashTable from {x1=>5/2, x2=>-2}
-  pLevelFourE = new MutableHashTable from {x1=>-2, x2=>1}
-  pLevelFourF = new MutableHashTable from {x1=>1, x2=>1}
+  pLevelFourA = new MutableHashTable from {x1=>-3/4, x2=>-2_QQ}
+  pLevelFourB = new MutableHashTable from {x1=>-5/2, x2=>-2_QQ} 
+  pLevelFourC = new MutableHashTable from {x1=>9/16, x2=>-2_QQ} 
+  pLevelFourD = new MutableHashTable from {x1=>5/2, x2=>-2_QQ}
+  pLevelFourE = new MutableHashTable from {x1=>-2_QQ, x2=>1_QQ}
+  pLevelFourF = new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}
   
   cellLevelThreeA = new MutableHashTable from {"point"=>pLevelFourA}
   cellLevelThreeB = new MutableHashTable from {"point"=>pLevelFourB}
@@ -999,15 +1051,29 @@ TEST /// -* openCAD test smaller *-
   cellLevelThreeE = new MutableHashTable from {"point"=>pLevelFourE}
   cellLevelThreeF = new MutableHashTable from {"point"=>pLevelFourF}
 
-  pLevelThreeA = new MutableHashTable from {x2=>-2}
-  pLevelThreeB = new MutableHashTable from {x2=>1}
+  pLevelThreeA = new MutableHashTable from {x2=>-2_QQ}
+  pLevelThreeB = new MutableHashTable from {x2=>1_QQ}
   
   pLevelTwoA = new MutableHashTable from {-3/4=>cellLevelThreeA, -5/2=>cellLevelThreeB, 9/16=>cellLevelThreeC, 5/2=>cellLevelThreeD, "point"=>pLevelThreeA, "polynomials"=>{x1^2-2,4*x1^3}}
-  pLevelTwoB = new MutableHashTable from {-2=>cellLevelThreeE, 1=>cellLevelThreeF, "point"=>pLevelThreeB, "polynomials"=>{x1^2+1,x1^3}}  
+  pLevelTwoB = new MutableHashTable from {-2_QQ=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>pLevelThreeB, "polynomials"=>{x1^2+1,x1^3}}  
   pLevelTwoC = new MutableHashTable
   
-  cellLevelOne = new MutableHashTable from {-2=>pLevelTwoA, 1=>pLevelTwoB, "point"=>pLevelTwoC, "polynomials"=>{x2}}
-
+  cellLevelOne = new MutableHashTable from {-2_QQ=>pLevelTwoA, 1_QQ=>pLevelTwoB, "point"=>pLevelTwoC, "polynomials"=>{x2}}
+  hashify(pLevelFourA)
+  peek pLevelFourA
+  
+  hashify pLevelTwoA
+  hashify C
+  hashify cellLevelOne, hashify C
+  assert(hashify cellLevelOne === hashify C)
+  printWidth = 200
+  
+ keys((hashify C)#(-2_QQ)#(-3/4_QQ)#"point")
+ oo/ring  
+  
+ keys((hashify cellLevelOne)#(-2_QQ)#(-3/4_QQ)#"point")
+ oo/ring  
+  
   peek cellLevelOne
   peek C
 
