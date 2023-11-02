@@ -43,7 +43,7 @@ factors(RingElement) := (p) -> (
 -- finds the support of a list of Polynomials
 support(List) := (L) -> (
     for p in L do
-     -- if liftable(p,QQ) == true then L = delete(p,L); --added to catch new output from evalPoly
+      if liftable(p,QQ) == true then L = delete(p,L); --added to catch new output from evalPoly
     unique(flatten(L/support))
     )
 
@@ -64,7 +64,7 @@ evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
           -- print("variable", k);
           p=sub(p, {k => alpha#k});
         );
-	--if liftable(p,QQ) == true then p = lift(p,QQ);
+	if liftable(p,QQ) == true then p = lift(p,QQ);
 -- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
         p
       )
