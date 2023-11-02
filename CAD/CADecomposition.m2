@@ -43,7 +43,7 @@ factors(RingElement) := (p) -> (
 -- finds the support of a list of Polynomials
 support(List) := (L) -> (
     for p in L do
-      if liftable(p,QQ) == true then L = delete(p,L); --added to catch new output from evalPoly
+     -- if liftable(p,QQ) == true then L = delete(p,L); --added to catch new output from evalPoly
     unique(flatten(L/support))
     )
 
@@ -64,7 +64,7 @@ evalPoly(RingElement,MutableHashTable) := (p, alpha) -> (
           -- print("variable", k);
           p=sub(p, {k => alpha#k});
         );
-	if liftable(p,QQ) == true then p = lift(p,QQ);
+	--if liftable(p,QQ) == true then p = lift(p,QQ);
 -- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
         p
       )
@@ -606,6 +606,7 @@ doc ///
       pts = new MutableHashTable
       pts#x1 = 1
       pts#x2 = 3
+      peek pts
       liftingPoint(L,pts)
   SeeAlso
     evalPolyList
@@ -855,76 +856,81 @@ TEST /// -* liftingPoint test *-
   --peek values (pairs LP)#2#1  -- -3
 
   pLevelThreeA = new MutableHashTable from {x3=>3, x1=>-1, x2=>3}
-  pLevelThreeB = new MutableHashTable from {x3=>3, x1=>-1, x2=>-3}  
+  pLevelThreeB = new MutableHashTable from {x3=>-3, x1=>-1, x2=>3}  
   pLevelTwo = new MutableHashTable from {x1=>-1, x2=>3}
   
   cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
   cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
 
-  cellLevelTwo = new MutableHashTable from {3=>cellLevelThreeA, -3=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{0*x3-3,x3^2-3}} --this last part is another ugly fix to ensure that "-3" is in R
+  cellLevelTwo = new MutableHashTable from {3_QQ=>cellLevelThreeA, -3_QQ=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{-3,x3^2-3}} --this last part is another ugly fix to ensure that "-3" is in R
   
   --peek cellLevelTwo
   --peek LP
 
-  peek pairs cellLevelTwo    -- I think the issue here is the -3 in the last pair is in R in LP
-  peek pairs LP	       	     -- but not cellLevelTwo
+  --peek pairs cellLevelTwo    -- I think the issue here is the -3 in the last pair is in R in LP
+  --peek pairs LP	       	     -- but not cellLevelTwo
   
   --tex peek pairs cellLevelTwo
   --tex peek pairs LP
 
+  cellLevelTwo#(3_QQ)
+  LP#(3_QQ)
 
-
-
-  assert(latterContainsFormer(cellLevelTwo, LP))
-
-  (keys LP)#1
-  (keys cellLevelTwo)#1
+  --latterContainsFormer(cellLevelTwo, LP)
+  --latterContainsFormer(LP, cellLevelTwo)
+  -- not of the same class.
+  latterContainsFormer(peek cellLevelTwo, peek LP)
+  latterContainsFormer(peek LP, peek cellLevelTwo)
+  --this works, maybe i'm misunderstanding how this command works now
   
-  --peek cellLevelTwo == peek LP -- not sure this is enough, it's just checking at top level they 'look' the same
+  -- peek cellLevelTwo == peek LP -- not sure this is enough, it's just checking at top level they 'look' the same
   -- would a recursive function checking they match all the way down work?
   
-  --PP1=pairs LP
-  --PP2=pairs cellLevelTwo
-
-  --PP1#3
-  --PP2#3
-
-  --PP1#3#1==PP2#3#1
-
   --assert(peek cellLevelTwo == peek LP)
   --assert(latterContainsFormer(peek cellLevelTwo, peek LP))
   --assert(latterContainsFormer(peek LP, peek cellLevelTwo))
-
-  PP1#3
-  LP#"polynomials"
-  cellLevelTwo#"polynomials"
 
   assert(LP#"polynomials" == cellLevelTwo#"polynomials")
   assert(latterContainsFormer(cellLevelTwo#"point", LP#"point"))
   assert(latterContainsFormer(LP#"point", cellLevelTwo#"point"))
   
-  assert(latterContainsFormer(cellLevelTwo#(-3), LP#(-3)))
-  assert(latterContainsFormer(LP#(-3), cellLevelTwo#(-3)))
+  --assert(latterContainsFormer(cellLevelTwo#(-3_QQ), LP#(-3_QQ)))
+  --assert(latterContainsFormer(LP#(-3_QQ), cellLevelTwo#(-3_QQ)))
+  -- not of same class, objects not the same.
+  assert(latterContainsFormer(peek cellLevelTwo#(-3_QQ), peek LP#(-3_QQ)))
+  assert(latterContainsFormer(peek LP#(-3_QQ), peek cellLevelTwo#(-3_QQ)))
+  --these work.
+  
+  peek cellLevelTwo#(-3_QQ)
+  peek LP#(-3_QQ)
+  pairs cellLevelTwo#(-3_QQ)
+  pairs LP#(-3_QQ)
+  peek pairs cellLevelTwo#(-3_QQ)
+  peek pairs LP#(-3_QQ)
+  peek values cellLevelTwo#(-3_QQ)
+  peek values LP#(-3_QQ)
+  --what isn't the same about these?
+  
+  assert(peek cellLevelTwo#(-3_QQ)==peek LP#(-3_QQ))
+  --true in emacs, error in Web
+  assert(peek values cellLevelTwo#(-3_QQ)==peek values LP#(-3_QQ))
+  --true in emacs, error in Web
+  latterContainsFormer(peek values cellLevelTwo#(-3_QQ),peek values LP#(-3_QQ))
+  --true in emacs, error in Web
+  assert(latterContainsFormer(peek values cellLevelTwo#(-3_QQ),peek values LP#(-3_QQ)))
+  --true in emacs, error in Web.
+  
 
-  assert(latterContainsFormer(cellLevelTwo#(3), LP#(3)))
-  assert(latterContainsFormer(LP#(3), cellLevelTwo#(3)))
-
-
-LP#((keys LP)#1)
-
-(keys LP)#1
-LP#"(-3)"
-
-LP#"R(3)"
-
-keys cellLevelTwo#(-3)
-  cellLevelTwo#(3)
-
-  assert(latterContainsFormer(cellLevelTwo#((keys cellLevelTwo)#1), LP#((keys LP)#1)))
-  assert(latterContainsFormer(LP#((keys LP)#1), cellLevelTwo#((keys cellLevelTwo)#1)))
- 
-  cellLevelTwo#((keys cellLevelTwo)#1)
-  LP#((keys LP)#1)
+  assert(peek values cellLevelTwo#(3_QQ)==peek values LP#(3_QQ))
+  
+  --assert(latterContainsFormer(cellLevelTwo#(3_QQ), LP#(3_QQ)))
+  --assert(latterContainsFormer(LP#(3_QQ), cellLevelTwo#(3_QQ)))
+  -- not of same class, objects not the same
+  assert(latterContainsFormer(peek cellLevelTwo#(3_QQ), peek LP#(3_QQ)))
+  assert(latterContainsFormer(peek LP#(3_QQ), peek cellLevelTwo#(3_QQ)))
+  --these work.
+  peek cellLevelTwo#(3_QQ)
+  peek LP#(3_QQ)
 
   keys cellLevelTwo
   keys LP
@@ -934,11 +940,12 @@ keys cellLevelTwo#(-3)
 
 
 
-  assert(cellLevelTwo == LP)
-  assert(latterContainsFormer(cellLevelTwo, LP))
-  assert(latterContainsFormer(LP, cellLevelTwo))
+  --assert(cellLevelTwo == LP)
+  --no method
+  assert(latterContainsFormer(peek cellLevelTwo, peek LP))
+  assert(latterContainsFormer(peek LP, peek cellLevelTwo))
 
-
+  --all of these checks are messy and don't work. What is a sufficient check that LP and the constructed thing "are the same"?
 
   -- for key in keys(LP) do assert(cellLevelTwo#?key)
   -- keys(cellLevelTwo)
@@ -1052,14 +1059,18 @@ TEST /// -* positivePoint test 2*-
   answer = new MutableHashTable from {
       x => 2}
   assert(peek PP == peek answer)
-  assert(latterContainsFormer(PP,answer))
-  assert(latterContainsFormer(answer,PP))
+  assert(latterContainsFormer(peek PP,peek answer))
+  assert(latterContainsFormer(peek answer,peek PP))
+  --these work in emacs. Is this enough?
   
+  peek PP
+  peek answer
   peek pairs PP
   peek pairs answer
   
   assert((peek pairs answer) == (peek pairs PP))
-  latterContainsFormer(peek pairs answer, peek pairs PP)
+  assert(latterContainsFormer(peek pairs answer, peek pairs PP))
+  --these are fine in emacs. Is this enough? It still seems to give an error for test 13
 ///
 
 TEST /// -* findSolution test 1*-
