@@ -41,7 +41,7 @@ factors(RingElement) := (p) -> (
   )
 
 -- finds the support of a list of Polynomials
--- overloads original command to return the support of a list of polynomials.
+-- overloads original command to return the combined support of a list of polynomials.
 support(List) := (L) -> (
     for p in L do
       if liftable(p,QQ) then L = delete(p,L); --added to catch new output from evalPolys
@@ -125,9 +125,9 @@ projectionPhase(List) := (L) -> (
       L = lazardProjection(L, var);
       variables = select(n -> n != var, variables); -- variable chosen is dropped
       S = prepend(L, S);
-      ordering = prepend(var, ordering)
+      ordering = prepend(var, ordering);
       );
-    ordering = prepend(variables_0, ordering) -- the variable left is added
+    ordering = prepend(variables_0, ordering); -- the variable left is added
     (S, ordering)
     )
 
@@ -160,7 +160,7 @@ samplePoints(List) := (L) -> (
     L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
-    )
+    );
     L1
     )
 
@@ -190,7 +190,7 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
     
     if #support(L) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of L is " | toString(L));
     -- v := (support(L))_0;
-    v := ordering_i
+    v := ordering_i;
     newSamplePoints := samplePoints(L);
     SNew := drop(S,1);
     for samplePoint in newSamplePoints do (
@@ -389,73 +389,53 @@ doc ///
 
 doc ///
   Key
-    (evalPolys, RingElement, MutableHashTable)
-    evalPolys
+    {evalPolys,(evalPolys, RingElement, MutableHashTable), (evalPolys, List, MutableHashTable)}
   Headline
-    Evaluates the given polynomial with respect to the given sample point.
+    Evaluates the given polynomial with respect to the given sample point. Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
   Usage
-    evalPolys(p,alpha)
+    evalPolys(p,alpha), evalPolys(S,alpha)
   Inputs
     p:RingElement
       polynomial as a RingElement
-    alpha:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables)
-  Outputs
-    :RingElement
-      RingElement describing the polynomial evaluated at the sample point.
-  Description
-    Text
-      Given the polynomial (p) and sample point (alpha) it evaluates the polynomial at the sample point and returns that polynomial. This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
-    Example
-	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable
-	  alpha#x0 = 3
-	  alpha#x1 = 4
-	  alpha#x2 = 1
-	  p=x1^2*x0-2*x3*x2
-	  evalPolys(p,alpha)
-          
-	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable
-	  alpha#x0 = 3
-	  alpha#x1 = 4
-	  alpha#x2 = 1
-	  alpha#x3 = -2
-	  p=x1^2*x0-2*x3*x2
-	  evalPolys(p,alpha)
-
-  SeeAlso
-///
-
-doc ///
-  Key
-    (evalPolys, List, MutableHashTable)
-    evalPolys
-  Headline
-    Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
-  Usage
-    evalPolys(S,alpha)
-  Inputs
     S:List
       list of polynomials as RingElements
     alpha:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
   Outputs
+    :RingElement
+      RingElement describing the polynomial evaluated at the sample point.
     :List
       List of RingElements describing the polynomials in S evaluated at the sample point.
   Description
     Text
+      Given the polynomial (p) and sample point (alpha) it evaluates the polynomial at the sample point and returns that polynomial. This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
       Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
     Example
-	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable
-	  alpha#x0 = 3
-	  alpha#x1 = 4
-	  alpha#x2 = 1
-	  S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
-	  evalPolys(S,alpha)
+       R=QQ[x0,x1,x2,x3]
+       alpha = new MutableHashTable
+       alpha#x0 = 3
+       alpha#x1 = 4
+       alpha#x2 = 1
+       p=x1^2*x0-2*x3*x2
+       evalPolys(p,alpha)
+          
+       R=QQ[x0,x1,x2,x3]
+       alpha = new MutableHashTable
+       alpha#x0 = 3
+       alpha#x1 = 4
+       alpha#x2 = 1
+       alpha#x3 = -2
+       p=x1^2*x0-2*x3*x2
+       evalPolys(p,alpha)
+
+       R=QQ[x0,x1,x2,x3]
+       alpha = new MutableHashTable
+       alpha#x0 = 3
+       alpha#x1 = 4
+       alpha#x2 = 1
+       S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
+       evalPolys(S,alpha)
   SeeAlso
-    evalPolys
 ///
 
 doc ///
