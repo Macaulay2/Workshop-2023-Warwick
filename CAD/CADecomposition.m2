@@ -86,8 +86,8 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
 
 -- Choose the next variable to project according to the heuristic gmods
 gmodsHeuristic = method()
-gmodsHeuristic(List, List) := (L, variables) -> (
-  gmodsVar := variables_0;
+gmodsHeuristic(List, List) := (L, v) -> (
+  gmodsVar := v_0;
   minGmods := sum(for p in L list degree(vars_0, p));
   for var in vars do (
     -- print var;
@@ -103,7 +103,7 @@ gmodsHeuristic(List, List) := (L, variables) -> (
 -- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
-  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients(?)
+  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients
   L = select(L, p -> member(v,support(p)));
   L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
 	L2 := for p in L list discriminant(p,v); --discriminants
@@ -389,54 +389,76 @@ doc ///
 
 doc ///
   Key
-    {evalPolys,(evalPolys, RingElement, MutableHashTable), (evalPolys, List, MutableHashTable)}
+    (evalPolys, RingElement, MutableHashTable)
+    evalPolys
   Headline
-    Evaluates the given polynomial with respect to the given sample point. Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
+    Evaluates the given polynomial with respect to the given sample point.
   Usage
-    evalPolys(p,alpha), evalPolys(S,alpha)
+    evalPolys(p,alpha)
   Inputs
     p:RingElement
       polynomial as a RingElement
-    S:List
-      list of polynomials as RingElements
     alpha:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
   Outputs
     :RingElement
       RingElement describing the polynomial evaluated at the sample point.
-    :List
-      List of RingElements describing the polynomials in S evaluated at the sample point.
   Description
     Text
       Given the polynomial (p) and sample point (alpha) it evaluates the polynomial at the sample point and returns that polynomial. This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
-      Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
     Example
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       p=x1^2*x0-2*x3*x2
-       evalPolys(p,alpha)
+	  R=QQ[x0,x1,x2,x3]
+	  alpha = new MutableHashTable
+	  alpha#x0 = 3
+	  alpha#x1 = 4
+	  alpha#x2 = 1
+	  p=x1^2*x0-2*x3*x2
+	  evalPolys(p,alpha)
           
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       alpha#x3 = -2
-       p=x1^2*x0-2*x3*x2
-       evalPolys(p,alpha)
+	  R=QQ[x0,x1,x2,x3]
+	  alpha = new MutableHashTable
+	  alpha#x0 = 3
+	  alpha#x1 = 4
+	  alpha#x2 = 1
+	  alpha#x3 = -2
+	  p=x1^2*x0-2*x3*x2
+	  evalPolys(p,alpha)
 
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
-       evalPolys(S,alpha)
   SeeAlso
 ///
+
+--Currently has issues - can't have duplicates and can't seem to combine them into one. How do we fix this?
+
+--doc ///
+--  Key
+--    (evalPolys, List, MutableHashTable)
+--    evalPolys
+--  Headline
+--    Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
+--  Usage
+--    evalPolys(S,alpha)
+--  Inputs
+--    S:List
+--      list of polynomials as RingElements
+--    alpha:MutableHashTable
+--      point described using a hash table where the keys are RingElements (variables)
+--  Outputs
+--    :List
+--      List of RingElements describing the polynomials in S evaluated at the sample point.
+--  Description
+--    Text
+--      Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
+--    Example
+--	  R=QQ[x0,x1,x2,x3]
+--	  alpha = new MutableHashTable
+--	  alpha#x0 = 3
+--	  alpha#x1 = 4
+--	  alpha#x2 = 1
+--	  S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
+--	  evalPolys(S,alpha)
+--   SeeAlso
+--    evalPolys
+--///
 
 doc ///
   Key
@@ -464,29 +486,32 @@ doc ///
 
 doc ///
   Key
-    (gmodsHeuristic, List)
+    (gmodsHeuristic, List, List)
     gmodsHeuristic
   Headline
     Uses the gmods heuristic to determine the next variable to project.
   Usage
-    gmodsHeuristic(L)
+    gmodsHeuristic(L, v)
   Inputs
     L:List
       of polynomials in several variables
+    variables:List
+      of variable used in the polynomials
   Outputs
     :RingElement
       RingElement giving the next variable
   Description
     Text
-      Given a list (L) of polynomials in one or more variables, returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
+      Given a list (L) of polynomials in one or more variables and a list of these variables (v), returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
       p1=x1^2*x2-x1*x3+x3^3
       p2=x2^2*x3+x3
       p3=-x1*x2
-      L={p0,p1,p2,p3}  
-      gmodsHeuristic(L)
+      L={p0,p1,p2,p3}
+      v=support(L)
+      gmodsHeuristic(L,v)
   SeeAlso
 ///
 
@@ -585,17 +610,19 @@ doc ///
 
 doc ///
   Key
-    (liftingPoint, List, MutableHashTable)
+    (liftingPoint, List, MutableHashTable, List)
     liftingPoint
   Headline
-    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
+    Given the projection phase of a CAD (S) and the variable ordering (ordering) it returns an OpenCAD above the point (p) given.
   Usage
-    liftingPoint(S,p)
+    liftingPoint(S,p,ordering)
   Inputs
     S:List
       list of lists of RingElements
     p:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
+    ordering:List
+      containing the variable ordering
   Outputs
     :MutableHashTable
       MutableHashTable describing an OpenCAD
@@ -611,8 +638,9 @@ doc ///
       pts = new MutableHashTable
       pts#x1 = 1
       pts#x2 = 3
+      ord={x1,x2,x3}
       peek pts
-      liftingPoint(L,pts)
+      liftingPoint(L,pts,ord)
   SeeAlso
     evalPolys
     samplePoints
