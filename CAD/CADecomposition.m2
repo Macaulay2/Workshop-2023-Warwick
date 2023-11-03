@@ -145,24 +145,24 @@ samplePoints(List) := (L) -> (
     -- print ourRoots;
     -- if ourRoots == {} then error "List has no roots";
     if length(ourRoots)=0 then (
-        L1 = {0};
-      )
-      else (
+        L1 = {0}
+    )
+    else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
-    for i from 0 to #ourRoots-2 do (
+      for i from 0 to #ourRoots-2 do (
       -- print("Roots", ourRoots);
-      while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
-        intervalSize = intervalSize/2;
-        ourRoots = realRootIsolation(h,intervalSize);
+        while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
+          intervalSize = intervalSize/2;
+          ourRoots = realRootIsolation(h,intervalSize);
+        );
       );
-    );
     -- Find the mid-points between intervals as cell witnesses:
-    L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
+      L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
     );
     L1
-    )
+  )
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
