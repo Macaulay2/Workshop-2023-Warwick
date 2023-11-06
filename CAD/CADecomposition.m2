@@ -103,7 +103,7 @@ gmodsHeuristic(List, List) := (L, variables) -> (
 -- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
-  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients(?)
+  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients
   L = select(L, p -> member(v,support(p)));
   L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
 	L2 := for p in L list discriminant(p,v); --discriminants
@@ -144,25 +144,26 @@ samplePoints(List) := (L) -> (
     -- print "root isolating intervals";
     -- print ourRoots;
     -- if ourRoots == {} then error "List has no roots";
+
     if length(ourRoots)==0 then (
         L1 := {};
       )
       else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
-    for i from 0 to #ourRoots-2 do (
+      for i from 0 to #ourRoots-2 do (
       -- print("Roots", ourRoots);
-      while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
-        intervalSize = intervalSize/2;
-        ourRoots = realRootIsolation(h,intervalSize);
+        while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
+          intervalSize = intervalSize/2;
+          ourRoots = realRootIsolation(h,intervalSize);
+        );
       );
-    );
     -- Find the mid-points between intervals as cell witnesses:
     L1=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
     );
     L1
-    )
+  )
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
@@ -393,52 +394,73 @@ doc ///
     (evalPolys, RingElement, MutableHashTable)
     (evalPolys, List, MutableHashTable)
   Headline
-    Evaluates the given polynomial with respect to the given sample point. Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
+    Evaluates the given polynomial with respect to the given sample point.
   Usage
-    evalPolys(p,alpha), evalPolys(S,alpha)
+    evalPolys(p,alpha)
   Inputs
     p:RingElement
       polynomial as a RingElement
-    S:List
-      list of polynomials as RingElements
     alpha:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
   Outputs
     :RingElement
       RingElement describing the polynomial evaluated at the sample point.
-    :List
-      List of RingElements describing the polynomials in S evaluated at the sample point.
   Description
     Text
       Given the polynomial (p) and sample point (alpha) it evaluates the polynomial at the sample point and returns that polynomial. This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
-      Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
     Example
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       p=x1^2*x0-2*x3*x2
-       evalPolys(p,alpha)
+	  R=QQ[x0,x1,x2,x3]
+	  alpha = new MutableHashTable
+	  alpha#x0 = 3
+	  alpha#x1 = 4
+	  alpha#x2 = 1
+	  p=x1^2*x0-2*x3*x2
+	  evalPolys(p,alpha)
           
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       alpha#x3 = -2
-       p=x1^2*x0-2*x3*x2
-       evalPolys(p,alpha)
+	  R=QQ[x0,x1,x2,x3]
+	  alpha = new MutableHashTable
+	  alpha#x0 = 3
+	  alpha#x1 = 4
+	  alpha#x2 = 1
+	  alpha#x3 = -2
+	  p=x1^2*x0-2*x3*x2
+	  evalPolys(p,alpha)
 
-       R=QQ[x0,x1,x2,x3]
-       alpha = new MutableHashTable
-       alpha#x0 = 3
-       alpha#x1 = 4
-       alpha#x2 = 1
-       S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
-       evalPolys(S,alpha)
   SeeAlso
 ///
+
+--Currently has issues - can't have duplicates and can't seem to combine them into one. How do we fix this?
+
+--doc ///
+--  Key
+--    (evalPolys, List, MutableHashTable)
+--    evalPolys
+--  Headline
+--    Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
+--  Usage
+--    evalPolys(S,alpha)
+--  Inputs
+--    S:List
+--      list of polynomials as RingElements
+--    alpha:MutableHashTable
+--      point described using a hash table where the keys are RingElements (variables)
+--  Outputs
+--    :List
+--      List of RingElements describing the polynomials in S evaluated at the sample point.
+--  Description
+--    Text
+--      Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
+--    Example
+--	  R=QQ[x0,x1,x2,x3]
+--	  alpha = new MutableHashTable
+--	  alpha#x0 = 3
+--	  alpha#x1 = 4
+--	  alpha#x2 = 1
+--	  S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
+--	  evalPolys(S,alpha)
+--   SeeAlso
+--    evalPolys
+--///
 
 doc ///
   Key
@@ -466,7 +488,7 @@ doc ///
 
 doc ///
   Key
-    (gmodsHeuristic, List,List)
+    (gmodsHeuristic, List, List)
     gmodsHeuristic
   Headline
     Uses the gmods heuristic to determine the next variable to project.
@@ -597,7 +619,7 @@ doc ///
     (liftingPoint, List, MutableHashTable, List)
     liftingPoint
   Headline
-    Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
+    Given the projection phase of a CAD (S) and the variable ordering (ordering) it returns an OpenCAD above the point (p) given.
   Usage
     liftingPoint(S,p,ordering)
   Inputs
@@ -623,6 +645,7 @@ doc ///
       pts = new MutableHashTable
       pts#x1 = 1
       pts#x2 = 3
+      ord={x1,x2,x3}
       peek pts
       ordering = {x1,x2,x3}
       liftingPoint(L,pts,ordering)
