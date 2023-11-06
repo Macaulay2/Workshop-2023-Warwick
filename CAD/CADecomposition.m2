@@ -140,7 +140,7 @@ samplePoints(List) := (L) -> (
     -- print("List of Pols:"); print L;
     -- print h;
     intervalSize := 1;
-    ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number
+    ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number. Returns interval.
     -- print "root isolating intervals";
     -- print ourRoots;
     -- if ourRoots == {} then error "List has no roots";
@@ -161,6 +161,8 @@ samplePoints(List) := (L) -> (
     L1=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
+    L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
+    L1 = {(min (flatten ourRoots))-1}|L1|{(max (flatten ourRoots))+1};
     );
     L1
   )
@@ -1185,3 +1187,6 @@ installPackage("CADecomposition",IgnoreExampleErrors=>true)
   peek oo
   peek H#(-2_QQ)
   
+R=QQ[x1,x2]
+L={x1*x2}
+openCAD(L)
