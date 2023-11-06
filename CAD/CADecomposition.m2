@@ -88,8 +88,8 @@ leadCoefficientt(RingElement, RingElement) := (p, v) -> (
 gmodsHeuristic = method()
 gmodsHeuristic(List, List) := (L, variables) -> (
   gmodsVar := variables_0;
-  minGmods := sum(for p in L list degree(vars_0, p));
-  for var in vars do (
+  minGmods := sum(for p in L list degree(variables_0, p));
+  for var in variables do (
     -- print var;
     newGmods := sum(for p in L list degree(var, p));
     if newGmods < minGmods then (
@@ -123,7 +123,7 @@ projectionPhase(List) := (L) -> (
     --   var := gmodsHeuristic(support(L)); (Line commnented out because the following felt more reasonable, if no errors were created remove this line)
       var := gmodsHeuristic(L, variables);
       L = lazardProjection(L, var);
-      variables = select(n -> n != var, variables); -- variable chosen is dropped
+      variables = select(variables,n -> n != var); -- variable chosen is dropped
       S = prepend(L, S);
       ordering = prepend(var, ordering);
       );
@@ -144,8 +144,8 @@ samplePoints(List) := (L) -> (
     -- print "root isolating intervals";
     -- print ourRoots;
     -- if ourRoots == {} then error "List has no roots";
-    if length(ourRoots)=0 then (
-        L1 = {0};
+    if length(ourRoots)==0 then (
+        L1 := {};
       )
       else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
@@ -157,7 +157,7 @@ samplePoints(List) := (L) -> (
       );
     );
     -- Find the mid-points between intervals as cell witnesses:
-    L1:=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
+    L1=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
     );
@@ -389,7 +389,9 @@ doc ///
 
 doc ///
   Key
-    {evalPolys,(evalPolys, RingElement, MutableHashTable), (evalPolys, List, MutableHashTable)}
+    evalPolys
+    (evalPolys, RingElement, MutableHashTable)
+    (evalPolys, List, MutableHashTable)
   Headline
     Evaluates the given polynomial with respect to the given sample point. Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
   Usage
@@ -464,21 +466,25 @@ doc ///
 
 doc ///
   Key
-    (gmodsHeuristic, List)
+    (gmodsHeuristic, List,List)
     gmodsHeuristic
   Headline
     Uses the gmods heuristic to determine the next variable to project.
   Usage
-    gmodsHeuristic(L)
+    gmodsHeuristic(L,variables)
   Inputs
     L:List
       of polynomials in several variables
+    variables:List
+      of variables in the polynomials provided
   Outputs
     :RingElement
       RingElement giving the next variable
   Description
     Text
-      Given a list (L) of polynomials in one or more variables, returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
+      Given a list (L) of polynomials in one or more variables, returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the 
+      variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this 
+      heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
@@ -486,7 +492,7 @@ doc ///
       p2=x2^2*x3+x3
       p3=-x1*x2
       L={p0,p1,p2,p3}  
-      gmodsHeuristic(L)
+      gmodsHeuristic(L,support(L))
   SeeAlso
 ///
 
@@ -508,7 +514,10 @@ doc ///
       list of projected polynomials not involving $v$
   Description
     Text
-      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials w.r.t $v$. For openCAD, the trailing coefficients are not needed.
+      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. 
+      It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given 
+      polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials 
+      w.r.t $v$. For openCAD, the trailing coefficients are not needed.
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
@@ -585,23 +594,26 @@ doc ///
 
 doc ///
   Key
-    (liftingPoint, List, MutableHashTable)
+    (liftingPoint, List, MutableHashTable, List)
     liftingPoint
   Headline
     Given the projection phase of a CAD (S) it returns an OpenCAD above the point given.
   Usage
-    liftingPoint(S,p)
+    liftingPoint(S,p,ordering)
   Inputs
     S:List
       list of lists of RingElements
     p:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
+    ordering:List
+      variable ordering followed in the projection
   Outputs
     :MutableHashTable
       MutableHashTable describing an OpenCAD
   Description
     Text
-      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the RingElements in S_(-1) are constant.
+      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the 
+      RingElements in S_(-1) are constant.
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2
@@ -612,7 +624,8 @@ doc ///
       pts#x1 = 1
       pts#x2 = 3
       peek pts
-      liftingPoint(L,pts)
+      ordering = {x1,x2,x3}
+      liftingPoint(L,pts,ordering)
   SeeAlso
     evalPolys
     samplePoints
@@ -1135,6 +1148,7 @@ uninstallPackage "CADecomposition"
 restart
 installPackage "CADecomposition"
 viewHelp "CADecomposition"
+installPackage("CADecomposition",IgnoreExampleErrors=>true)
 
   R=QQ[x1,x2,x3]
   p0=x1*x2
