@@ -1,8 +1,42 @@
 -- To do
---
---Issue with positivePoint and findSolution - don't load properly, giving wrong output
---test(s) #9, 10, 13 failing
---Trying to lift to QQ in evalPoly where possible, but this seems to break many other checks.
+
+--LEGACY: Check if these are still valid or not:
+--  Issue with positivePoint and findSolution - don't load properly, giving wrong output
+--  Trying to lift to QQ in evalPoly where possible, but this seems to break many other checks.
+
+--Need to update this to do list.
+--* Update examples, tests and documentation 
+--*  * (tests #2,3,5,7,9,10 failing) (evalPolys, evalPolys (List), gmodsHeuristic, projectionPhase, liftingPoint (the big one), openCAD smaller)
+--* Make sure realRootIsolation works as expected or that we can manipulate it into doing what we want (it has
+--  an issue where e.g. x1 would give isolation {-1,1} but -2*x1 would give isolation {1,-1} (interval switches here).
+--  What we need to do here is to make a workaround that forces it the right way round (e.g. sets the lower one as the
+--  first bound and the second as the lower), so we can correctly make the "-infinity to first root"
+--  and the "last root to infinity" intervals (but we need to find and get the smallest and the largest bounds first!)
+--* Create a "nice output" for openCAD - have a look at what Maple does
+--* Extra: output descriptions of cells
+
+--find out what "ourRoots" outputs.
+
+--evalPolys - need to get it working for Lists too.
+--is gmodsHeuristic sorted now? check the example works like it should etc.
+--check lazardProjection example makes sense - do it manually too (might as well write that up if i do)
+--check all the "see also"s make sense and refer to all previous ones i guess!
+--projectionPhase is ok i think?
+--check samplePoints examples make sense - do them manually if you need to check.
+--liftingPoint example is broken.
+
+--is latterContainsFormer still used? If not we can remove it. If so, check it still works properly.
+--need to write documentation for hashify.
+--positivePoint - output is a MHT - is that what we want?
+--findSolution - example seems ok but check it!
+
+--tests:
+--gmodsHeuristic test (Test 5) fails - no method for applying to a list.
+--projectionPhase test (Test 7) fails - no method for applying sort to these - check what changed.
+--samplePoints test (Test 8) is fine but check it makes sense if things have changed!
+--liftingPoint test (Test 9) is a complete mess - need to sit down and think about it in detail.
+--same with openCAD test (Test 10)
+--findSolution tests - maybe make all of the same form: FS = findSolution, then assert FS is true/false.
 
 newPackage(
     "CADecomposition",
@@ -158,10 +192,9 @@ samplePoints(List) := (L) -> (
         );
       );
     -- Find the mid-points between intervals as cell witnesses:
-    L1=for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
+    L1 = for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
     -- print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
-    L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
     L1 = {(min (flatten ourRoots))-1}|L1|{(max (flatten ourRoots))+1};
     );
     L1
@@ -570,7 +603,9 @@ doc ///
       of lists of projection polynomials in decreasing numbers of variables
   Description
     Text
-      Given a list (L) of polynomials or a list of lists of polynomials, these are stored, then a variable is selected using gmods, and the Lazard projection is done on the polynomials. This new list in one fewer variables is also stored, and the process is repeated on this new list until only polynomials in one variable remain.
+      Given a list (L) of polynomials or a list of lists of polynomials, these are stored, then a variable is selected using gmods, and the Lazard 
+      projection is done on the polynomials. This new list in one fewer variables is also stored, and the process is repeated on this new list 
+      until only polynomials in one variable remain.
     Example
       R=QQ[x]
 	  R=QQ[x1,x2,x3]
@@ -647,7 +682,6 @@ doc ///
       pts = new MutableHashTable
       pts#x1 = 1
       pts#x2 = 3
-      ord={x1,x2,x3}
       peek pts
       ordering = {x1,x2,x3}
       liftingPoint(L,pts,ordering)
@@ -1175,6 +1209,7 @@ installPackage "CADecomposition"
 viewHelp "CADecomposition"
 installPackage("CADecomposition",IgnoreExampleErrors=>true)
 
+    --L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
