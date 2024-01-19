@@ -1,5 +1,11 @@
 -- To do
 
+-- Note 18/01/2023 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
+-- I think we should just work through an example slowly step-by-step comparing what we expect to get out
+-- to what we actually receive, and use that to see where we're going wrong.
+
+
+
 --LEGACY: Check if these are still valid or not:
 --  Issue with positivePoint and findSolution - don't load properly, giving wrong output
 --  Trying to lift to QQ in evalPoly where possible, but this seems to break many other checks.
@@ -49,6 +55,9 @@ newPackage(
     DebuggingMode => true
     )
 
+--"A package can contain the code for many functions, only some of which should be made visible to the user.
+--The function export allows one to specify which symbols are to be made visible."
+--At the end, trim this down to only the ones useful for people using the package.
 export {"factors",
 "factorsInList",
 "evalPoly",
@@ -138,11 +147,17 @@ gmodsHeuristic(List, List) := (L, variables) -> (
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
   L0 := select(L, p -> not member(v,support(p))); --trailing coefficients
+  -- "p is given the value of everything in L that does not have v in its support"
+  -- "return the parts of each poly p in L that do not rely on v"
+  -- I guess check this works
   L = select(L, p -> member(v,support(p)));
+  print "L";print L;
+  -- "return the parts of each poly p in L that rely on v"
   L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
 	L2 := for p in L list discriminant(p,v); --discriminants
 	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
-	factorsInList(L0|L1|L2|L3)
+        print "L0,L1,L2,L3";print L0;print L1;print L2;print L3;
+	factorsInList(L0|L1|L2|L3) -- put these back together as one list
 	)
 
 -- Creates a full Lazard projection
@@ -158,7 +173,7 @@ projectionPhase(List) := (L) -> (
       var := gmodsHeuristic(L, variables);
       L = lazardProjection(L, var);
       variables = select(variables,n -> n != var); -- variable chosen is dropped
-      S = prepend(L, S);
+      S = prepend(L, S); --
       ordering = prepend(var, ordering);
       );
     ordering = prepend(variables_0, ordering); -- the variable left is added
@@ -169,16 +184,17 @@ projectionPhase(List) := (L) -> (
 samplePoints = method()
 samplePoints(List) := (L) -> (
     -- if L=={} then error "Error: Expected non-empty list";
+    -- set up A, monoid on single variable
     A := QQ(monoid[support(L)]);
+    -- put product of polys in L inside ring A.
     h:=sub(product L, A);
-    -- print("List of Pols:"); print L;
-    -- print h;
+    print("List of Pols:"); print L; print h;
+    -- set initial interval size as 1 for isolating intervals
     intervalSize := 1;
+    --call RealRoots:realRootIsolation (isolates real solutions of h in intervals of length at most 1)
     ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number. Returns interval.
-    -- print "root isolating intervals";
-    -- print ourRoots;
-    -- if ourRoots == {} then error "List has no roots";
-
+    print "root isolating intervals"; print ourRoots;
+    -- if no roots, set L1 to empty list.
     if length(ourRoots)==0 then (
         L1 := {};
       )
@@ -187,15 +203,18 @@ samplePoints(List) := (L) -> (
       for i from 0 to #ourRoots-2 do (
       -- print("Roots", ourRoots);
         while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
+            --check this! bug with package might mean we have to check if both sides have any elements in common at all!
           intervalSize = intervalSize/2;
           ourRoots = realRootIsolation(h,intervalSize);
         );
       );
+    print "ourRoots refined"; print ourRoots;
     -- Find the mid-points between intervals as cell witnesses:
     L1 = for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
-    -- print "Mid Points:"; print L1;
+    print "Mid Points:"; print L1;
     -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
     L1 = {(min (flatten ourRoots))-1}|L1|{(max (flatten ourRoots))+1};
+    print "Mid Points and first and last:"; print L1;
     );
     L1
   )
@@ -204,38 +223,73 @@ samplePoints(List) := (L) -> (
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
 liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
-    -- List is a list of lists of polynomials, the first list of polys with i+1 variables (up to n variables, where n is the number of variables in the initial polynomials)
-    -- HashTable is a point in i variables
-    -- List is the variable ordering followed in the projection
+    -- List (S) is a list of lists of polynomials, the first list of polys with i+1 variables (up to n variables, where n is the number of variables in the initial polynomials)
+    -- CHECK: the list of projections? I.e. n vars, n-1 vars, ..., 2 vars, 1 var? So i different lists?
+    -- HashTable (p) is a point in i variables
+    -- List (ordering) is the variable ordering followed in the projection
+    
+    print "S, p, ordering"; -- [test for understanding]
+    print S; -- [test for understanding]
+    print p; -- [test for understanding]
+    print ordering;  -- [test for understanding]
+
+
     cell := new MutableHashTable;
     cell#"point" = p;
     i := #keys(p);
+    print "i"; -- [test for understanding]
+    print i; -- [test for understanding]
     -- we check if all the variables have been given a value already
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
-    L := evalPolys(S_i, p); -- S is the list of lists of polynomials
+    L := evalPolys(S_i, p); -- evaluating the polys in i+1 vars at point p (so L should be a set of univariate polynomials)
     cell#"polynomials"=L;
-    print L;
-    print S_i;
-    print p;
-    
-    
+    print "L, S_i, p"; -- [test for understanding]
+    print L; -- [test for understanding]
+    print S_i; -- [test for understanding]
+    print p; -- [test for understanding]
+
     -- I want this to ensure that values are returned as values, but including it also breaks tests #12,14,15,16,17.
     --if liftable(L,QQ) then L = lift(p,QQ); -- if a value, return as a value.
+    -- "L = lift(p,QQ)" may have just been a typo, see if it helps!
     
-    -- This function evaluates the point p into the polynomials of S_i
     
+    
+    --Check in case L is not univariate.
     if #support(L) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of L is " | toString(L));
     -- v := (support(L))_0;
     v := ordering_i;
+    print "v"; -- [test for understanding]
+    print v; -- [test for understanding]
     newSamplePoints := samplePoints(L);
-    SNew := drop(S,1);
+    SNew := drop(S,1); -- we move down a level, so don't want the first set of projection polynomials.
     for samplePoint in newSamplePoints do (
         pNew := copy p;
         pNew#v = samplePoint;
+        print "pNew#v (samplePoint)"; -- [test for understanding]
+        print pNew#v; -- [test for understanding]
         cell#samplePoint = liftingPoint(S, pNew, ordering);
         );
     cell
     )
+
+--cell#samplePoint should be in SNew? No, we can probably remove this line.
+
+--liftingPoint effectively makes a MHT for (i+1)th variable w.r.t. ordering, we'll call this x_(i+1), with
+-- "point":        p, the values for the "first" i variables (w.r.t ordering)
+-- "polynomials":  these values substituted into the projection polynomials for level i+1 
+--                 (polys with i+1 variables), making a set of univariate polys in x_(i+1) (we call this L)
+-- [numeric]:      each of the sample points of L. Inside this is a new, more detailed MHT for the
+--                 "first" i+1 variables (i.e. the values from p along with the new sample point
+
+-- get the order the right way round when explaining it, are the proj polys starting with all n vars, then
+-- decreasing by one with each set down to 1, and does ordering reflect this?
+
+-- this starts at the "top" level (get level numbers right way round), with the "most important variable"
+-- (check this too, is the most important one projected away first?)
+
+-- check how it works with an example. You would expect:
+-- topmost layer: point is empty, polynomials are the original 
+
 
 -- Does the open CAD
 openCAD = method()
@@ -321,7 +375,8 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
     ) else (
         evaluations := evalPolys(L,cell#"point");
 	evaluations = for e in evaluations list value(toString(e)); --elements in list were in R and not treated as numbers, this fixes that.
-	for e in evaluations list e>0; --see if positive or not
+	-- try using lift command instead?
+        for e in evaluations list e>0; --see if positive or not
         if all(evaluations, elem->(elem>0)) then (
           return cell#"point"
         )
@@ -953,6 +1008,12 @@ TEST /// -* liftingPoint test *-
 
   --this all needs rewriting, should just compare hashified.
   
+  
+
+  hashify(cellLevelTwo)
+
+
+  
   printWidth=200
   hashify(cellLevelTwo), hashify LP
   keys (hashify cellLevelTwo)
@@ -1045,6 +1106,11 @@ TEST /// -* openCAD test smaller *-
   p1=x1^3*x2^2
   L={p0,p1}
   C=openCAD(L)
+  peek C
+  
+  gmodsHeuristic(L,support(L))
+  
+  hashify C
 
   pLevelFourA = new MutableHashTable from {x1=>-3/4, x2=>-2_QQ}
   pLevelFourB = new MutableHashTable from {x1=>-5/2, x2=>-2_QQ} 
@@ -1072,8 +1138,9 @@ TEST /// -* openCAD test smaller *-
   peek pLevelFourA
   
   hashify pLevelTwoA
-  hashify C
-  hashify cellLevelOne, hashify C
+  hashify cellLevelOne
+   hashify C
+
   assert(hashify cellLevelOne === hashify C)
   printWidth = 200
   
@@ -1198,16 +1265,19 @@ end--
 
 -* Development section *-
 restart
-debug needsPackage "CADecomposition"
+debug needsPackage "CADecomposition" --load package
 needsPackage "CADecomposition"
-check "CADecomposition"
+check "CADecomposition" --run tests
 
 restart
 uninstallPackage "CADecomposition"
 restart
-installPackage "CADecomposition"
+installPackage "CADecomposition" --load and install a package and its documentation
 viewHelp "CADecomposition"
 installPackage("CADecomposition",IgnoreExampleErrors=>true)
+
+
+--====================
 
     --L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
   R=QQ[x1,x2,x3]
@@ -1225,3 +1295,6 @@ installPackage("CADecomposition",IgnoreExampleErrors=>true)
 R=QQ[x1,x2]
 L={x1*x2}
 openCAD(L)
+
+--==============================
+
