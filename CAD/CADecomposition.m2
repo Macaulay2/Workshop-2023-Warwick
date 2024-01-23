@@ -1,5 +1,8 @@
 -- To do
 
+-- Note 23/01/2023 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
+-- e.g. L is always the initial list of polys p. 
+
 -- Note 18/01/2023 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
 -- I think we should just work through an example slowly step-by-step comparing what we expect to get out
 -- to what we actually receive, and use that to see where we're going wrong.
@@ -60,8 +63,7 @@ newPackage(
 --At the end, trim this down to only the ones useful for people using the package.
 export {"factors",
 "factorsInList",
-"evalPoly",
-"evalPolyList",
+"evalPolys",
 "leadCoefficientt",
 "gmodsHeuristic",
 "lazardProjection",
@@ -71,7 +73,8 @@ export {"factors",
 "openCAD",
 "latterContainsFormer",
 "positivePoint",
-"findSolution"
+"findSolution",
+"hashify"
 }
 
 -* Code section *-
@@ -94,16 +97,16 @@ support(List) := (L) -> (
 -- find factors of all polynomials in a list, removing repetition
 factorsInList = method()
 factorsInList(List) := (L) -> (
-    L0 := apply(L, p -> factors(p));
+    L0 := apply(L, p -> factors(p)); --calls 'factors' on each element of L
     -- print("Unflattend list of factors:", L0);
-    L1 := flatten(L0);
-    L2 := L1/first//unique;
-    L3 := select(L2, p -> #support p>0 )
+    L1 := flatten(L0); --flattens these to a list containing listed pairs (factors and multiplicities)
+    L2 := L1/first//unique; --take the first element of each of these lists and keeps unique ones, only returning the unique factors of all the polynomials in one list.
+    L3 := select(L2, p -> #support p>0 ) --keeps only nonempty elements of the list
 )
 
 
 
--- Evaluates the given RingElement or List of RingElement in a point given by a MutableHashTable.
+-- Evaluates the given RingElement or List of RingElements at a point given by a MutableHashTable.
 evalPolys = method()
 evalPolys(RingElement,MutableHashTable) := (p, alpha) -> (
         for k in keys(alpha) do(
