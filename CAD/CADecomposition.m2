@@ -1,5 +1,8 @@
 -- To do
 
+-- Note 29/01/2023: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
+
+
 -- Note 23/01/2023 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
 -- e.g. L is always the initial list of polys p. 
 
@@ -101,7 +104,7 @@ factorsInList(List) := (L) -> (
     -- print("Unflattend list of factors:", L0);
     L1 := flatten(L0); --flattens these to a list containing listed pairs (factors and multiplicities)
     L2 := L1/first//unique; --take the first element of each of these lists and keeps unique ones, only returning the unique factors of all the polynomials in one list.
-    L3 := select(L2, p -> #support p>0 ) --keeps only nonempty elements of the list
+    L3 := select(L2, p -> #support p>0 ) --keeps only nonconstant/nonempty  elements of the list
 )
 
 
@@ -149,18 +152,19 @@ gmodsHeuristic(List, List) := (L, variables) -> (
 -- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
-  L0 := select(L, p -> not member(v,support(p))); --trailing coefficients
-  -- "p is given the value of everything in L that does not have v in its support"
-  -- "return the parts of each poly p in L that do not rely on v"
-  -- I guess check this works
-  L = select(L, p -> member(v,support(p)));
-  print "L";print L;
+  L0 := select(L, p -> not member(v,support(p))); --polynomials not relying on v
+  L = select(L, p -> member(v,support(p))); --remove polynomials p not relying on v 
+  -- as these would create redundant calculations (resultants would be a power of p,
+  -- discriminants and leading coefficient would be 0 and trailing coefficient would be p
+  -- so we will just slot these back in later)
+  --print "L";print L;
   -- "return the parts of each poly p in L that rely on v"
-  L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
-	L2 := for p in L list discriminant(p,v); --discriminants
-	L3 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
-        print "L0,L1,L2,L3";print L0;print L1;print L2;print L3;
-	factorsInList(L0|L1|L2|L3) -- put these back together as one list
+        L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
+        L2 := for p in L list p-v*contract(v,p); --trailing coefficients
+	L3 := for p in L list discriminant(p,v); --discriminants
+	L4 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
+        --print "L0,L1,L2,L3,L4";print L0;print L1;print L2;print L3;print L4;
+	factorsInList(L0|L1|L2|L3|L4) -- put these back together as one list, but as factors (squarefree).
 	)
 
 -- Creates a full Lazard projection
@@ -169,17 +173,24 @@ projectionPhase(List) := (L) -> (
     -- List is list of multivariate polynomials
     S := {L};
     variables := support(L); --initial variables, the ones chosen already will be dropped
+    --print variables;
     ordering := {}; -- this will contain the variable ordering chosen
+    --print ordering;
     while length(variables) > 1 do (
       -- print(L);
     --   var := gmodsHeuristic(support(L)); (Line commnented out because the following felt more reasonable, if no errors were created remove this line)
       var := gmodsHeuristic(L, variables);
+      --print var;
       L = lazardProjection(L, var);
       variables = select(variables,n -> n != var); -- variable chosen is dropped
       S = prepend(L, S); --
+      --print S;
       ordering = prepend(var, ordering);
+      --print ordering;
       );
     ordering = prepend(variables_0, ordering); -- the variable left is added
+    --print "S, ordering";
+    --print S; print ordering;
     (S, ordering)
     )
 
@@ -191,7 +202,7 @@ samplePoints(List) := (L) -> (
     A := QQ(monoid[support(L)]);
     -- put product of polys in L inside ring A.
     h:=sub(product L, A);
-    print("List of Pols:"); print L; print h;
+    print("List of Pols and their product:"); print L; print h;
     -- set initial interval size as 1 for isolating intervals
     intervalSize := 1;
     --call RealRoots:realRootIsolation (isolates real solutions of h in intervals of length at most 1)
@@ -208,7 +219,8 @@ samplePoints(List) := (L) -> (
         while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
             --check this! bug with package might mean we have to check if both sides have any elements in common at all!
           intervalSize = intervalSize/2;
-          ourRoots = realRootIsolation(h,intervalSize);
+          ourRoots = realRootIsolation(h,intervalSize); -- consider here ordering these from smallest to
+	  -- largest in order to avoid any further issues from this package (just in case).
         );
       );
     print "ourRoots refined"; print ourRoots;
@@ -1279,7 +1291,6 @@ installPackage "CADecomposition" --load and install a package and its documentat
 viewHelp "CADecomposition"
 installPackage("CADecomposition",IgnoreExampleErrors=>true)
 
-
 --====================
 
     --L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
@@ -1301,3 +1312,32 @@ openCAD(L)
 
 --==============================
 
+--EXAMPLE TO RUN THROUGH FOR PAPER--
+R=QQ[x1,x2]
+p1:=x1^2+x2^2-1
+p2:=x1^3-x2^2
+L={p1,p2}
+
+findSolution(L);
+
+
+alpha = new MutableHashTable -- this is a test, this a solution!
+alpha#x1 = 2
+alpha#x2 = 1
+evalPolys(L,alpha)
+
+factors(p1)
+factors(p2)
+support(L)
+factorsInList(L)
+
+GML:=gmodsHeuristic(L,support(L))
+
+leadCoefficientt(p1,GML)
+leadCoefficientt(p2,GML)
+
+lazardProjection(L,GML)
+
+projectionPhase(L);
+
+samplePoints(lazardProjection(L,GML));
