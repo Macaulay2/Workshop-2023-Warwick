@@ -282,8 +282,10 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
         pNew#v = samplePoint;
         print "pNew#v (samplePoint)"; -- [test for understanding]
         print pNew#v; -- [test for understanding]
-        cell#samplePoint = liftingPoint(S, pNew, ordering);
+        cell#samplePoint = liftingPoint(SNew, pNew, ordering);
         );
+    --print cell
+    --DF:=ASDF
     cell
     )
 
@@ -960,7 +962,7 @@ TEST /// -* gmodsHeuristic test *-
   p2=x2^2*x3+x3
   p3=-x1*x2
   L={p0,p1,p2,p3}  
-  assert(gmodsHeuristic(L) == x1)
+  assert(gmodsHeuristic(L,support(L)) == x1)
 ///
 
 TEST /// -* lazardProjection test *-
@@ -983,8 +985,9 @@ TEST /// -* projectionPhase test *-
   f2=x2^2*x3+x3
   L={f0,f1,f2}
   P = projectionPhase(L)
-  answer = {{x2^2+1,x2}, {x3,x2^2+1,x2,4*x2*x3-1}, {x1*x2,x1^2*x2+x3^3-x1*x3,x2^2*x3+x3}}
-  assert(sort P === sort answer)
+  answerS = {{x2^2+1,x2}, {x3,x2^2+1,x2,4*x2*x3-1}, {x1*x2,x1^2*x2+x3^3-x1*x3,x2^2*x3+x3}}
+  answerordering = {x2, x3, x1}
+  assert(P == (answerS,answerordering))
 ///
 
 TEST /// -* samplePoints test *-
@@ -1004,11 +1007,14 @@ TEST /// -* liftingPoint test *-
   p0=x1*x2
   p1=x1*x2+x3^2
   L={p0,p1}
-  P = projectionPhase(L)
+  (P,ord) = projectionPhase(L)
+  print P
+  print ord
   pts = new MutableHashTable
   pts#x1 = -1
   pts#x2 = 3
-  LP = liftingPoint(P,pts)
+  --ord = {x2,x1,x3}
+  LP = liftingPoint(P,pts,ord)
 
   pLevelThreeA = new MutableHashTable from {x3=>3, x1=>-1, x2=>3}
   pLevelThreeB = new MutableHashTable from {x3=>-3, x1=>-1, x2=>3}  
