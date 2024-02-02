@@ -1287,15 +1287,17 @@ end--
 -* Development section *-
 restart
 debug needsPackage "CADecomposition" --load package
-needsPackage "CADecomposition"
+--needsPackage "CADecomposition"
 check "CADecomposition" --run tests
 
 restart
 uninstallPackage "CADecomposition"
 restart
-installPackage "CADecomposition" --load and install a package and its documentation
+installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
+--installPackage "CADecomposition" --load and install a package and its documentation
 viewHelp "CADecomposition"
-installPackage("CADecomposition",IgnoreExampleErrors=>true)
+--if this does not load properly, html files should now be created in
+--home\[name]\.Macaulay2\local\share\doc\Macaulay2\CADecomposition\html
 
 --====================
 
