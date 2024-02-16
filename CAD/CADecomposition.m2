@@ -1,5 +1,11 @@
 -- To do
 
+-- Note 16/02/2023 Another fix to realRootIsolation to avoid it breaking when only roots are 0. 
+-- Added RealRoots2 and imports from this while RealRoots proper needs fixing.
+-- Also finally fixed liftingPoint test using thorough debugging using hash command.
+
+-- Note 15/02/2023 Fixed RealRoots:-realRootIsolation, which should go into prod soon. Will need to update any checks relying on this now.
+
 -- Note 29/01/2023: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
 
 
@@ -56,7 +62,8 @@ newPackage(
     Date => "29/03/2023",
     Headline => "Cylindrical Algebraic Decomposition",
     Authors => {{ Name => "del Rio, T.", Email => "delriot@coventry.ac.uk", HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},	{ Name => "Rahkooy, H.", Email => "rahkooy@maths.ox.ac.uk", HomePage => "https://people.maths.ox.ac.uk/rahkooy/"},	{ Name => "Lee, C.", Email => "cel34@bath.ac.uk", HomePage => "https://people.bath.ac.uk/cel34/"}},
-    PackageExports => {"Elimination", "RealRoots"},
+    --PackageExports => {"Elimination", "RealRoots"}, --when RealRoots is updated, uncomment this.
+    PackageExports => {"Elimination", "RealRoots2"},
     AuxiliaryFiles => false,
     DebuggingMode => true
     )
@@ -219,8 +226,7 @@ samplePoints(List) := (L) -> (
         while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
             --check this! bug with package might mean we have to check if both sides have any elements in common at all!
           intervalSize = intervalSize/2;
-          ourRoots = realRootIsolation(h,intervalSize); -- consider here ordering these from smallest to
-	  -- largest in order to avoid any further issues from this package (just in case).
+          ourRoots = realRootIsolation(h,intervalSize);
         );
       );
     print "ourRoots refined"; print ourRoots;
@@ -256,26 +262,26 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
     print i; -- [test for understanding]
     -- we check if all the variables have been given a value already
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
-    L := evalPolys(S_i, p); -- evaluating the polys in i+1 vars at point p (so L should be a set of univariate polynomials)
-    cell#"polynomials"=L;
-    print "L, S_i, p"; -- [test for understanding]
-    print L; -- [test for understanding]
+    U := evalPolys(S_i, p); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
+    cell#"polynomials"=U;
+    print "U, S_i, p"; -- [test for understanding]
+    print U; -- [test for understanding]
     print S_i; -- [test for understanding]
     print p; -- [test for understanding]
 
     -- I want this to ensure that values are returned as values, but including it also breaks tests #12,14,15,16,17.
-    --if liftable(L,QQ) then L = lift(p,QQ); -- if a value, return as a value.
-    -- "L = lift(p,QQ)" may have just been a typo, see if it helps!
+    --if liftable(U,QQ) then U = lift(p,QQ); -- if a value, return as a value.
+    -- "U = lift(p,QQ)" may have just been a typo, see if it helps!
     
     
     
-    --Check in case L is not univariate.
-    if #support(L) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of L is " | toString(L));
-    -- v := (support(L))_0;
+    --Check in case U is not univariate.
+    if #support(U) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of U is " | toString(U));
+    -- v := (support(U))_0;
     v := ordering_i;
     print "v"; -- [test for understanding]
     print v; -- [test for understanding]
-    newSamplePoints := samplePoints(L);
+    newSamplePoints := samplePoints(U);
     SNew := drop(S,1); -- we move down a level, so don't want the first set of projection polynomials.
     for samplePoint in newSamplePoints do (
         pNew := copy p;
@@ -997,7 +1003,7 @@ TEST /// -* samplePoints test *-
   g=x^3-1
   L1={f,g}
   S = samplePoints(L1)
-  answer = {-3, -1/2, 2}
+  answer = {-3, -1/2, 2} --this will be correct when the RealRoots update goes live
   assert(S == answer)
 ///
 
@@ -1011,113 +1017,23 @@ TEST /// -* liftingPoint test *-
   print P
   print ord
   pts = new MutableHashTable
-  pts#x1 = -1
+  pts#x3 = -1
   pts#x2 = 3
   --ord = {x2,x1,x3}
   LP = liftingPoint(P,pts,ord)
 
-  pLevelThreeA = new MutableHashTable from {x3=>3, x1=>-1, x2=>3}
-  pLevelThreeB = new MutableHashTable from {x3=>-3, x1=>-1, x2=>3}  
-  pLevelTwo = new MutableHashTable from {x1=>-1, x2=>3}
+  pLevelThreeA = new MutableHashTable from {x3=>-1, x2=>3, x1=>-3/16}
+  pLevelThreeB = new MutableHashTable from {x3=>-1, x2=>3, x1=>-11/8}  
+  pLevelThreeC = new MutableHashTable from {x3=>-1, x2=>3, x1=>1_QQ}   
+  pLevelTwo = new MutableHashTable from {x3=>-1, x2=>3}
   
   cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
   cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
+  cellLevelThreeC = new MutableHashTable from {"point"=>pLevelThreeC}  
 
-  cellLevelTwo = new MutableHashTable from {3_QQ=>cellLevelThreeA, -3_QQ=>cellLevelThreeB, "point"=>pLevelTwo, "polynomials"=>{-3_QQ,x3^2-3}}
+  cellLevelTwo = new MutableHashTable from {-3/16_QQ=>cellLevelThreeA, -11/8_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>pLevelTwo, "polynomials"=>{3*x1,3*x1+1}}
 
-
-
-  --this all needs rewriting, should just compare hashified.
-  
-  
-
-  hashify(cellLevelTwo)
-
-
-  
-  printWidth=200
-  hashify(cellLevelTwo), hashify LP
-  keys (hashify cellLevelTwo)
-  hashify cellLevelTwo#(3_QQ)#"point"#x1
-  hashify LP#(3_QQ)#"point"#x1
-  
-  
-  assert(hashify(cellLevelTwo == hashify LP))
-
-
-  assert(LP#"polynomials" == cellLevelTwo#"polynomials")
-  assert(latterContainsFormer(cellLevelTwo#"point", LP#"point"))
-  assert(latterContainsFormer(LP#"point", cellLevelTwo#"point"))
-  
-  --assert(latterContainsFormer(cellLevelTwo#(-3_QQ), LP#(-3_QQ)))
-  --assert(latterContainsFormer(LP#(-3_QQ), cellLevelTwo#(-3_QQ)))
-  -- not of same class, objects not the same.
-  assert(latterContainsFormer(peek cellLevelTwo#(-3_QQ), peek LP#(-3_QQ)))
-  assert(latterContainsFormer(peek LP#(-3_QQ), peek cellLevelTwo#(-3_QQ)))
-  --these work.
-  
-  peek cellLevelTwo#(-3_QQ)
-  peek LP#(-3_QQ)
-  pairs cellLevelTwo#(-3_QQ)
-  pairs LP#(-3_QQ)
-  peek pairs cellLevelTwo#(-3_QQ)
-  peek pairs LP#(-3_QQ)
-  peek values cellLevelTwo#(-3_QQ)
-  peek values LP#(-3_QQ)
-  --what isn't the same about these?
-  
-  assert(peek cellLevelTwo#(-3_QQ)==peek LP#(-3_QQ))
-  --true in emacs, error in Web
-  assert(peek values cellLevelTwo#(-3_QQ)==peek values LP#(-3_QQ))
-  --true in emacs, error in Web
-  latterContainsFormer(peek values cellLevelTwo#(-3_QQ),peek values LP#(-3_QQ))
-  --true in emacs, error in Web
-  assert(latterContainsFormer(peek values cellLevelTwo#(-3_QQ),peek values LP#(-3_QQ)))
-  --true in emacs, error in Web.
-  
-
-  assert(peek values cellLevelTwo#(3_QQ)==peek values LP#(3_QQ))
-  
-  --assert(latterContainsFormer(cellLevelTwo#(3_QQ), LP#(3_QQ)))
-  --assert(latterContainsFormer(LP#(3_QQ), cellLevelTwo#(3_QQ)))
-  -- not of same class, objects not the same
-  assert(latterContainsFormer(peek cellLevelTwo#(3_QQ), peek LP#(3_QQ)))
-  assert(latterContainsFormer(peek LP#(3_QQ), peek cellLevelTwo#(3_QQ)))
-  --these work.
-  peek cellLevelTwo#(3_QQ)
-  peek LP#(3_QQ)
-
-  keys cellLevelTwo
-  keys LP
-
-  (keys cellLevelTwo)#1
-  (keys LP)#1
-
-
-
-  --assert(cellLevelTwo == LP)
-  --no method
-  assert(latterContainsFormer(peek cellLevelTwo, peek LP))
-  assert(latterContainsFormer(peek LP, peek cellLevelTwo))
-
-  --all of these checks are messy and don't work. What is a sufficient check that LP and the constructed thing "are the same"?
-
-  -- for key in keys(LP) do assert(cellLevelTwo#?key)
-  -- keys(cellLevelTwo)
-  -- keys(LP)
-  -- values H
-  -- values LP
-  -- assert(sort(keys(H)) == sort(keys(LP)))
-  -- assert(values(H) == values(LP))
-  -- assert(keys(LP#"point") == keys(H#"point")) 
-  -- assert(values(LP#"point") == values(H#"point"))
-  -- assert(LP#"point" == LP#"point")
-  -- assert(LP#"polynomials" == H#"polynomials") 
-  -- peek H
-  -- peek LP
-  -- peek H#"point"
-  -- peek LP#"point"
-  -- assert(LP == H)
+  assert(hashify(LP) === hashify(cellLevelTwo))
 ///
 
 TEST /// -* openCAD test smaller *-
@@ -1294,6 +1210,8 @@ restart
 uninstallPackage "CADecomposition"
 restart
 installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
+uninstallPackage "RealRoots"
+installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
 --installPackage "CADecomposition" --load and install a package and its documentation
 viewHelp "CADecomposition"
 --if this does not load properly, html files should now be created in
@@ -1349,3 +1267,26 @@ lazardProjection(L,GML)
 projectionPhase(L);
 
 samplePoints(lazardProjection(L,GML));
+
+--==========================================================
+
+ R=QQ[x]
+  f=x^2-1
+  g=x^3-1
+  L1={f,g}
+  S = samplePoints(L1)
+
+--x^4+x^3-x-1
+
+--============================
+
+R=QQ[x1,x2,x3]
+  p0=x1*x2
+  p1=x1*x2+x3^2
+  L={p0,p1}
+  (P,ord) = projectionPhase(L)
+  pts = new MutableHashTable
+  pts#x1 = -1
+  pts#x2 = 3
+  --ord = {x2,x1,x3}
+  LP = liftingPoint(P,pts,ord)
