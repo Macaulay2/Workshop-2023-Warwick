@@ -209,8 +209,6 @@ samplePoints(List) := (L) -> (
     A := QQ(monoid[support(L)]);
     -- put product of polys in L inside ring A.
     h:=sub(product L, A);
-    --!!!workaround for issue in realRootisolation: if lc is negative, multiply by -1.!!!
-    if leadCoefficient(h)<0 then h = -h;
     print("List of Pols and their product:"); print L; print h;
     -- set initial interval size as 1 for isolating intervals
     intervalSize := 1;
@@ -1245,7 +1243,10 @@ R=QQ[x1,x2]
 p1:=x1^2+x2^2-1
 p2:=x1^3-x2^2
 L={p1,p2}
+
 findSolution(L);
+
+
 alpha = new MutableHashTable -- this is a test, this a solution!
 alpha#x1 = 2
 alpha#x2 = 1
@@ -1263,151 +1264,8 @@ leadCoefficientt(p2,GML)
 
 lazardProjection(L,GML)
 
-projectionPhase(L)
+projectionPhase(L);
 
-samplePoints(lazardProjection(L,GML))
-
-L2:={-2*p1,3*p2}
-samplePoints(lazardProjection(L2,gmodsHeuristic(L2,support(L2))))
-
---=== PROBLEM CASE FOR REALROOTISOLATION --FIX SUBMITTED, LET'S SEE WHAT HAPPENS.
---issue is that realRootIsolation does not account for negative lead coeff. Current workaround 
--- in this package would be to invert the polynomial if its lc is negative and then call realRootIsolation.
-
-d0:=-2*(x1*(x1-1))
-A0 := QQ(monoid[x1]);
-h0:=sub(d0, A0);
-
-d1:=-d0
-h1:=sub(d1, A0);
-
-realRootIsolation(h0,1)
-realRootIsolation(h1,1)
-
-d2:=2*d0
-h2:=sub(d2, A0);
-
-realRootIsolation(h2,1)
-
-factor(d2)
-factors(d2)
-liftable (((factors(d2))#2)#0,QQ)
-
-ddump:=2*(x1+1)*d0
-hdump:=sub(ddump, A0);
-factor(ddump)
-factors(ddump)
-realRootIsolation(hdump,1)
-
-ddump:=-2*(x1+1)*d0
-hdump:=sub(ddump, A0);
-factor(ddump)
-factors(ddump)
-realRootIsolation(hdump,1)
-
---check https://github.com/Macaulay2/M2/blob/776fd94fa0060f047234ac837464962d3581609f/M2/Macaulay2/packages/RealRoots.m2#L4
-
-
-f:=d0
-R1:= ring f
-sub(f/gcd(f,diff((support f)#0,f)),R1)
-
-
-C := (listForm f)/last
-M := (sum(C,abs))/(leadCoefficient f)
-
-
-M := abs((sum(C,abs))/(leadCoefficient f))
-
-
-
-
-f/last
-f
-listForm f
-
-sum(C,abs)
-leadCoefficient f
-
-sum(C,abs)/(leadCoefficient f)
-
-L := {{-M,M}}
-
-
-L := {{-abs(M),abs(M)}}
-
-TESTO:={-1,-2,3}
-sum(TESTO)
-sum(TESTO,abs)
-
-
-
-
-
-
-hdump:=sub(ddump, A0);
-factor(ddump)
-factors(ddump)
-realRootIsolation(hdump,1)
-
-
-
-
-ddump:=(50*x1 + 1/10)*(5*x1 - 2/10)
-
-
-f:=ddump
-R1:= ring f
-sub(f/gcd(f,diff((support f)#0,f)),R1)
-
-leadCoefficient(f)
-
-listForm f
-f/leadCoefficient(f)
-listForm (f/leadCoefficient(f))
-
-
-
-
-C := (listForm (((f-leadTerm(f))/leadCoefficient(f)))/last
-        M := sum(C,abs)
-
-
-
-f
-(f-leadTerm(f))/leadCoefficient(f)
-
-
-
-
-C := (listForm ((f-leadTerm(f))/leadCoefficient(f)))/last
-
-
-
-sum(C,abs)
-
-M := max(1,sum(C,abs))
-
-
-
-
-
-
-
-
-
-d0
-d0/leadCoefficient(d0)
-
-C := (listForm f)/last
-M := (sum(C,abs))/(leadCoefficient f)
-
-
-M := abs((sum(C,abs))/(leadCoefficient f))
-
-
-
-<<<<<<< HEAD
 samplePoints(lazardProjection(L,GML));
 
 --==========================================================
@@ -1432,5 +1290,3 @@ R=QQ[x1,x2,x3]
   pts#x2 = 3
   --ord = {x2,x1,x3}
   LP = liftingPoint(P,pts,ord)
-=======
->>>>>>> 69b45e009c26b7762ceca3c511a382d62d484b1d
