@@ -399,7 +399,7 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	--bound for real roots
 	C := (listForm ((f-leadTerm(f))/leadCoefficient(f)))/last; --make the polynomial monic, and obtain list of coefficients of non-lead monomials.
     	M := min(1+max(0,max(apply(C,abs))),max(1,sum(C,abs))); --obtains Cauchy or Lagrange bound (setting interval width = 0 if the polynomial is only a single term)
-	
+	--if #C = 0, M = 1, else 
 	L := {{-M,M}};
 	midp := 0;
 	v := new MutableHashTable from {M=>variations apply(l,g->signAt(g,M)),-M=>variations apply(l,g->signAt(g,-M))};

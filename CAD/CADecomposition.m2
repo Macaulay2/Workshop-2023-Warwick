@@ -288,7 +288,9 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
         pNew#v = samplePoint;
         print "pNew#v (samplePoint)"; -- [test for understanding]
         print pNew#v; -- [test for understanding]
-        cell#samplePoint = liftingPoint(SNew, pNew, ordering);
+        cell#samplePoint = liftingPoint(S, pNew, ordering);
+	--have to keep S, not SNew, as i increases, but #(SNew) would decrease.
+	--either keep this as S or ise SNew and replace i with 0.
         );
     --print cell
     --DF:=ASDF
