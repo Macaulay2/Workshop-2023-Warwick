@@ -257,7 +257,7 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
 
     cell := new MutableHashTable;
     cell#"point" = p;
-    i := #keys(p);
+    i := #keys(p); --number of variables that have been assigned
     print "i"; -- [test for understanding]
     print i; -- [test for understanding]
     -- we check if all the variables have been given a value already
@@ -282,7 +282,6 @@ liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
     print "v"; -- [test for understanding]
     print v; -- [test for understanding]
     newSamplePoints := samplePoints(U);
-    SNew := drop(S,1); -- we move down a level, so don't want the first set of projection polynomials.
     for samplePoint in newSamplePoints do (
         pNew := copy p;
         pNew#v = samplePoint;

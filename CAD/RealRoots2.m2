@@ -397,9 +397,24 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	l := SturmSequence(f);
 	
 	--bound for real roots
-	C := (listForm ((f-leadTerm(f))/leadCoefficient(f)))/last; --make the polynomial monic, and obtain list of coefficients of non-lead monomials.
-    	M := min(1+max(0,max(apply(C,abs))),max(1,sum(C,abs))); --obtains Cauchy or Lagrange bound (setting interval width = 0 if the polynomial is only a single term)
-	--if #C = 0, M = 1, else 
+	--Cauchy bound is usually good, but Knuth is better in cases of coefficient blowup.
+		
+	(M0,C0) := coefficients f; -- get exponents and coefficients of polynomial as matrices
+
+        C := flatten(entries(C0)); -- convert coefficients to list
+	if #C == 1 then (
+    	    M := 0; -- if polynomial is only one term (only root is 0), isolate it with the correct precision.
+	) else (
+	    C = apply(C,i -> lift(i,QQ)); --lift coefficients to QQ
+	    C1 := apply(C,i -> abs(lift(i/C#0,QQ))); --divide coeffs by leading coeff, take abs, with values in QQ.
+	    M1 := flatten(apply(flatten(entries(M0)), i -> degree(i))); -- convert exponents to list
+            MC := 1 + max(apply(drop(C1,1), abs)); -- Cauchy bound
+            CK := apply(drop(C1,1),drop(M1,1), (c,m) -> 2*(c^(1/(M1#0-m)))); -- Knuth bound
+            MK := max(apply(CK, i -> ceiling(C#0*i)/C#0)); --loosen slightly to keep in QQ
+            print "MC, MK"; print MC; print MK;
+	    M = min(MC,MK); -- take the smaller of the two bounds.
+	);
+
 	L := {{-M,M}};
 	midp := 0;
 	v := new MutableHashTable from {M=>variations apply(l,g->signAt(g,M)),-M=>variations apply(l,g->signAt(g,-M))};
@@ -1040,7 +1055,7 @@ TEST ///
 TEST ///
     R = QQ[t];
     f = (t-1)^2*(t+3)*(t+5)*(t-6);
-    assert(realRootIsolation(f,1/2) == {{-1365/256,-637/128},{-819/256,-91/32},{91/128,273/256},{91/16,1547/256}});
+    assert(realRootIsolation(f,1/2) == {{-21/4,-39/8},{-27/8,-3},{3/4,9/8},{45/8,6}});
     ///    
     
 TEST ///
@@ -1091,30 +1106,3 @@ uninstallPackage "RealRoots2"
 restart
 installPackage "RealRoots2"
 viewHelp "RealRoots2"
-
-R=QQ[x]
-f1=x^2-1
-f2=x^3-1
-L1={f1,f2}
-h:=sub(product L1, R)
-realRootIsolation(h,1)
-
-
-
-
-
-f = x^4+x^3-x-1
-l := SturmSequence(f)
-variations apply(l,g->signAt(g,-2))
-
-
-
-
-
-
-C := (listForm ((f-leadTerm(f))/leadCoefficient(f)))/last --make the polynomial monic, and obtain list of coefficients of non-lead monomials.
-M := min(1+max(apply(C,abs)),max(1,sum(C,abs))) --obtains Cauchy or Lagrange bound.
-L := {{-M,M}}A := QQ(monoid[support(L1)]);
-midp := 0
-v := new MutableHashTable from {M=>variations apply(l,g->signAt(g,M)),-M=>variations apply(l,g->signAt(g,-M))}
-peek v
