@@ -410,7 +410,16 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	    M1 := flatten(apply(flatten(entries(M0)), i -> degree(i))); -- convert exponents to list
             MC := 1 + max(apply(drop(C1,1), abs)); -- Cauchy bound
             CK := apply(drop(C1,1),drop(M1,1), (c,m) -> 2*(c^(1/(M1#0-m)))); -- Knuth bound
-            MK := max(apply(CK, i -> ceiling(C#0*i)/C#0)); --loosen slightly to keep in QQ
+	    MK := max CK;
+	    if ring MK === QQ or ring MK === ZZ then ( -- want to keep in QQ
+		MK = MK_QQ;
+	    ) else
+	        if abs(C#0) > 1 then  ( -- if suitable, keep bound in form similar to other bound 
+		    MK = ceiling(abs(C#0)*MK)/abs(C#0); -- (round up to nearest 1/leadcoeff, this is a bad rational approximation if MK was very small)
+		) else (
+		    MK = ceiling MK; -- if leading term is less than 1, the above approximation is less accurate than just taking the ceiling.
+		);
+	    );
             print "MC, MK"; print MC; print MK;
 	    M = min(MC,MK); -- take the smaller of the two bounds.
 	);

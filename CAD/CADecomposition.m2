@@ -48,14 +48,6 @@
 --positivePoint - output is a MHT - is that what we want?
 --findSolution - example seems ok but check it!
 
---tests:
---gmodsHeuristic test (Test 5) fails - no method for applying to a list.
---projectionPhase test (Test 7) fails - no method for applying sort to these - check what changed.
---samplePoints test (Test 8) is fine but check it makes sense if things have changed!
---liftingPoint test (Test 9) is a complete mess - need to sit down and think about it in detail.
---same with openCAD test (Test 10)
---findSolution tests - maybe make all of the same form: FS = findSolution, then assert FS is true/false.
-
 newPackage(
     "CADecomposition",
     Version => "0.1",
@@ -81,7 +73,6 @@ export {"factors",
 "samplePoints",
 "liftingPoint",
 "openCAD",
-"latterContainsFormer",
 "positivePoint",
 "findSolution",
 "hashify"
@@ -322,65 +313,6 @@ openCAD(List) := (L) -> (
   (S, ordering) := projectionPhase(L);
   p := new MutableHashTable;
   liftingPoint(S, p, ordering)
-)
-
--- Checks if an object contains all the information the other has
--- I've created it for my purpose, but if it is useful it should be possible to generalise
-latterContainsFormer = method()
-latterContainsFormer(Thing, Thing) := (former, latter) -> (
-  if not instance(former, class(latter)) then (
-    print("The Things sent are not of the same class.");
-    return false
-  ); -- maybe I want to use ancestor here
-  if instance(former, MutableHashTable) then (
-    for key in keys(former) do (
-      if not latter#?key then(
-        print("Latter MutableHashTable doesnt have that key.");
-        return false
-      );
-      boolean := latterContainsFormer(former#key, latter#key);
-      if not boolean then(
-        print("The objects stored in former and latter under key are not the same");
-        return false
-      )
-    )
-  )
-  else if instance(former, List) then (
-    -- gives an error if both are lists containing different types of elements, i.e. list of polys vs list of lists, so below check may also be needed.
-    classListFormer := {}; 
-    classListLatter := {};
-    for elt in former do (
-      classListFormer = unique(append(classListFormer,class(elt)))
-    );
-    classListFormer;
-    for elt in latter do (
-      classListLatter = unique(append(classListLatter,class(elt)))
-    );
-    classListLatter;
-    -- check latter contains all of former's types
-    if not unique(join(classListFormer,classListLatter)) === classListLatter then (
-      print ("former contains element(s) of a different type!");
-      return false
-    )
-    --if it does, check each element of that type is in latter
-    else for elt in classListLatter do (
-      ofTypeInLatter:=select(latter,elt); 
-      ofTypeInFormer:=select(former,elt);
-      --print ofTypeInLatter;
-      --print ofTypeInFormer;
-      for elemFormer in ofTypeInFormer do (
-	    if not any(ofTypeInLatter, elem->elem==(elemFormer)) then (
-	      print (concatenate("elemFormer of type ",toString(elt)," is not in latter"));
-	      return false
-	    )
-	  )
-    )
-  )
-  else if former!=latter then (
-    print("former and latter are not the same");
-    return false
-  );
-  return true
 )
 
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
@@ -760,11 +692,11 @@ doc ///
       p2=x2^2*x3+x3
       L={p0,p1,p2}
       pts = new MutableHashTable
-      pts#x1 = 1
-      pts#x2 = 3
-      peek pts
-      ordering = {x1,x2,x3}
-      liftingPoint(L,pts,ordering)
+      pts#x2 = -2
+      pts#x3 = -3/32
+      (S,ordering) =  projectionPhase(L)
+      LP = liftingPoint(S,pts,ordering)
+      hashify LP
   SeeAlso
     evalPolys
     samplePoints
@@ -809,38 +741,6 @@ doc ///
   SeeAlso
     projectionPhase
     liftingPoint
-///
-
-doc ///
-  Key
-    (latterContainsFormer, Thing, Thing)
-    latterContainsFormer
-  Headline
-    Checks if an object contains all the information the other has
-  Usage
-    latterContainsFormer(former, latter)
-  Inputs
-    former:Thing
-      a thing
-    latter:Thing
-      a thing	
-  Outputs
-    :Boolean
-      true or false
-  Description
-    Text
-      This function first checks two objects are of the same class, then if they are of type MutableHashTable, it checks they both contain the keys from former and that these keys contain the same objects. If they are lists, it checks they contain the elements from former, and for any other type it checks if they are the the same, returning false if it fails any of these and true otherwise.
-    Example
-      R=QQ[x1,x2,x3]
-      f0=x1*x2
-      f1=x1^2*x2-x1*x3+x3^3
-      f2=x2^2*x3+x3
-      L1={f0,f1}
-      L2={f1,f2} 
-      P1 = projectionPhase(L1)
-      P2 = projectionPhase(L2)
-      latterContainsFormer(P1, P2)
-  SeeAlso
 ///
 
 doc ///
@@ -1074,47 +974,11 @@ TEST /// -* openCAD test smaller *-
   
   cellLevelOne = new MutableHashTable from {-1_QQ=>pLevelTwoA, 1_QQ=>pLevelTwoB, "point"=>pLevelTwoC, "polynomials"=>{x1}}
   
-  hashify cellLevelOne
-   hashify C
-
   assert(hashify cellLevelOne === hashify C)
-  printWidth = 200
-  
-  --issue atm is (values(hashify cellLevelOne))#1 and (values(hashify cellLevelOne))#2
-  --vs (values(hashify C))#1 and (values(hashify C))#2
-  --as their hashes are different! Keep digging!
-  
-  
-  --V1 = (values(hashify cellLevelOne))#1, V2 = (values(hashify cellLevelOne))#2, V3 = (values(hashify C))#1, V4 = (values(hashify C))#2
-
-  --VV1 = values V1, VV2 = values V2, VV3 = values V3, VV4 = values V4
-  
-  --(values((values(VV1#1))#0))#0
-  --(values((values(VV1#1))#0))#1
-  --(values((values(VV3#1))#0))#0
-  --(values((values(VV3#1))#0))#1
-///
-
-TEST /// -* latterContainsFormer test *-
--- Test 11
-  R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L1={f0,f1}
-  L2={f1,f2} 
-  P1 = projectionPhase(L1)
-  P2 = projectionPhase(L2)
-  lcf1 = latterContainsFormer(P1, P2)
-  lcf2 = latterContainsFormer(P1, P1)  
-  lcf3 = latterContainsFormer(L1, P1)  
-  assert(lcf1 == false)
-  assert(lcf2 == true)
-  assert(lcf3 == false)
 ///
 
 TEST /// -* positivePoint test 1*-
--- Test 12
+-- Test 11
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1128,7 +992,7 @@ TEST /// -* positivePoint test 1*-
 /// 
   
 TEST /// -* positivePoint test 2*-
--- Test 13
+-- Test 12
   R=QQ[x]
   p0=x^2-1
   p1=x
@@ -1136,24 +1000,12 @@ TEST /// -* positivePoint test 2*-
   C=openCAD(L)
   PP=positivePoint(L,C)
   answer = new MutableHashTable from {
-      x => 2}
-  assert(peek PP == peek answer)
-  assert(latterContainsFormer(peek PP,peek answer))
-  assert(latterContainsFormer(peek answer,peek PP))
-  --these work in emacs. Is this enough?
-  
-  peek PP
-  peek answer
-  peek pairs PP
-  peek pairs answer
-  
-  assert((peek pairs answer) == (peek pairs PP))
-  assert(latterContainsFormer(peek pairs answer, peek pairs PP))
-  --these are fine in emacs. Is this enough? It still seems to give an error for test 13
+      x => 2_QQ}
+  assert(hashify PP === hashify answer)
 ///
 
 TEST /// -* findSolution test 1*-
--- Test 14
+-- Test 13
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1163,7 +1015,7 @@ TEST /// -* findSolution test 1*-
 ///
 
 TEST /// -* findSolution test 2*-
--- Test 15
+-- Test 14
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1174,7 +1026,7 @@ TEST /// -* findSolution test 2*-
 ///
 
 TEST /// -* findSolution test 3*-
--- Test 16
+-- Test 15
   R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1^2*x2-x1*x3+x3^3
@@ -1186,7 +1038,7 @@ TEST /// -* findSolution test 3*-
 /// 
   
 TEST /// -* findSolution test 4*-
--- Test 17 
+-- Test 16
   R=QQ[x]
   p0=x^2-1
   p1=x
@@ -1210,6 +1062,7 @@ restart
 uninstallPackage "CADecomposition"
 restart
 installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
+installPackage("CADecomposition")
 uninstallPackage "RealRoots"
 installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
 --installPackage "CADecomposition" --load and install a package and its documentation
