@@ -1,49 +1,33 @@
 -- To do
 
--- Note 16/02/2023 Another fix to realRootIsolation to avoid it breaking when only roots are 0. 
+-- Note 21/03/2024 - Lots of updates. Testing examples for paper. Updated/checked commands, tests, docs and examples. 
+-- Renamed leadCoefficientt to leadCoeff.
+-- Updated a lot of commands and checked them, unifying naming.
+-- samplePoint updated to only refind interval if two intervals actually touch on a root
+
+-- Note 16/02/2024 Another fix to realRootIsolation to avoid it breaking when only roots are 0. 
 -- Added RealRoots2 and imports from this while RealRoots proper needs fixing.
 -- Also finally fixed liftingPoint test using thorough debugging using hash command.
 
--- Note 15/02/2023 Fixed RealRoots:-realRootIsolation, which should go into prod soon. Will need to update any checks relying on this now.
+-- Note 15/02/2024 Fixed RealRoots:-realRootIsolation, which should go into prod soon. Will need to update any checks relying on this now.
 
--- Note 29/01/2023: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
+-- Note 29/01/2024: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
 
 
--- Note 23/01/2023 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
+-- Note 23/01/2024 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
 -- e.g. L is always the initial list of polys p. 
 
--- Note 18/01/2023 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
+-- Note 18/01/2024 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
 -- I think we should just work through an example slowly step-by-step comparing what we expect to get out
 -- to what we actually receive, and use that to see where we're going wrong.
 
-
-
---LEGACY: Check if these are still valid or not:
---  Issue with positivePoint and findSolution - don't load properly, giving wrong output
---  Trying to lift to QQ in evalPoly where possible, but this seems to break many other checks.
-
 --Need to update this to do list.
 --* Update examples, tests and documentation 
---*  * (tests #2,3,5,7,9,10 failing) (evalPolys, evalPolys (List), gmodsHeuristic, projectionPhase, liftingPoint (the big one), openCAD smaller)
---* Make sure realRootIsolation works as expected or that we can manipulate it into doing what we want (it has
---  an issue where e.g. x1 would give isolation {-1,1} but -2*x1 would give isolation {1,-1} (interval switches here).
---  What we need to do here is to make a workaround that forces it the right way round (e.g. sets the lower one as the
---  first bound and the second as the lower), so we can correctly make the "-infinity to first root"
---  and the "last root to infinity" intervals (but we need to find and get the smallest and the largest bounds first!)
 --* Create a "nice output" for openCAD - have a look at what Maple does
 --* Extra: output descriptions of cells
 
---find out what "ourRoots" outputs.
-
---evalPolys - need to get it working for Lists too.
---is gmodsHeuristic sorted now? check the example works like it should etc.
---check lazardProjection example makes sense - do it manually too (might as well write that up if i do)
 --check all the "see also"s make sense and refer to all previous ones i guess!
---projectionPhase is ok i think?
 --check samplePoints examples make sense - do them manually if you need to check.
---liftingPoint example is broken.
-
---is latterContainsFormer still used? If not we can remove it. If so, check it still works properly.
 --need to write documentation for hashify.
 --positivePoint - output is a MHT - is that what we want?
 --findSolution - example seems ok but check it!
@@ -66,7 +50,7 @@ newPackage(
 export {"factors",
 "factorsInList",
 "evalPolys",
-"leadCoefficientt",
+"leadCoeff",
 "gmodsHeuristic",
 "lazardProjection",
 "projectionPhase",
@@ -83,8 +67,7 @@ export {"factors",
 -- factors a given polynomial
 factors = method()
 factors(RingElement) := (p) -> (
-  L := p//factor//toList/toList
-  -- print L
+    p//factor//toList/toList
   )
 
 -- finds the support of a list of Polynomials
@@ -98,49 +81,42 @@ support(List) := (L) -> (
 -- find factors of all polynomials in a list, removing repetition
 factorsInList = method()
 factorsInList(List) := (L) -> (
-    L0 := apply(L, p -> factors(p)); --calls 'factors' on each element of L
-    -- print("Unflattend list of factors:", L0);
-    L1 := flatten(L0); --flattens these to a list containing listed pairs (factors and multiplicities)
-    L2 := L1/first//unique; --take the first element of each of these lists and keeps unique ones, only returning the unique factors of all the polynomials in one list.
-    L3 := select(L2, p -> #support p>0 ) --keeps only nonconstant/nonempty  elements of the list
+    FL := flatten(apply(L, p -> factors(p))); --calls 'factors' on each element of L and combines these into a single list of pairs.
+    FL = FL/first//unique; --Reduces list to only the unique factors, removing multiplicity.
+    FL = select(FL, p -> #support p>0 ) --removes any constants.
 )
-
-
 
 -- Evaluates the given RingElement or List of RingElements at a point given by a MutableHashTable.
 evalPolys = method()
 evalPolys(RingElement,MutableHashTable) := (p, alpha) -> (
-        for k in keys(alpha) do(
-          -- print("variable", k);
-          p=sub(p, {k => alpha#k});
-        );
-	if liftable(p,QQ) then p = lift(p,QQ);
--- currently breaks 'support' - need to add a case where if element is in QQ then return {}?
-        p
-      )
-evalPolys(List,MutableHashTable) := (S, alpha) -> (
-  S1 := for p in S list
-    evalPolys(p,alpha);
-  S1
-)
+    for k in keys(alpha) do(
+      p=sub(p, {k => alpha#k}); --substitute in all of the values for the variables specified in alpha.
+    );
+    if liftable(p,QQ) then p = lift(p,QQ); --if the output is a constant, lift it.
+      p
+    )
+evalPolys(List,MutableHashTable) := (L, alpha) -> (
+    E := for p in L list
+      evalPolys(p,alpha); --for a list of polynomials, call evalPolys on each polynomial in the list and return the evaluated list.
+    E
+    )
 
 -- Finds the lead coefficient of a ring element with respect to a variable
-leadCoefficientt = method()
-leadCoefficientt(RingElement, RingElement) := (p, v) -> (
-  d := degree(v,p);	
-  contract(v^d,p)
+leadCoeff = method()
+leadCoeff(RingElement, RingElement) := (p, v) -> (
+  d := degree(v,p); --obtain the highest degree of the specified variable
+  contract(v^d,p) --return the coefficient of the leading term.
 )
 
 -- Choose the next variable to project according to the heuristic gmods
 gmodsHeuristic = method()
 gmodsHeuristic(List, List) := (L, variables) -> (
-  gmodsVar := variables_0;
-  minGmods := sum(for p in L list degree(variables_0, p));
+  gmodsVar := variables_0; --start with the first variable in the list.
+  minGmods := sum(for p in L list degree(gmodsVar, p)); --sum of variable degree in each polynomial.
   for var in variables do (
-    -- print var;
-    newGmods := sum(for p in L list degree(var, p));
-    if newGmods < minGmods then (
-      gmodsVar = var;
+    newGmods := sum(for p in L list degree(var, p)); --for each other variable, do the same
+    if newGmods < minGmods then ( --if this variable has a smaller degree sum, set it as the new variable, and update minGmods.
+      gmodsVar = var; 
       minGmods = newGmods;
       );
     );
@@ -152,84 +128,65 @@ lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
   L0 := select(L, p -> not member(v,support(p))); --polynomials not relying on v
   L = select(L, p -> member(v,support(p))); --remove polynomials p not relying on v 
-  -- as these would create redundant calculations (resultants would be a power of p,
+  -- these would create redundant calculations (resultants would be a power of p,
   -- discriminants and leading coefficient would be 0 and trailing coefficient would be p
   -- so we will just slot these back in later)
-  --print "L";print L;
   -- "return the parts of each poly p in L that rely on v"
-        L1 := for p in L list leadCoefficientt(p,v); --lead coefficients
+        L1 := for p in L list leadCoeff(p,v); --leading coefficients
         L2 := for p in L list p-v*contract(v,p); --trailing coefficients
 	L3 := for p in L list discriminant(p,v); --discriminants
 	L4 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
-        --print "L0,L1,L2,L3,L4";print L0;print L1;print L2;print L3;print L4;
-	factorsInList(L0|L1|L2|L3|L4) -- put these back together as one list, but as factors (squarefree).
+	factorsInList(L0|L1|L2|L3|L4) -- combine these into one list, as squarefree factors.
 	)
 
 -- Creates a full Lazard projection
 projectionPhase = method()
 projectionPhase(List) := (L) -> (
-    -- List is list of multivariate polynomials
     S := {L};
     variables := support(L); --initial variables, the ones chosen already will be dropped
-    --print variables;
     ordering := {}; -- this will contain the variable ordering chosen
-    --print ordering;
-    while length(variables) > 1 do (
-      -- print(L);
-    --   var := gmodsHeuristic(support(L)); (Line commnented out because the following felt more reasonable, if no errors were created remove this line)
-      var := gmodsHeuristic(L, variables);
-      --print var;
-      L = lazardProjection(L, var);
-      variables = select(variables,n -> n != var); -- variable chosen is dropped
-      S = prepend(L, S); --
-      --print S;
-      ordering = prepend(var, ordering);
-      --print ordering;
-      );
-    ordering = prepend(variables_0, ordering); -- the variable left is added
-    --print "S, ordering";
-    --print S; print ordering;
+    while length(variables) > 1 do ( --project recursively until you are left with univariate polynomials
+      v := gmodsHeuristic(L, variables); --identify variable to project away.
+      L = lazardProjection(L, v); --get projection in v
+      variables = select(variables,n -> n != v); -- variable chosen is dropped
+      S = prepend(L, S); --projection polynomials are added to S.
+      ordering = prepend(v, ordering); --variable projected is added to ordering.
+    );
+    ordering = prepend(variables_0, ordering); -- the remaining variable is added to ordering.
     (S, ordering)
     )
 
 -- Given a nonempty list of univariate polynomials, samplePoints prduces sample points for the cells (seperating the roots)
 samplePoints = method()
 samplePoints(List) := (L) -> (
-    -- if L=={} then error "Error: Expected non-empty list";
-    -- set up A, monoid on single variable
+    if L=={} then error "Error: Expected non-empty list";
     A := QQ(monoid[support(L)]);
-    -- put product of polys in L inside ring A.
     h:=sub(product L, A);
-    print("List of Pols and their product:"); print L; print h;
-    -- set initial interval size as 1 for isolating intervals
-    intervalSize := 1;
-    --call RealRoots:realRootIsolation (isolates real solutions of h in intervals of length at most 1)
-    ourRoots := realRootIsolation(h,intervalSize); -- when RealRoots is evaluating h they get an element of R, not a number. Returns interval.
-    print "root isolating intervals"; print ourRoots;
-    -- if no roots, set L1 to empty list.
+    intervalSize := 1; 
+    ourRoots := realRootIsolation(h,intervalSize); --call RealRoots:-realRootIsolation (isolates real solutions of h in intervals of width at most 1)
     if length(ourRoots)==0 then (
-        L1 := {};
+        SP := {}; -- if the polynomials have no roots, set SP to empty list.
       )
       else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
       for i from 0 to #ourRoots-2 do (
-      -- print("Roots", ourRoots);
-        while (ourRoots_i_1)==(ourRoots_(i+1)_0) do (
-            --check this! bug with package might mean we have to check if both sides have any elements in common at all!
+        while (ourRoots_i_1)==(ourRoots_(i+1)_0) and sub(h,{(support h)#0=>ourRoots_i_1})==0 do (
+	  print("Roots", ourRoots);
           intervalSize = intervalSize/2;
+	  print("Two intervals touch on a root, refining intervalSize to", intervalSize);
           ourRoots = realRootIsolation(h,intervalSize);
         );
       );
-    print "ourRoots refined"; print ourRoots;
-    -- Find the mid-points between intervals as cell witnesses:
-    L1 = for i from 1 to #ourRoots-1 list (ourRoots_(i-1)_1+ourRoots_i_0)/2;
-    print "Mid Points:"; print L1;
-    -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
-    -- (putting all roots into QQ - get +-1 in ZZ if one root
-    L1 = {((min (flatten ourRoots))-1)_QQ}|L1|{((max (flatten ourRoots))+1)_QQ};
-    print "Mid Points and first and last:"; print L1;
+      print "ourRoots refined"; print ourRoots;
+      -- Find the mid-points between intervals as cell witnesses:
+      SP = for i from 0 to #ourRoots-2 list (ourRoots_i_1+ourRoots_(i+1)_0)/2; --if there is only one root, this correctly returns an empty list.
+      print "Mid Points:"; print SP;
+      -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
+      -- (putting all roots into QQ - get +-1 in ZZ if one root
+      SP = {((min (flatten ourRoots))-1)_QQ}|SP|{((max (flatten ourRoots))+1)_QQ};
+      print "Mid Points and first and last:"; print SP;
     );
-    L1
+    SP
   )
 
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
@@ -388,7 +345,7 @@ doc ///
     (factors, RingElement)
     factors
   Headline
-    Returns a list of two element lists containing its factors and the exponents.
+    Returns a list of pairs containing the polynomial's factors and exponents.
   Usage
     factors(p)
   Inputs
@@ -396,10 +353,10 @@ doc ///
       polynomial in a ring
   Outputs
     :List
-      list of lists of the factors and their exponents, last element is the constant with exponent 1
+      list of list pairs containing the polynomial's factors and their exponents.
   Description
     Text
-      This function breaks a RingElement into its factors
+      This function breaks a RingElement into its factors, returning this as a list of pairs (factor and exponent).
     Example
       R=QQ[x1,x2,x3]
       p=x1^3*x2^3*x3-4*x1^2*x2^3*x3-x1^2*x2^2*x3^2+x1^2*x2^2*x3+4*x1*x2^3*x3+4*x1*x2^2*x3^2-4*x1*x2^2*x3-4*x2^2*x3^2+4*x2^2*x3
@@ -417,18 +374,16 @@ doc ///
     factorsInList(L)
   Inputs
     L:List
-        list of RingElements
+     list of RingElements (polynomials in a ring).
   Outputs
     :List
-      list of lists its factors and its exponents
+      List containing the factors of each polynomial, without multiplicity.
   Description
     Text
-      This function returns all the factors that appear in a list of RingElements without considering how many times they appear and ignoring the coefficients.
+      This function returns all of the factors that appear in a list of RingElements, ignoring constants and multiplicity.
     Example
       R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
       L={p0,p1,p2}
       factorsInList(L)
   SeeAlso
@@ -441,7 +396,7 @@ doc ///
     (evalPolys, RingElement, MutableHashTable)
     (evalPolys, List, MutableHashTable)
   Headline
-    Evaluates the given polynomial or list of polynomials with respect to the given sample points.
+    Evaluates the given polynomial or list of polynomials with respect to the given sample point.
   Usage
     evalPolys(p,alpha)
     evalPolys(L,alpha)
@@ -449,9 +404,9 @@ doc ///
     p:RingElement
       polynomial as a RingElement
     L:List
-      List of polynomials as RingElements
+      list of polynomials as RingElements
     alpha:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables)
+      point described using a mutable hash table where the keys are RingElements (variables in the ring)
   Outputs
     :RingElement
       RingElement describing the polynomial evaluated at the sample point.
@@ -459,21 +414,21 @@ doc ///
       List of RingElements describing the polynomials evaluated at the sample point.
   Description
     Text
-      Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evalPolyst evaluates the polynomial(s) at the sample point and returns the evaluated polynomial(s). 
+      Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evalPolys evaluates the 
+      polynomial(s) at the sample point and returns the evaluated polynomial(s). 
       This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point 
       $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
     Example
 	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable
-	  alpha#x0 = 3
-	  alpha#x1 = 4
-	  alpha#x2 = 1
+	  alpha = new MutableHashTable;
+	  alpha#x0 = 3, alpha#x1 = 4, alpha#x2 = 1;
 	  p0=x1^2*x0-2*x3*x2
 	  evalPolys(p0,alpha)
-	  alpha1 := copy alpha
-	  alpha1#x3 = -2
+	  alpha1 := copy alpha;
+	  alpha1#x3 = -2;
 	  evalPolys(p0,alpha1)
-          p1=x0*(x1-1)*(x2-2)*(x3-3)
+	  
+          p1=x0*(x1-1)*(x2-2)*(x3-3);
     	  L = {p0,p1}
 	  evalPolys(L,alpha)
 	  evalPolys(L,alpha1)
@@ -482,25 +437,27 @@ doc ///
 
 doc ///
   Key
-    (leadCoefficientt, RingElement, RingElement)
-    leadCoefficientt
+    (leadCoeff, RingElement, RingElement)
+    leadCoeff
   Headline
     Finds the lead coefficient of a ring element with respect to a variable.
   Usage
-    leadCoefficientt(p,v)
+    leadCoeff(p,v)
   Inputs
     p:RingElement
+      a polynomial in the ring
     v:RingElement
       a variable in the ring
   Outputs
     :RingElement
+      the leading coefficient of $p$ with respect to the variable $v$.
   Description
     Text
       The leading coefficient of a RingElement with respect to a variable is returned.
     Example
       R=QQ[x1,x2,x3]
       p=x1^2*x2-x1*x3+x3^3
-      leadCoefficientt(p,x1)
+      leadCoeff(p,x1)
   SeeAlso
 ///
 
@@ -519,19 +476,16 @@ doc ///
       of variables in the polynomials provided
   Outputs
     :RingElement
-      RingElement giving the next variable
+      the chosen variable to project.
   Description
     Text
-      Given a list (L) of polynomials in one or more variables, returns the variable with the lowest degree in the product of the given polynomials. In case of tie, the 
+      Given a list $L$ of polynomials in one or more variables, returns the variable with the lowest sum of degrees of the given polynomials. In case of tie, the 
       variable that appears earlier in support(L) is returned. This heuristic is motivated by the complexity analysis of CAD. Further information regarding this 
       heuristic can be found in "https://doi.org/10.1007/978-3-031-14788-3_17".
     Example
       R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
-      p3=-x1*x2
-      L={p0,p1,p2,p3}  
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
+      L={p0,p1,p2,p3}
       gmodsHeuristic(L,support(L))
   SeeAlso
 ///
@@ -554,19 +508,18 @@ doc ///
       list of projected polynomials not involving $v$
   Description
     Text
-      Lazard projection is an operation that takes a variable $v$ set of polynomials in n variables and returns a set of polynomials without that variable. 
-      It is used in the projection phase of Cylindrical Algebraic Decomposition and it consists of the leading and trailing coefficients of the given 
-      polynomials with respect to (w.r.t) $v$, the discriminant of the given polynomials w.r.t $v$ and the resultant between any pair of given polynomials 
+      Lazard projection is an operation that takes a variable $v$ and a set $L$ of polynomials in $n$ variables, and returns a set of polynomials 
+      in the remaining $n-1$ variables, representing the significant points of the polynomials.
+      This is used in the projection phase of Cylindrical Algebraic Decomposition, and consists of the leading and trailing coefficients of the given 
+      polynomials w.r.t $v$, the discriminants of the polynomials w.r.t $v$ and the resultants between each pair of polynomials 
       w.r.t $v$. For openCAD, the trailing coefficients are not needed.
     Example
       R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
       L={p0,p1,p2}
       L2 = lazardProjection(L,x1)
   SeeAlso
-    leadCoefficientt
+    leadCoeff
     factorsInList
 ///
 
@@ -580,22 +533,22 @@ doc ///
     projectionPhase(L)
   Inputs
     L:List
-      of polynomials
+      of polynomials in a ring
   Outputs
-    :List
-      of lists of projection polynomials in decreasing numbers of variables
+    S:List
+      of lists of projection polynomials in increasing numbers of variables (starting with univariate polynomials and ending in the original list $L$).
+    ordering:List
+      of variables used in projections. The projection set of polynomials of in $k$ variables will contain the first $k$ variables of this list.
   Description
     Text
-      Given a list (L) of polynomials or a list of lists of polynomials, these are stored, then a variable is selected using gmods, and the Lazard 
-      projection is done on the polynomials. This new list in one fewer variables is also stored, and the process is repeated on this new list 
-      until only polynomials in one variable remain.
+      The projection phase of the CAD is calculated. Given a list $L$ of polynomials in $n$ variables (level $n$), the Lazard projection is applied recursively
+      until one variable remains. At each step, the list of projection polynomials and the projected variable are stored, resulting in a final list of projection 
+      polynomials from level 1 to level $n$, and the list of variables, ordered so that the first $k$ variables of the list are the variables of the polynomials
+      at level $k$.
     Example
-      R=QQ[x]
 	  R=QQ[x1,x2,x3]
-	  f0=x1*x2
-	  f1=x1^2*x2-x1*x3+x3^3
-	  f2=x2^2*x3+x3
-	  L={f0,f1,f2}
+	  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
+	  L={p0,p1,p2}
 	  projectionPhase(L)
   SeeAlso
     gmodsHeuristic
@@ -615,7 +568,7 @@ doc ///
       nonempty, of polynomials in one variable
   Outputs
     :List
-      list of points in ZZ/QQ/RR, depending on the defining coefficient field
+      list of points in QQ
   Description
     Text
       Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
@@ -658,13 +611,10 @@ doc ///
       RingElements in S_(-1) are constant.
     Example
       R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
       L={p0,p1,p2}
       pts = new MutableHashTable
-      pts#x2 = -2
-      pts#x3 = -3/32
+      pts#x2 = -2, pts#x3 = -3/32;
       (S,ordering) =  projectionPhase(L)
       LP = liftingPoint(S,pts,ordering)
       hashify LP
@@ -785,9 +735,7 @@ TEST /// -* factors test *-
 TEST /// -* factorsInList test *-
 -- Test 1
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   F = factorsInList(L) 
   answer = {x2,x1,x1^2*x2+x3^3-x1*x3,x3,x2^2+1}
@@ -797,49 +745,36 @@ TEST /// -* factorsInList test *-
 TEST /// -* evalPolys test *-
 -- Test 2
   R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L={f0,f1,f2}
-  p = new MutableHashTable
-  p#x1 = 1
-  p#x2 = 3
-  E = evalPolys(f1,p)
-  answer = 3-x3+x3^3
-  assert(E == answer)
+  p=x1^2*x2-x1*x3+x3^3
+  alpha = new MutableHashTable;
+  alpha#x1 = 1, alpha#x2 = 3;
+  E = evalPolys(p,alpha)
+  assert(E == 3-x3+x3^3)
 ///
 
 TEST /// -* evalPolys test (List)*-
 -- Test 3
   R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L={f0,f1,f2}
-  p = new MutableHashTable
-  p#x1 = 1
-  p#x2 = 3
-  E = evalPolys(L,p)
-  answer = {3, 3-x3+x3^3, 9*x3+x3}
-  assert(E == answer)
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
+  L={p0,p1,p2}
+  alpha = new MutableHashTable
+  alpha#x1 = 1, alpha#x2 = 3;
+  E = evalPolys(L,alpha)
+  assert(E == {3, 3-x3+x3^3, 9*x3+x3})
 ///
 
-TEST /// -* leadCoefficientt test *-
+TEST /// -* leadCoeff test *-
 -- Test 4
   R=QQ[x1,x2,x3]
   p=x1^2*x2-x1*x3+x3^3
-  L = leadCoefficientt(p,x1)
-  answer = x2
-  assert(L == answer)
+  L = leadCoeff(p,x1)
+  assert(leadCoeff(p,x1) == x2)
 ///
 
 TEST /// -* gmodsHeuristic test *-
 -- Test 5
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}  
   assert(gmodsHeuristic(L,support(L)) == x1)
 ///
@@ -847,37 +782,30 @@ TEST /// -* gmodsHeuristic test *-
 TEST /// -* lazardProjection test *-
 -- Test 6
   R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L={f0,f1,f2}
-  L2 = lazardProjection(L,x1)
-  answer = {x3,x2,4*x2*x3-1,x2^2+1}
-  assert(sort L2 === sort answer)
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
+  L={p0,p1,p2}
+  LP = lazardProjection(L,x1)
+  assert(LP === {x3,x2^2+1,x2,4*x2*x3-1})
 ///
 
 TEST /// -* projectionPhase test *-
 -- Test 7
   R=QQ[x1,x2,x3]
-  f0=x1*x2
-  f1=x1^2*x2-x1*x3+x3^3
-  f2=x2^2*x3+x3
-  L={f0,f1,f2}
-  P = projectionPhase(L)
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
+  L={p0,p1,p2}
+  PP = projectionPhase(L)
   answerS = {{x2^2+1,x2}, {x3,x2^2+1,x2,4*x2*x3-1}, {x1*x2,x1^2*x2+x3^3-x1*x3,x2^2*x3+x3}}
   answerordering = {x2, x3, x1}
-  assert(P == (answerS,answerordering))
+  assert(PP == (answerS,answerordering))
 ///
 
 TEST /// -* samplePoints test *-
 -- Test 8
   R=QQ[x]
-  f=x^2-1
-  g=x^3-1
-  L1={f,g}
-  S = samplePoints(L1)
-  answer = {-3, -1/2, 2} --this will be correct when the RealRoots update goes live
-  assert(S == answer)
+  p0=x^2-1, p1=x^3-1
+  L={p0,p1}
+  SP = samplePoints(L)
+  assert(SP == {-3, -1/2, 2}) --this will be correct when the RealRoots update goes live
 ///
 
 TEST /// -* liftingPoint test *-
@@ -890,15 +818,15 @@ TEST /// -* liftingPoint test *-
   print P
   print ord
   pts = new MutableHashTable
-  pts#x3 = -1
-  pts#x2 = 3
+  pts#x3 = -1_QQ
+  pts#x2 = 3_QQ
   --ord = {x2,x1,x3}
   LP = liftingPoint(P,pts,ord)
 
-  pLevelThreeA = new MutableHashTable from {x3=>-1, x2=>3, x1=>-3/2}
-  pLevelThreeB = new MutableHashTable from {x3=>-1, x2=>3, x1=>-1/4}  
-  pLevelThreeC = new MutableHashTable from {x3=>-1, x2=>3, x1=>1_QQ}   
-  pLevelTwo = new MutableHashTable from {x3=>-1, x2=>3}
+  pLevelThreeA = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>-3/2}
+  pLevelThreeB = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>-1/4}  
+  pLevelThreeC = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>1_QQ}   
+  pLevelTwo = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ}
   
   cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
   cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
@@ -1083,8 +1011,8 @@ factorsInList(L)
 
 GML:=gmodsHeuristic(L,support(L))
 
-leadCoefficientt(p1,GML)
-leadCoefficientt(p2,GML)
+leadCoeff(p1,GML)
+leadCoeff p2,GML)
 
 lazardProjection(L,GML)
 
