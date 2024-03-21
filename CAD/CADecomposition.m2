@@ -441,73 +441,44 @@ doc ///
     (evalPolys, RingElement, MutableHashTable)
     (evalPolys, List, MutableHashTable)
   Headline
-    Evaluates the given polynomial with respect to the given sample point.
+    Evaluates the given polynomial or list of polynomials with respect to the given sample points.
   Usage
     evalPolys(p,alpha)
+    evalPolys(L,alpha)
   Inputs
     p:RingElement
       polynomial as a RingElement
+    L:List
+      List of polynomials as RingElements
     alpha:MutableHashTable
       point described using a hash table where the keys are RingElements (variables)
   Outputs
     :RingElement
       RingElement describing the polynomial evaluated at the sample point.
+    :List
+      List of RingElements describing the polynomials evaluated at the sample point.
   Description
     Text
-      Given the polynomial (p) and sample point (alpha) it evaluates the polynomial at the sample point and returns that polynomial. This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
+      Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evalPolyst evaluates the polynomial(s) at the sample point and returns the evaluated polynomial(s). 
+      This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point 
+      $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
     Example
 	  R=QQ[x0,x1,x2,x3]
 	  alpha = new MutableHashTable
 	  alpha#x0 = 3
 	  alpha#x1 = 4
 	  alpha#x2 = 1
-	  p=x1^2*x0-2*x3*x2
-	  evalPolys(p,alpha)
-          
-	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable
-	  alpha#x0 = 3
-	  alpha#x1 = 4
-	  alpha#x2 = 1
-	  alpha#x3 = -2
-	  p=x1^2*x0-2*x3*x2
-	  evalPolys(p,alpha)
-
+	  p0=x1^2*x0-2*x3*x2
+	  evalPolys(p0,alpha)
+	  alpha1 := copy alpha
+	  alpha1#x3 = -2
+	  evalPolys(p0,alpha1)
+          p1=x0*(x1-1)*(x2-2)*(x3-3)
+    	  L = {p0,p1}
+	  evalPolys(L,alpha)
+	  evalPolys(L,alpha1)
   SeeAlso
 ///
-
---Currently has issues - can't have duplicates and can't seem to combine them into one. How do we fix this?
-
---doc ///
---  Key
---    (evalPolys, List, MutableHashTable)
---    evalPolys
---  Headline
---    Given a list of polynomials (S) and a sample point (alpha), returns the polynomials of S evaluated at alpha.
---  Usage
---    evalPolys(S,alpha)
---  Inputs
---    S:List
---      list of polynomials as RingElements
---    alpha:MutableHashTable
---      point described using a hash table where the keys are RingElements (variables)
---  Outputs
---    :List
---      List of RingElements describing the polynomials in S evaluated at the sample point.
---  Description
---    Text
---      Given the list of polynomial (S) and sample point (alpha) it evaluates the list polynomial at the sample point and returns that polynomial, by calling evalPolys on each polynomial in S. 	  This is used in the lifting phase of the CAD, where the polynomials in set of polynomials in $k$ variables are evaluated at a point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return univariate polynomials in $\mathbb{R}[x_k]$.
---    Example
---	  R=QQ[x0,x1,x2,x3]
---	  alpha = new MutableHashTable
---	  alpha#x0 = 3
---	  alpha#x1 = 4
---	  alpha#x2 = 1
---	  S = {x1^2*x0-2*x3*x2,x1^3*x0*x2+x3}
---	  evalPolys(S,alpha)
---   SeeAlso
---    evalPolys
---///
 
 doc ///
   Key
@@ -609,7 +580,7 @@ doc ///
     projectionPhase(L)
   Inputs
     L:List
-      of lists of polynomials
+      of polynomials
   Outputs
     :List
       of lists of projection polynomials in decreasing numbers of variables
@@ -1143,3 +1114,16 @@ R=QQ[x1,x2,x3]
   pts#x2 = 3
   --ord = {x2,x1,x3}
   LP = liftingPoint(P,pts,ord)
+
+--========================
+
+--big example: intersecting sphere. This is 3-dim and takes about 58 seconds.
+R = QQ[x1,x2,x3]
+L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
+timing openCAD(L)
+
+var = gmodsHeuristic(L,support(L))
+lazardProjection(L,var)
+(S,ordering) = projectionPhase(L)
+
+samplePoints(S#0) --this is one of the crazy parts

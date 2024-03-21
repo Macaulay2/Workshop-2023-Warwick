@@ -413,17 +413,16 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	    MK := max CK;
 	    if ring MK === QQ or ring MK === ZZ then ( -- want to keep in QQ
 		MK = MK_QQ;
-	    ) else
+	    ) else (
 	        if abs(C#0) > 1 then  ( -- if suitable, keep bound in form similar to other bound 
 		    MK = ceiling(abs(C#0)*MK)/abs(C#0); -- (round up to nearest 1/leadcoeff, this is a bad rational approximation if MK was very small)
 		) else (
 		    MK = ceiling MK; -- if leading term is less than 1, the above approximation is less accurate than just taking the ceiling.
-		);
+	        );
 	    );
             print "MC, MK"; print MC; print MK;
 	    M = min(MC,MK); -- take the smaller of the two bounds.
 	);
-
 	L := {{-M,M}};
 	midp := 0;
 	v := new MutableHashTable from {M=>variations apply(l,g->signAt(g,M)),-M=>variations apply(l,g->signAt(g,-M))};
@@ -445,7 +444,7 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 		        L = append(L,{midp,I#1})
 		        );
 		    print L;
-		    )
+		    );
 		)
 	    );
 	sort L --list is ordered from smallest to largest interval, in case the while look stops after a larger interval
@@ -1039,7 +1038,6 @@ TEST ///
     assert(SturmCount(f,Multiplicity=>true) == 7);
     assert(SturmCount(f,-10,5,Multiplicity=>true) == 6);
     assert(SturmCount(f,0,6,Multiplicity=>true) == 4);
-    
     
     assert(SturmCount(g) == 4);
     assert(SturmCount(g,-3,1) == 3);
