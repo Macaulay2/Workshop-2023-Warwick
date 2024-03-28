@@ -574,10 +574,9 @@ doc ///
       Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
     Example
       R=QQ[x]
-      f=x^2-1
-      g=x^3-1
-      L1={f,g}
-      samplePoints(L1)
+      p0=x^2-1, p1=x^3-1;
+      L={p0,p1}
+      samplePoints(L)
 
       f1=5*x^3+1
       g1=x^2-1
