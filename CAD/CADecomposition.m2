@@ -171,20 +171,14 @@ samplePoints(List) := (L) -> (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
       for i from 0 to #ourRoots-2 do (
         while (ourRoots_i_1)==(ourRoots_(i+1)_0) and sub(h,{(support h)#0=>ourRoots_i_1})==0 do (
-	  print("Roots", ourRoots);
           intervalSize = intervalSize/2;
-	  print("Two intervals touch on a root, refining intervalSize to", intervalSize);
           ourRoots = realRootIsolation(h,intervalSize);
         );
       );
-      print "ourRoots refined"; print ourRoots;
-      -- Find the mid-points between intervals as cell witnesses:
       SP = for i from 0 to #ourRoots-2 list (ourRoots_i_1+ourRoots_(i+1)_0)/2; --if there is only one root, this correctly returns an empty list.
-      print "Mid Points:"; print SP;
       -- Add the beginning of the first interval and the end of the last interval to the list, but each of which -+1 in order to avoid them being a root:
       -- (putting all roots into QQ - get +-1 in ZZ if one root
       SP = {((min (flatten ourRoots))-1)_QQ}|SP|{((max (flatten ourRoots))+1)_QQ};
-      print "Mid Points and first and last:"; print SP;
     );
     SP
   )
@@ -192,92 +186,45 @@ samplePoints(List) := (L) -> (
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
-liftingPoint(List, MutableHashTable, List) := (S, p, ordering) -> (
-    -- List (S) is a list of lists of polynomials, the first list of polys with i+1 variables (up to n variables, where n is the number of variables in the initial polynomials)
-    -- CHECK: the list of projections? I.e. n vars, n-1 vars, ..., 2 vars, 1 var? So i different lists?
-    -- HashTable (p) is a point in i variables
-    -- List (ordering) is the variable ordering followed in the projection
-    
-    print "S, p, ordering"; -- [test for understanding]
-    print S; -- [test for understanding]
-    print p; -- [test for understanding]
-    print ordering;  -- [test for understanding]
-
-
+liftingPoint(List, MutableHashTable, List) := (S, alpha, ordering) -> (
+    -- List (S) is a list of lists of polynomials, representing the projection polynomials at each level, starting in one variable, up to
+    -- the initial list of polynomials in n variables.
+    -- HashTable (alpha) is a point in i variables
+    -- List (ordering) is the variable ordering followed in the projection (the first i variables are the variables at level i)
     cell := new MutableHashTable;
-    cell#"point" = p;
-    i := #keys(p); --number of variables that have been assigned
-    print "i"; -- [test for understanding]
-    print i; -- [test for understanding]
+    cell#"point" = alpha;
+    i := #keys(alpha); --number of variables that have been assigned
     -- we check if all the variables have been given a value already
     if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
-    U := evalPolys(S_i, p); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
+    U := evalPolys(S_i, alpha); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
     cell#"polynomials"=U;
-    print "U, S_i, p"; -- [test for understanding]
-    print U; -- [test for understanding]
-    print S_i; -- [test for understanding]
-    print p; -- [test for understanding]
-
-    -- I want this to ensure that values are returned as values, but including it also breaks tests #12,14,15,16,17.
-    --if liftable(U,QQ) then U = lift(p,QQ); -- if a value, return as a value.
-    -- "U = lift(p,QQ)" may have just been a typo, see if it helps!
-    
-    
-    
     --Check in case U is not univariate.
     if #support(U) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of U is " | toString(U));
-    -- v := (support(U))_0;
     v := ordering_i;
-    print "v"; -- [test for understanding]
-    print v; -- [test for understanding]
     newSamplePoints := samplePoints(U);
     for samplePoint in newSamplePoints do (
-        pNew := copy p;
-        pNew#v = samplePoint;
-        print "pNew#v (samplePoint)"; -- [test for understanding]
-        print pNew#v; -- [test for understanding]
-        cell#samplePoint = liftingPoint(S, pNew, ordering);
-	--have to keep S, not SNew, as i increases, but #(SNew) would decrease.
-	--either keep this as S or ise SNew and replace i with 0.
-        );
-    --print cell
-    --DF:=ASDF
+        alphaNew := copy alpha;
+        alphaNew#v = samplePoint;
+        cell#samplePoint = liftingPoint(S, alphaNew, ordering);
+    );
     cell
     )
 
---cell#samplePoint should be in SNew? No, we can probably remove this line.
-
---liftingPoint effectively makes a MHT for (i+1)th variable w.r.t. ordering, we'll call this x_(i+1), with
--- "point":        p, the values for the "first" i variables (w.r.t ordering)
--- "polynomials":  these values substituted into the projection polynomials for level i+1 
---                 (polys with i+1 variables), making a set of univariate polys in x_(i+1) (we call this L)
--- [numeric]:      each of the sample points of L. Inside this is a new, more detailed MHT for the
---                 "first" i+1 variables (i.e. the values from p along with the new sample point
-
--- get the order the right way round when explaining it, are the proj polys starting with all n vars, then
--- decreasing by one with each set down to 1, and does ordering reflect this?
-
--- this starts at the "top" level (get level numbers right way round), with the "most important variable"
--- (check this too, is the most important one projected away first?)
-
--- check how it works with an example. You would expect:
--- topmost layer: point is empty, polynomials are the original 
-
-
--- Does the open CAD
+--project and lift the initial polynomials, performing a full open CAD.
 openCAD = method()
 openCAD(List) := (L) -> (
   (S, ordering) := projectionPhase(L);
-  p := new MutableHashTable;
-  liftingPoint(S, p, ordering)
+  alpha := new MutableHashTable;
+  liftingPoint(S, alpha, ordering)
 )
 
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
 positivePoint = method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
-    if length(keys(cell#"point"))!=length(support(L)) then (
+    -- move down to bottom level, where all variables are evaluated.
+    if length(keys(cell#"point"))<length(support(L)) then (
         for key in keys(cell) do(
-            -- if the key is not "points" or "polynomials"
+            -- if the key is not "points" or "polynomials", call again 
             if not instance(key,String) then(
                 result := positivePoint(L, cell#key);
                 -- if the answer is a point (something different from null)
@@ -288,7 +235,7 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
         )
     ) else (
         evaluations := evalPolys(L,cell#"point");
-	evaluations = for e in evaluations list value(toString(e)); --elements in list were in R and not treated as numbers, this fixes that.
+	evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
 	-- try using lift command instead?
         for e in evaluations list e>0; --see if positive or not
         if all(evaluations, elem->(elem>0)) then (
@@ -560,29 +507,33 @@ doc ///
     (samplePoints, List)
     samplePoints
   Headline
-    Computes a list of sample points in each cell that isolate the roots
+    Computes a list of sample points in each cell that represent each open cell.
   Usage
     samplePoints(L)
   Inputs
     L:List
       nonempty, of polynomials in one variable
   Outputs
-    :List
+    SP:List
       list of points in QQ
   Description
     Text
-      Sample points are the points in each cell of the CAD. Such points are computed via isolating real roots of univariate polynomials obtained after projecting wrt all variables.
+      Sample points are the representative points in each cell of the CAD. Such points are computed in the lifting phase, by isolating real 
+      roots of the univariate polynomials obtained by substituting in sample points from lower levels.
+      
+      This method relies on the interval bisection method from realRootIsolation in the RealRoots package, which isolates the real roots within a specific half-open interval.
+      If two intervals touch on a root, the interval bisection is run again with more precision until no intervals touch on a root.
+      Once this is completed, it takes the midpoint of each interval as a sample point for each open region, along with points higher and lower than the largest and smallest,
+      representing the first and last open cells.
     Example
       R=QQ[x]
       p0=x^2-1, p1=x^3-1;
-      L={p0,p1}
-      samplePoints(L)
+      L1={p0,p1}
+      samplePoints(L1)
 
-      f1=5*x^3+1
-      g1=x^2-1
-      h1=1/2*x^5+3*x-1
-      L2={f1,g1,h1}
-      S:=samplePoints(L2)
+      p2=5*x^3+1, p3=x^2-1, p4=1/2*x^5+3*x-1;
+      L2={p2,p3,p4}
+      samplePoints(L2)
   SeeAlso
 ///
 
@@ -591,31 +542,31 @@ doc ///
     (liftingPoint, List, MutableHashTable, List)
     liftingPoint
   Headline
-    Given the projection phase of a CAD (S) and the variable ordering (ordering) it returns an OpenCAD above the point (p) given.
+    Given the projection phase of a CAD (S) and the variable ordering (ordering), this method returns an OpenCAD above the point (alpha) given.
   Usage
-    liftingPoint(S,p,ordering)
+    liftingPoint(S,alpha,ordering)
   Inputs
     S:List
       list of lists of RingElements
-    p:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables)
+    alpha:MutableHashTable
+      point described using a hash table where the keys are RingElements (variables) and the values are sample points.
     ordering:List
       variable ordering followed in the projection
   Outputs
-    :MutableHashTable
+    LP:MutableHashTable
       MutableHashTable describing an OpenCAD
   Description
     Text
-      Given the projection phase of a CAD (S) it creates an Open Cylindrical Algebraic Decomposition. It basically breaks the space into cells where the sign of the 
-      RingElements in S_(-1) are constant.
+      Given the projection phase of a CAD (S), liftingPoint creates an Open Cylindrical Algebraic Decomposition, which breaks the space into cells where 
+      the signs of the polynomials in each element of S are constant.
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
       L={p0,p1,p2}
-      pts = new MutableHashTable
-      pts#x2 = -2, pts#x3 = -3/32;
+      alpha = new MutableHashTable
+      alpha#x2 = -2, alpha#x3 = -3/32;
       (S,ordering) =  projectionPhase(L)
-      LP = liftingPoint(S,pts,ordering)
+      LP = liftingPoint(S,alpha,ordering)
       hashify LP
   SeeAlso
     evalPolys
@@ -627,35 +578,28 @@ doc ///
     (openCAD, List)
     openCAD
   Headline
-    Given a list of polynomials, an open CAD of those polynomials is returned. (main algorithm)
+    Given a list of polynomials, an open CAD of those polynomials is returned (main algorithm).
   Usage
     openCAD(L)
   Inputs
     L:List
       of polynomials all in the same ring
   Outputs
-    :MutableHashTable
+    C:MutableHashTable
       describing an open CAD of the given list of polynomials
   Description
     Text
       An open CAD is a mathematical object that decomposes the space into cells in which the given polynomials are sign invariant.
     Example
       R=QQ[x1,x2,x3]
-      p0=x1*x2
-      p1=x1^2*x2-x1*x3+x3^3
-      p2=x2^2*x3+x3
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
       L={p0,p1,p2}
       openCAD(L)
       hashify openCAD(L)
       
       R=QQ[x1,x2]
-      p0=x1-x2
-      p1=x1^3+x2^2
+      p0=x1-x2, p1=x1^3+x2^2;
       L={p0,p1}
-      S := projectionPhase(L);
-      print S
-      --p := new MutableHashTable;
-      --liftingPoint(S,p)
       openCAD(L)
       hashify openCAD(L)
   SeeAlso
@@ -677,7 +621,7 @@ doc ///
     cell:MutableHashTable
       cell of the CAD
   Outputs
-    :MutableHashTable
+    PP:MutableHashTable
       MutableHashTable describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive
   Description
     Text
@@ -810,67 +754,54 @@ TEST /// -* samplePoints test *-
 TEST /// -* liftingPoint test *-
 -- Test 9
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1*x2+x3^2
+  p0=x1*x2, p1=x1*x2+x3^2;
   L={p0,p1}
-  (P,ord) = projectionPhase(L)
-  print P
-  print ord
-  pts = new MutableHashTable
-  pts#x3 = -1_QQ
-  pts#x2 = 3_QQ
-  --ord = {x2,x1,x3}
-  LP = liftingPoint(P,pts,ord)
+  (S,ordering) = projectionPhase(L)
+  alpha = new MutableHashTable
+  alpha#x3 = -1_QQ, alpha#x2 = 1_QQ;
+  LP = liftingPoint(S,alpha,ordering)
 
-  pLevelThreeA = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>-3/2}
-  pLevelThreeB = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>-1/4}  
-  pLevelThreeC = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ, x1=>1_QQ}   
-  pLevelTwo = new MutableHashTable from {x3=>-1_QQ, x2=>3_QQ}
-  
-  cellLevelThreeA = new MutableHashTable from {"point"=>pLevelThreeA}
-  cellLevelThreeB = new MutableHashTable from {"point"=>pLevelThreeB}
-  cellLevelThreeC = new MutableHashTable from {"point"=>pLevelThreeC}  
-
-  cellLevelTwo = new MutableHashTable from {-3/2_QQ=>cellLevelThreeA, -1/4_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>pLevelTwo, "polynomials"=>{3*x1,3*x1+1}}
+  ptLevelThreeA = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-3/4}
+  ptLevelThreeB = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-5/2}  
+  ptLevelThreeC = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>1_QQ}   
+  ptLevelTwo = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ}
+  cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelThreeA}
+  cellLevelThreeB = new MutableHashTable from {"point"=>ptLevelThreeB}
+  cellLevelThreeC = new MutableHashTable from {"point"=>ptLevelThreeC}  
+  cellLevelTwo = new MutableHashTable from {-3/4_QQ=>cellLevelThreeA, -5/2_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>ptLevelTwo, "polynomials"=>{x1,x1+1}}
 
   assert(hashify(LP) === hashify(cellLevelTwo))
 ///
 
-TEST /// -* openCAD test smaller *-
+TEST /// -* openCAD test *-
 -- Test 10
   R=QQ[x1,x2]
-  p0=x1^2+x2
-  p1=x1^3*x2^2
+  p0=x1^2+x2, p1=x1^3*x2^2;
   L={p0,p1}
   C=openCAD(L)
-  peek C
-  
-  gmodsHeuristic(L,support(L))
-  
-  hashify C
 
-  pLevelFourA = new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}
-  pLevelFourB = new MutableHashTable from {x1=>-1_QQ, x2=>-3/4} 
-  pLevelFourC = new MutableHashTable from {x1=>-1_QQ, x2=>1_QQ}
-  pLevelFourD = new MutableHashTable from {x1=>1_QQ, x2=>-5/2}
-  pLevelFourE = new MutableHashTable from {x1=>1_QQ, x2=>-3/4}
-  pLevelFourF = new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}
+  ptLevelFourA = new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}
+  ptLevelFourB = new MutableHashTable from {x1=>-1_QQ, x2=>-3/4} 
+  ptLevelFourC = new MutableHashTable from {x1=>-1_QQ, x2=>1_QQ}
+  ptLevelFourD = new MutableHashTable from {x1=>1_QQ, x2=>-5/2}
+  ptLevelFourE = new MutableHashTable from {x1=>1_QQ, x2=>-3/4}
+  ptLevelFourF = new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}
   
-  cellLevelThreeA = new MutableHashTable from {"point"=>pLevelFourA}
-  cellLevelThreeB = new MutableHashTable from {"point"=>pLevelFourB}
-  cellLevelThreeC = new MutableHashTable from {"point"=>pLevelFourC}
-  cellLevelThreeD = new MutableHashTable from {"point"=>pLevelFourD}
-  cellLevelThreeE = new MutableHashTable from {"point"=>pLevelFourE}
-  cellLevelThreeF = new MutableHashTable from {"point"=>pLevelFourF}
+  cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelFourA}
+  cellLevelThreeB = new MutableHashTable from {"point"=>ptLevelFourB}
+  cellLevelThreeC = new MutableHashTable from {"point"=>ptLevelFourC}
+  cellLevelThreeD = new MutableHashTable from {"point"=>ptLevelFourD}
+  cellLevelThreeE = new MutableHashTable from {"point"=>ptLevelFourE}
+  cellLevelThreeF = new MutableHashTable from {"point"=>ptLevelFourF}
 
-  pLevelThreeA = new MutableHashTable from {x1=>-1_QQ}
-  pLevelThreeB = new MutableHashTable from {x1=>1_QQ}
+  ptLevelThreeA = new MutableHashTable from {x1=>-1_QQ}
+  ptLevelThreeB = new MutableHashTable from {x1=>1_QQ}
   
-  pLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>pLevelThreeA, "polynomials"=>{x2+1,-x2^2}}
-  pLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>pLevelThreeB, "polynomials"=>{x2+1,x2^2}}  
-  pLevelTwoC = new MutableHashTable
+  ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>ptLevelThreeA, "polynomials"=>{x2+1,-x2^2}}
+  ptLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>ptLevelThreeB, "polynomials"=>{x2+1,x2^2}}  
+  ptLevelTwoC = new MutableHashTable
   
-  cellLevelOne = new MutableHashTable from {-1_QQ=>pLevelTwoA, 1_QQ=>pLevelTwoB, "point"=>pLevelTwoC, "polynomials"=>{x1}}
+  cellLevelOne = new MutableHashTable from {-1_QQ=>ptLevelTwoA, 1_QQ=>ptLevelTwoB, "point"=>ptLevelTwoC, "polynomials"=>{x1}}
   
   assert(hashify cellLevelOne === hashify C)
 ///
@@ -878,27 +809,21 @@ TEST /// -* openCAD test smaller *-
 TEST /// -* positivePoint test 1*-
 -- Test 11
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
-  L={p0,p1,p2,p3}
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
+  L={p0,p1,p2,p3};
   C=openCAD(L)
   PP=positivePoint(L,C)
-  PP
   assert(PP == "no point exists")
 /// 
   
 TEST /// -* positivePoint test 2*-
 -- Test 12
   R=QQ[x]
-  p0=x^2-1
-  p1=x
-  L={p0,p1}
+  p0=x^2-1, p1=x;
+  L={p0,p1};
   C=openCAD(L)
   PP=positivePoint(L,C)
-  answer = new MutableHashTable from {
-      x => 2_QQ}
+  answer = new MutableHashTable from {x => 2_QQ}
   assert(hashify PP === hashify answer)
 ///
 

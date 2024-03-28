@@ -420,18 +420,18 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 		    MK = ceiling MK; -- if leading term is less than 1, the above approximation is less accurate than just taking the ceiling.
 	        );
 	    );
-            print "MC, MK"; print MC; print MK;
+         --   print "MC, MK"; print MC; print MK;
 	    M = min(MC,MK); -- take the smaller of the two bounds.
 	);
 	L := {{-M,M}};
 	midp := 0;
 	v := new MutableHashTable from {M=>variations apply(l,g->signAt(g,M)),-M=>variations apply(l,g->signAt(g,-M))};
-	print L;
+--	print L;
 	while (max apply(L,I-> I#1-I#0) > r) or (max apply(L,I-> v#(I#0)-v#(I#1)) > 1) do (
 	    for I in L do (
 		if ((v#(I#0)-v#(I#1) == 1) and (I#1-I#0 <= r)) then (
 	            L = take(L,{1,#L})|{L#0}; -- skip bisection if root is identified and bound is within interval size.
-		    print L;
+		--    print L;
 		)
 		else (
 		    midp = (sum I)/2;
@@ -443,7 +443,7 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	  	    if (v#midp-v#(I#1) > 0) then (
 		        L = append(L,{midp,I#1})
 		        );
-		    print L;
+		--    print L;
 		    );
 		)
 	    );
