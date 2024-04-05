@@ -44,7 +44,7 @@ newPackage(
     DebuggingMode => true
     )
 
---"A package can contain the code for many functions, only some of which should be made visible to the user.
+--"A package can contain the code for many functions, only some of which should be made visibxle to the user.
 --The function export allows one to specify which symbols are to be made visible."
 --At the end, trim this down to only the ones useful for people using the package.
 export {"factors",
@@ -236,7 +236,6 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
     ) else (
         evaluations := evalPolys(L,cell#"point");
 	evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
-	-- try using lift command instead?
         for e in evaluations list e>0; --see if positive or not
         if all(evaluations, elem->(elem>0)) then (
           return cell#"point"
@@ -245,19 +244,19 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
     return "no point exists"
 )
 
--- Checks if there is a point in which all the polynomials given in the list are strictly positive
+-- Checks if there is a point in which all the polynomials given in the list are strictly positive, and return it
 findSolution = method()
 findSolution(List) := (L) -> (
     cad := openCAD(L);
     result := positivePoint(L, cad);
+    TF := null;
     if instance(result, HashTable)
     then (
-      print(peek(result));
-      print("There are solutions");
-      return true)
-    else (
-      print("There is no solution");
-      return false)
+      result = peek result;
+      TF = true)
+      else (
+      TF = false);
+    TF, result
 )
 
 -- Turns MutableHashTables into HashTables
@@ -612,7 +611,7 @@ doc ///
     (positivePoint, List, MutableHashTable)
     positivePoint
   Headline
-    Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
+    Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive.
   Usage
     positivePoint(L,cell)
   Inputs
@@ -622,17 +621,17 @@ doc ///
       cell of the CAD
   Outputs
     PP:MutableHashTable
-      MutableHashTable describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive
+      MutableHashTable describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
   Description
     Text
-      Given the a list of polynomials and a cell of a CAD, it checks if a point exists where all polynomials are strictly positive, or returns "no point exists" otherwise.
+      Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns "no point exists" otherwise.
     Example
       R=QQ[x]
-      p0=x^2-1
-      p1=x
+      p0=x^2-1, p1=x;
       L={p0,p1}
-      C=openCAD(L)
-      PP=positivePoint(L,C)
+      C=openCAD(L);
+      PP=positivePoint(L,C);
+      hashify(PP)
   SeeAlso
     evalPolys
 ///
@@ -656,14 +655,58 @@ doc ///
       Given a list of polynomials L, this checks if the CAD of L contains a point where each of the polynomials in L are strictly positive.
     Example
       R=QQ[x]
-      p0=x^2-1
-      p1=x
+      p0=x^2-1, p1=x;
       L={p0,p1}
       FS=findSolution(L)
   SeeAlso
     openCAD
     positivePoint
 ///
+
+doc ///
+  Key
+    (hashify, MutableHashTable)
+    (hashify, Thing)
+    hashify
+  Headline
+    Recursively turns MutableHashTables into equivalent HashTables.
+  Usage
+    hashify(MHT)
+  Inputs
+    MHT:MutableHashTable
+      A MutableHashTable.
+  Outputs
+    HT:HashTable
+      The equivalent HashTable.
+  Description
+    Text
+      This method takes a MutableHashTable and turns it and any nested MutableHashTables within into HashTables, leaving any other thing the same.
+    Example
+      R=QQ[x1,x2]
+      ptLevelFourA = new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}
+      cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelFourA}
+      ptLevelThreeA = new MutableHashTable from {x1=>-1_QQ}
+      ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA}
+      cellLevelOne = new MutableHashTable from {-1_QQ=>ptLevelTwoA}
+  
+      cellLevelOne
+      peek cellLevelOne    
+      hashify cellLevelOne
+      assert(hashify cellLevelOne === hashify C)
+      
+      
+      
+      
+      
+      
+      
+      
+  SeeAlso
+    openCAD
+    positivePoint
+///
+
+
 
 -* Test section *-
 TEST /// -* factors test *-
@@ -830,44 +873,35 @@ TEST /// -* positivePoint test 2*-
 TEST /// -* findSolution test 1*-
 -- Test 13
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
-  assert(findSolution(L) == true)
+  CAD = new MutableHashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
+  assert(findSolution L === (true, peek CAD))
 ///
 
 TEST /// -* findSolution test 2*-
 -- Test 14
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution(L) == false)
+  assert(findSolution L === (false,"no point exists"))  
 ///
 
 TEST /// -* findSolution test 3*-
 -- Test 15
   R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  p3=-x1*x2
+  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  FS=findSolution(L)
-  assert(FS == false)
+  assert(findSolution L === (false,"no point exists"))
 /// 
   
 TEST /// -* findSolution test 4*-
 -- Test 16
   R=QQ[x]
-  p0=x^2-1
-  p1=x
+  p0=x^2-1, p1=x;
   L={p0,p1}
-  FS=findSolution(L)
-  assert(FS == true)
+  CAD = new MutableHashTable from {x => 2_QQ};
+  assert(findSolution L === (true, peek CAD))
 ///
 
 
