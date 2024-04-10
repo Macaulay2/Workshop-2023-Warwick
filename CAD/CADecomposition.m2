@@ -1,65 +1,43 @@
--- To do
-
--- Note 21/03/2024 - Lots of updates. Testing examples for paper. Updated/checked commands, tests, docs and examples. 
--- Renamed leadCoefficientt to leadCoeff.
--- Updated a lot of commands and checked them, unifying naming.
--- samplePoint updated to only refind interval if two intervals actually touch on a root
-
--- Note 16/02/2024 Another fix to realRootIsolation to avoid it breaking when only roots are 0. 
--- Added RealRoots2 and imports from this while RealRoots proper needs fixing.
--- Also finally fixed liftingPoint test using thorough debugging using hash command.
-
--- Note 15/02/2024 Fixed RealRoots:-realRootIsolation, which should go into prod soon. Will need to update any checks relying on this now.
-
--- Note 29/01/2024: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
-
-
--- Note 23/01/2024 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
--- e.g. L is always the initial list of polys p. 
-
--- Note 18/01/2024 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
--- I think we should just work through an example slowly step-by-step comparing what we expect to get out
--- to what we actually receive, and use that to see where we're going wrong.
-
---Need to update this to do list.
---* Update examples, tests and documentation 
---* Create a "nice output" for openCAD - have a look at what Maple does
---* Extra: output descriptions of cells
-
---check all the "see also"s make sense and refer to all previous ones i guess!
---check samplePoints examples make sense - do them manually if you need to check.
---need to write documentation for hashify.
---positivePoint - output is a MHT - is that what we want?
---findSolution - example seems ok but check it!
-
 newPackage(
     "CADecomposition",
-    Version => "0.1",
-    Date => "29/03/2023",
-    Headline => "Cylindrical Algebraic Decomposition",
-    Authors => {{ Name => "del Rio, T.", Email => "delriot@coventry.ac.uk", HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},	{ Name => "Rahkooy, H.", Email => "rahkooy@maths.ox.ac.uk", HomePage => "https://people.maths.ox.ac.uk/rahkooy/"},	{ Name => "Lee, C.", Email => "cel34@bath.ac.uk", HomePage => "https://people.bath.ac.uk/cel34/"}},
+    Version => "1.0",
+    Date => "10/04/2024",
+    Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
+    Authors => {
+	{ Name => "del Rio, T.", 
+	  Email => "delriot@coventry.ac.uk", 
+	  HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},	
+        { Name => "Rahkooy, H.", 
+	  Email => "rahkooy@maths.ox.ac.uk", 
+	  HomePage => "https://people.maths.ox.ac.uk/rahkooy/"},	
+        { Name => "Lee, C.", 
+	  Email => "cel34@bath.ac.uk", 
+	  HomePage => "https://people.bath.ac.uk/cel34/"}
+        },
     --PackageExports => {"Elimination", "RealRoots"}, --when RealRoots is updated, uncomment this.
+    Keywords => {"Real Algebraic Geometry"}
     PackageExports => {"Elimination", "RealRoots2"},
     AuxiliaryFiles => false,
-    DebuggingMode => true
+    DebuggingMode => false
     )
 
 --"A package can contain the code for many functions, only some of which should be made visibxle to the user.
 --The function export allows one to specify which symbols are to be made visible."
 --At the end, trim this down to only the ones useful for people using the package.
-export {"factors",
-"factorsInList",
-"evalPolys",
-"leadCoeff",
-"gmodsHeuristic",
-"lazardProjection",
-"projectionPhase",
-"samplePoints",
-"liftingPoint",
-"openCAD",
-"positivePoint",
-"findSolution",
-"hashify"
+export {
+    "factors",
+    "factorsInList",
+    "evalPolys",
+    "leadCoeff",
+    "gmodsHeuristic",
+    "lazardProjection",
+    "projectionPhase",
+    "samplePoints",
+    "liftingPoint",
+    "openCAD",
+    "positivePoint",
+    "findSolution",
+    "hashify"
 }
 
 -* Code section *-
@@ -666,6 +644,8 @@ doc ///
 doc ///
   Key
     (hashify, MutableHashTable)
+    (hashify, List)
+    (hashify, MutableList)
     (hashify, Thing)
     hashify
   Headline
@@ -677,33 +657,21 @@ doc ///
       A MutableHashTable.
   Outputs
     HT:HashTable
-      The equivalent HashTable.
+      A HashTable, where the initial MutableHashTable and any other MutableHashTables contained inside are replaced with equivalent HashTables.
   Description
     Text
       This method takes a MutableHashTable and turns it and any nested MutableHashTables within into HashTables, leaving any other thing the same.
+      This command will also do the same to elements of a List or MutableList, leaving anything that isn't a MutableHashTable unchanged.
     Example
       R=QQ[x1,x2]
-      ptLevelFourA = new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}
-      cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelFourA}
-      ptLevelThreeA = new MutableHashTable from {x1=>-1_QQ}
-      ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA}
-      cellLevelOne = new MutableHashTable from {-1_QQ=>ptLevelTwoA}
-  
-      cellLevelOne
-      peek cellLevelOne    
-      hashify cellLevelOne
-      assert(hashify cellLevelOne === hashify C)
-      
-      
-      
-      
-      
-      
-      
-      
+      MHT = new MutableHashTable from {-1_QQ=>new MutableHashTable from {-5/2=>new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}}}
+      hashify MHT
   SeeAlso
+    evalPolys
+    liftingPoint
     openCAD
     positivePoint
+    findSolution
 ///
 
 
@@ -804,14 +772,11 @@ TEST /// -* liftingPoint test *-
   alpha#x3 = -1_QQ, alpha#x2 = 1_QQ;
   LP = liftingPoint(S,alpha,ordering)
 
-  ptLevelThreeA = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-3/4}
-  ptLevelThreeB = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-5/2}  
-  ptLevelThreeC = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>1_QQ}   
-  ptLevelTwo = new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ}
-  cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelThreeA}
-  cellLevelThreeB = new MutableHashTable from {"point"=>ptLevelThreeB}
-  cellLevelThreeC = new MutableHashTable from {"point"=>ptLevelThreeC}  
-  cellLevelTwo = new MutableHashTable from {-3/4_QQ=>cellLevelThreeA, -5/2_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>ptLevelTwo, "polynomials"=>{x1,x1+1}}
+  cellLevelThreeA = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-3/4}}
+  cellLevelThreeB = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-5/2}  }
+  cellLevelThreeC = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>1_QQ}}  
+
+  cellLevelTwo = new MutableHashTable from {-3/4_QQ=>cellLevelThreeA, -5/2_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ}, "polynomials"=>{x1,x1+1}}
 
   assert(hashify(LP) === hashify(cellLevelTwo))
 ///
@@ -823,30 +788,21 @@ TEST /// -* openCAD test *-
   L={p0,p1}
   C=openCAD(L)
 
-  ptLevelFourA = new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}
-  ptLevelFourB = new MutableHashTable from {x1=>-1_QQ, x2=>-3/4} 
-  ptLevelFourC = new MutableHashTable from {x1=>-1_QQ, x2=>1_QQ}
-  ptLevelFourD = new MutableHashTable from {x1=>1_QQ, x2=>-5/2}
-  ptLevelFourE = new MutableHashTable from {x1=>1_QQ, x2=>-3/4}
-  ptLevelFourF = new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}
+  cellLevelThreeA = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}
+  cellLevelThreeB = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-3/4} }
+  cellLevelThreeC = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>1_QQ}}
+  cellLevelThreeD = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>1_QQ, x2=>-5/2}}
+  cellLevelThreeE = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>1_QQ, x2=>-3/4}}
+  cellLevelThreeF = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}}
   
-  cellLevelThreeA = new MutableHashTable from {"point"=>ptLevelFourA}
-  cellLevelThreeB = new MutableHashTable from {"point"=>ptLevelFourB}
-  cellLevelThreeC = new MutableHashTable from {"point"=>ptLevelFourC}
-  cellLevelThreeD = new MutableHashTable from {"point"=>ptLevelFourD}
-  cellLevelThreeE = new MutableHashTable from {"point"=>ptLevelFourE}
-  cellLevelThreeF = new MutableHashTable from {"point"=>ptLevelFourF}
-
-  ptLevelThreeA = new MutableHashTable from {x1=>-1_QQ}
-  ptLevelThreeB = new MutableHashTable from {x1=>1_QQ}
-  
-  ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>ptLevelThreeA, "polynomials"=>{x2+1,-x2^2}}
-  ptLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>ptLevelThreeB, "polynomials"=>{x2+1,x2^2}}  
+  ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x1=>-1_QQ}, "polynomials"=>{x2+1,-x2^2}}
+  ptLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>new MutableHashTable from {x1=>1_QQ}, "polynomials"=>{x2+1,x2^2}}  
   ptLevelTwoC = new MutableHashTable
   
   cellLevelOne = new MutableHashTable from {-1_QQ=>ptLevelTwoA, 1_QQ=>ptLevelTwoB, "point"=>ptLevelTwoC, "polynomials"=>{x1}}
   
   assert(hashify cellLevelOne === hashify C)
+  
 ///
 
 TEST /// -* positivePoint test 1*-
@@ -904,112 +860,12 @@ TEST /// -* findSolution test 4*-
   assert(findSolution L === (true, peek CAD))
 ///
 
-
-
+TEST /// -* hashify test*-
+-- Test 17
+  R=QQ[x1,x2]
+  MCell = new MutableHashTable from {-1_QQ=>new MutableHashTable from {-5/2=>new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}}}
+  HCell = new HashTable from {-1_QQ=>new HashTable from {-5/2=>new HashTable from {"point"=>new HashTable from {x1=>-1_QQ, x2=>-5/2}}}}
+  assert(hashify MCell === HCell)
+///
 
 end--
-
--* Development section *-
-restart
-debug needsPackage "CADecomposition" --load package
---needsPackage "CADecomposition"
-check "CADecomposition" --run tests
-
-restart
-uninstallPackage "CADecomposition"
-restart
-installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
-installPackage("CADecomposition")
-uninstallPackage "RealRoots"
-installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
---installPackage "CADecomposition" --load and install a package and its documentation
-viewHelp "CADecomposition"
---if this does not load properly, html files should now be created in
---home\[name]\.Macaulay2\local\share\doc\Macaulay2\CADecomposition\html
-
---====================
-
-    --L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,-p2}
-  assert(findSolution(L) == true)
-
-  H = openCAD {p0,p1,-p2}
-  keys H
-  peek oo
-  peek H#(-2_QQ)
-  
-R=QQ[x1,x2]
-L={x1*x2}
-openCAD(L)
-
---==============================
-
---EXAMPLE TO RUN THROUGH FOR PAPER--
-R=QQ[x1,x2]
-p1:=x1^2+x2^2-1
-p2:=x1^3-x2^2
-L={p1,p2}
-
-findSolution(L);
-
-
-alpha = new MutableHashTable -- this is a test, this a solution!
-alpha#x1 = 2
-alpha#x2 = 1
-evalPolys(L,alpha)
-
-factors(p1)
-factors(p2)
-support(L)
-factorsInList(L)
-
-GML:=gmodsHeuristic(L,support(L))
-
-leadCoeff(p1,GML)
-leadCoeff p2,GML)
-
-lazardProjection(L,GML)
-
-projectionPhase(L);
-
-samplePoints(lazardProjection(L,GML));
-
---==========================================================
-
- R=QQ[x]
-  f=x^2-1
-  g=x^3-1
-  L1={f,g}
-  S = samplePoints(L1)
-
---x^4+x^3-x-1
-
---============================
-
-R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1*x2+x3^2
-  L={p0,p1}
-  (P,ord) = projectionPhase(L)
-  pts = new MutableHashTable
-  pts#x1 = -1
-  pts#x2 = 3
-  --ord = {x2,x1,x3}
-  LP = liftingPoint(P,pts,ord)
-
---========================
-
---big example: intersecting sphere. This is 3-dim and takes about 58 seconds.
-R = QQ[x1,x2,x3]
-L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
-timing openCAD(L)
-
-var = gmodsHeuristic(L,support(L))
-lazardProjection(L,var)
-(S,ordering) = projectionPhase(L)
-
-samplePoints(S#0) --this is one of the crazy parts
