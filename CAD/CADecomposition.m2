@@ -16,9 +16,9 @@ newPackage(
         },
 
     Keywords => {"Real Algebraic Geometry"},
-    PackageExports => {"Elimination", "RealRoots_new"}, --when RealRoots is updated, rename "RealRoots_new" to "RealRoots".
+    PackageExports => {"Elimination", "RealRootsNew"}, --when RealRoots is updated, rename "RealRoots_new" to "RealRoots".
     AuxiliaryFiles => false,
-    DebuggingMode => false
+    DebuggingMode => true
     )
 
 --"A package can contain the code for many functions, only some of which should be made visibxle to the user.
@@ -242,6 +242,9 @@ hashify = method()
 hashify(MutableHashTable) := (H) -> (
    hashTable for KV in pairs H list KV#0 => hashify(KV#1)
     )
+hashify(HashTable) := (H) -> (
+   hashTable for KV in pairs H list KV#0 => hashify(KV#1)
+    )
 hashify(List) := (H) -> (
     for x in H list hashify x
     )
@@ -274,10 +277,10 @@ doc ///
     factors(p)
   Inputs
     p:RingElement
-      polynomial in a ring
+      polynomial in a ring.
   Outputs
     :List
-      list of list pairs containing the polynomial's factors and their exponents.
+      of list pairs containing the polynomial's factors and their exponents.
   Description
     Text
       This function breaks a RingElement into its factors, returning this as a list of pairs (factor and exponent).
@@ -298,10 +301,10 @@ doc ///
     factorsInList(L)
   Inputs
     L:List
-     list of RingElements (polynomials in a ring).
+     of polynomials in a ring.
   Outputs
     :List
-      List containing the factors of each polynomial, without multiplicity.
+      containing the factors of each polynomial, without multiplicity.
   Description
     Text
       This function returns all of the factors that appear in a list of RingElements, ignoring constants and multiplicity.
@@ -326,22 +329,22 @@ doc ///
     evalPolys(L,alpha)
   Inputs
     p:RingElement
-      polynomial as a RingElement
+      polynomial in a ring.
     L:List
-      list of polynomials as RingElements
+      of polynomials in a ring.
     alpha:MutableHashTable
-      point described using a mutable hash table where the keys are RingElements (variables in the ring)
+      point described using a mutable hash table where the keys are RingElements (variables in the ring) and the values are the associated sample point.
   Outputs
     :RingElement
-      RingElement describing the polynomial evaluated at the sample point.
+      describing the polynomial evaluated at the sample point.
     :List
-      List of RingElements describing the polynomials evaluated at the sample point.
+      of polynomials evaluated at the sample point.
   Description
     Text
       Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evalPolys evaluates the 
       polynomial(s) at the sample point and returns the evaluated polynomial(s). 
-      This is used in the lifting phase of the CAD, where a polynomial in $k$ variables is evaluated at a point 
-      $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}] to return a univariate polynomial in $\mathbb{R}[x_k]$.
+      This is used in the lifting phase of the CAD, where a polynomial in k variables is evaluated at a 
+      point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}]$ to return a univariate polynomial in $\mathbb{R}[x_k]$.
     Example
 	  R=QQ[x0,x1,x2,x3]
 	  alpha = new MutableHashTable;
@@ -369,12 +372,12 @@ doc ///
     leadCoeff(p,v)
   Inputs
     p:RingElement
-      a polynomial in the ring
+      a polynomial in the ring.
     v:RingElement
-      a variable in the ring
+      a variable in the ring.
   Outputs
     :RingElement
-      the leading coefficient of $p$ with respect to the variable $v$.
+      the leading coefficient of p with respect to the variable v.
   Description
     Text
       The leading coefficient of a RingElement with respect to a variable is returned.
@@ -395,9 +398,9 @@ doc ///
     gmodsHeuristic(L,variables)
   Inputs
     L:List
-      of polynomials in several variables
+      of polynomials in several variables.
     variables:List
-      of variables in the polynomials provided
+      of variables in the polynomials provided.
   Outputs
     :RingElement
       the chosen variable to project.
@@ -424,19 +427,19 @@ doc ///
     lazardProjection(L,v)
   Inputs
     L:List
-      of polynomials all in the same ring
+      of polynomials all in the same ring.
     v:RingElement
-      a variable in the ring
+      a variable in the ring.
   Outputs
     :List
-      list of projected polynomials not involving $v$
+      of projected polynomials not involving v.
   Description
     Text
-      Lazard projection is an operation that takes a variable $v$ and a set $L$ of polynomials in $n$ variables, and returns a set of polynomials 
+      Lazard projection is an operation that takes a variable v and a set L of polynomials in $n$ variables, and returns a set of polynomials 
       in the remaining $n-1$ variables, representing the significant points of the polynomials.
       This is used in the projection phase of Cylindrical Algebraic Decomposition, and consists of the leading and trailing coefficients of the given 
-      polynomials w.r.t $v$, the discriminants of the polynomials w.r.t $v$ and the resultants between each pair of polynomials 
-      w.r.t $v$. For openCAD, the trailing coefficients are not needed.
+      polynomials w.r.t v, the discriminants of the polynomials w.r.t v and the resultants between each pair of polynomials 
+      w.r.t v. For openCAD, the trailing coefficients are not needed.
     Example
       R=QQ[x1,x2,x3]
       p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
@@ -457,15 +460,15 @@ doc ///
     projectionPhase(L)
   Inputs
     L:List
-      of polynomials in a ring
+      of polynomials in a ring.
   Outputs
     S:List
-      of lists of projection polynomials in increasing numbers of variables (starting with univariate polynomials and ending in the original list $L$).
+      of lists of projection polynomials in increasing numbers of variables (starting with univariate polynomials and ending in the original list L).
     ordering:List
-      of variables used in projections. The projection set of polynomials of in $k$ variables will contain the first $k$ variables of this list.
+      of variables used in projections. The projection set of polynomials of in k variables will contain the first k variables of this list.
   Description
     Text
-      The projection phase of the CAD is calculated. Given a list $L$ of polynomials in $n$ variables (level $n$), the Lazard projection is applied recursively
+      The projection phase of the CAD is calculated. Given a list L of polynomials in $n$ variables (level $n$), the Lazard projection is applied recursively
       until one variable remains. At each step, the list of projection polynomials and the projected variable are stored, resulting in a final list of projection 
       polynomials from level 1 to level $n$, and the list of variables, ordered so that the first $k$ variables of the list are the variables of the polynomials
       at level $k$.
@@ -489,10 +492,10 @@ doc ///
     samplePoints(L)
   Inputs
     L:List
-      nonempty, of polynomials in one variable
+      nonempty, of polynomials in one variable.
   Outputs
     SP:List
-      list of points in QQ
+      of points in QQ.
   Description
     Text
       Sample points are the representative points in each cell of the CAD. Such points are computed in the lifting phase, by isolating real 
@@ -524,14 +527,14 @@ doc ///
     liftingPoint(S,alpha,ordering)
   Inputs
     S:List
-      list of lists of RingElements
+      of lists of RingElements, representing the projection polynomials of each level.
     alpha:MutableHashTable
-      point described using a hash table where the keys are RingElements (variables) and the values are sample points.
+      the point described using a hash table where the keys are RingElements (variables) and the values are sample points.
     ordering:List
-      variable ordering followed in the projection
+      the variable ordering followed in the projection.
   Outputs
     LP:MutableHashTable
-      MutableHashTable describing an OpenCAD
+      describing an OpenCAD.
   Description
     Text
       Given the projection phase of a CAD (S), liftingPoint creates an Open Cylindrical Algebraic Decomposition, which breaks the space into cells where 
@@ -560,10 +563,10 @@ doc ///
     openCAD(L)
   Inputs
     L:List
-      of polynomials all in the same ring
+      of polynomials all in the same ring.
   Outputs
     C:MutableHashTable
-      describing an open CAD of the given list of polynomials
+      describing an open CAD of the given list of polynomials.
   Description
     Text
       An open CAD is a mathematical object that decomposes the space into cells in which the given polynomials are sign invariant.
@@ -594,12 +597,12 @@ doc ///
     positivePoint(L,cell)
   Inputs
     L:List
-      list of polynomials
+      a list of polynomials.
     cell:MutableHashTable
-      cell of the CAD
+      the cell of the CAD.
   Outputs
     PP:MutableHashTable
-      MutableHashTable describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
+      describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
   Description
     Text
       Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns "no point exists" otherwise.
@@ -624,10 +627,12 @@ doc ///
     findSolution(L)
   Inputs
     L:List
-      list of polynomials
+      a list of polynomials.
   Outputs
     :Boolean
-      Whether the CAD of L of has a point where all of the polynomials in the list are strictly positive
+      saying whether the CAD of L of has a point where all of the polynomials in the list are strictly positive.
+    :MutableHashTable
+      describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
   Description
     Text
       Given a list of polynomials L, this checks if the CAD of L contains a point where each of the polynomials in L are strictly positive.
@@ -643,29 +648,38 @@ doc ///
 
 doc ///
   Key
+    hashify
     (hashify, MutableHashTable)
+    (hashify, HashTable)
     (hashify, List)
     (hashify, MutableList)
     (hashify, Thing)
-    hashify
+
   Headline
     Recursively turns MutableHashTables into equivalent HashTables.
   Usage
     hashify(MHT)
   Inputs
-    MHT:MutableHashTable
-      A MutableHashTable.
+    M:MutableHashTable
+      A mutable hash table.
+    M:HashTable
+      A hash table.
+    M:List
+      A list.
+    M:MutableList
+      A mutable list.
+    M:Thing
+      Any other object that isn't one of the ones listed above.
   Outputs
-    HT:HashTable
-      A HashTable, where the initial MutableHashTable and any other MutableHashTables contained inside are replaced with equivalent HashTables.
+    H:Thing
+      wherein any mutable hash tables are replaced with equivalent hash tables.
   Description
     Text
-      This method takes a MutableHashTable and turns it and any nested MutableHashTables within into HashTables, leaving any other thing the same.
-      This command will also do the same to elements of a List or MutableList, leaving anything that isn't a MutableHashTable unchanged.
+      This method takes a MutableHashTable, HashTable, List or MutableList and turns any MutableHashTables within into HashTables, leaving everything else the same.
     Example
-      R=QQ[x1,x2]
-      MHT = new MutableHashTable from {-1_QQ=>new MutableHashTable from {-5/2=>new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}}}
-      hashify MHT
+      R=QQ[x1,x2];
+      M = new MutableHashTable from {-1_QQ=>new MutableHashTable from {-5/2=>new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}}};
+      hashify M
   SeeAlso
     evalPolys
     liftingPoint
@@ -869,3 +883,23 @@ TEST /// -* hashify test*-
 ///
 
 end--
+
+-* Development section *-
+restart
+debug needsPackage "CADecomposition" --load package
+--needsPackage "CADecomposition"
+check "CADecomposition" --run tests
+
+restart
+uninstallPackage "CADecomposition"
+restart
+installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
+installPackage("CADecomposition")
+uninstallPackage "RealRoots"
+installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
+--installPackage "CADecomposition" --load and install a package and its documentation
+viewHelp "CADecomposition"
+
+
+
+

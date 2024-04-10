@@ -1,6 +1,6 @@
 --RealRoots.m2
 newPackage(
-    "RealRoots",
+    "RealRootsNew",
     Version=>"0.1",
     --updates/corrections to realRootIsolation by Corin Lee (cel34@bath.ac.uk) 2024/03/16
     Date=>"Oct 9, 2020",
@@ -571,7 +571,7 @@ isHurwitzStable (RingElement) := Boolean => f->(
 
 beginDocumentation()
 document {
-	Key => RealRoots,
+	Key => RealRootsNew,
 	Headline => "Package for exploring, counting and locating real solutions to polynomial systems",
 	"The purpose of this package is to provide general tools for elimination and solving systems of polynomial equations."
 	}
@@ -755,7 +755,7 @@ document {
      	}
 
 document {
-    	Key => {"Multiplicity(RealRoots)", [SylvesterCount, Multiplicity], [SturmCount, Multiplicity]},
+    	Key => {"Multiplicity(RealRootsNew)", [SylvesterCount, Multiplicity], [SturmCount, Multiplicity]},
 	PARA {"This is an optional input for counting roots with multiplicity."}
     }
 
