@@ -14,9 +14,9 @@ newPackage(
 	  Email => "cel34@bath.ac.uk", 
 	  HomePage => "https://people.bath.ac.uk/cel34/"}
         },
-    --PackageExports => {"Elimination", "RealRoots"}, --when RealRoots is updated, uncomment this.
-    Keywords => {"Real Algebraic Geometry"}
-    PackageExports => {"Elimination", "RealRoots_new"},
+
+    Keywords => {"Real Algebraic Geometry"},
+    PackageExports => {"Elimination", "RealRoots_new"}, --when RealRoots is updated, rename "RealRoots_new" to "RealRoots".
     AuxiliaryFiles => false,
     DebuggingMode => false
     )

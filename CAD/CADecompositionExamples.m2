@@ -44,7 +44,7 @@ restart
 installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
 installPackage("CADecomposition")
 uninstallPackage "RealRoots"
-installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
+installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
 --installPackage "CADecomposition" --load and install a package and its documentation
 viewHelp "CADecomposition"
 --if this does not load properly, html files should now be created in
