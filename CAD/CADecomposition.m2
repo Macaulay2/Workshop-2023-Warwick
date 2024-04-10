@@ -16,7 +16,7 @@ newPackage(
         },
     --PackageExports => {"Elimination", "RealRoots"}, --when RealRoots is updated, uncomment this.
     Keywords => {"Real Algebraic Geometry"}
-    PackageExports => {"Elimination", "RealRoots2"},
+    PackageExports => {"Elimination", "RealRoots_new"},
     AuxiliaryFiles => false,
     DebuggingMode => false
     )
@@ -37,7 +37,7 @@ export {
     "openCAD",
     "positivePoint",
     "findSolution",
-    "hashify"
+"hashify"
 }
 
 -* Code section *-
