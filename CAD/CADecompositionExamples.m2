@@ -52,32 +52,27 @@ viewHelp "CADecomposition"
 
 --====================
 
-    --L1 = {max ourRoots_0)-1}|L1|{ourRoots_(#ourRoots-1)_1+1};
-  R=QQ[x1,x2,x3]
-  p0=x1*x2
-  p1=x1^2*x2-x1*x3+x3^3
-  p2=x2^2*x3+x3
-  L={p0,p1,-p2}
-  assert(findSolution(L) == true)
-
-  H = openCAD {p0,p1,-p2}
-  keys H
-  peek oo
-  peek H#(-2_QQ)
-  
-R=QQ[x1,x2]
-L={x1*x2}
-openCAD(L)
-
---==============================
-
 --EXAMPLE TO RUN THROUGH FOR PAPER--
+--Jirstrand example
+
 R=QQ[x1,x2]
 p1:=x1^2+x2^2-1
 p2:=x1^3-x2^2
 L={p1,p2}
 
-findSolution(L);
+findSolution(L)
+evalPolys(L,positivePoint(L,openCAD(L)))
+evalPolys(L,(findSolution L)_1)
+
+
+
+hashify openCAD(L)
+
+
+
+
+
+
 
 
 alpha = new MutableHashTable -- this is a test, this a solution!

@@ -225,16 +225,10 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive, and return it
 findSolution = method()
 findSolution(List) := (L) -> (
-    cad := openCAD(L);
-    result := positivePoint(L, cad);
-    TF := null;
+    result := positivePoint(L, openCAD(L));
     if instance(result, HashTable)
-    then (
-      result = peek result;
-      TF = true)
-      else (
-      TF = false);
-    TF, result
+    then (true, hashify result, evalPolys(L,result) )
+    else (false, result, null)
 )
 
 -- Turns MutableHashTables into HashTables
@@ -631,8 +625,10 @@ doc ///
   Outputs
     :Boolean
       saying whether the CAD of L of has a point where all of the polynomials in the list are strictly positive.
-    :MutableHashTable
+    :HashTable
       describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
+    :List
+      describing the polynomial(s) evaluated at this point (if the point exists).
   Description
     Text
       Given a list of polynomials L, this checks if the CAD of L contains a point where each of the polynomials in L are strictly positive.
@@ -845,8 +841,8 @@ TEST /// -* findSolution test 1*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
-  CAD = new MutableHashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
-  assert(findSolution L === (true, peek CAD))
+  CAD = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
+  assert(findSolution L === (true, CAD,{1_QQ,109/64,5/2}))
 ///
 
 TEST /// -* findSolution test 2*-
@@ -854,7 +850,7 @@ TEST /// -* findSolution test 2*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists"))  
+  assert(findSolution L === (false,"no point exists",null))  
 ///
 
 TEST /// -* findSolution test 3*-
@@ -862,7 +858,7 @@ TEST /// -* findSolution test 3*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists"))
+  assert(findSolution L === (false,"no point exists",null))
 /// 
   
 TEST /// -* findSolution test 4*-
@@ -870,8 +866,8 @@ TEST /// -* findSolution test 4*-
   R=QQ[x]
   p0=x^2-1, p1=x;
   L={p0,p1}
-  CAD = new MutableHashTable from {x => 2_QQ};
-  assert(findSolution L === (true, peek CAD))
+  CAD = new HashTable from {x => 2_QQ};
+  assert(findSolution L === (true, CAD, {3_QQ,2_QQ}))
 ///
 
 TEST /// -* hashify test*-
@@ -883,23 +879,5 @@ TEST /// -* hashify test*-
 ///
 
 end--
-
--* Development section *-
-restart
-debug needsPackage "CADecomposition" --load package
---needsPackage "CADecomposition"
-check "CADecomposition" --run tests
-
-restart
-uninstallPackage "CADecomposition"
-restart
-installPackage("CADecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
-installPackage("CADecomposition")
-uninstallPackage "RealRoots"
-installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
---installPackage "CADecomposition" --load and install a package and its documentation
-viewHelp "CADecomposition"
-
-
 
 
