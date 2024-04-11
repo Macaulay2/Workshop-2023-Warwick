@@ -61,12 +61,13 @@ p2:=x1^3-x2^2
 L={p1,p2}
 
 findSolution(L)
-evalPolys(L,positivePoint(L,openCAD(L)))
-evalPolys(L,(findSolution L)_1)
-
-
-
 hashify openCAD(L)
+
+--now do all the related commands: 
+
+--projectionPhase if that makes sense, gmodsHeuristic at each bit, lazardProjection at each bit, 
+--liftingPoint, evalPolys, samplePoints (realRootIso)
+--leadCoeff,factorsInList,factors
 
 
 
