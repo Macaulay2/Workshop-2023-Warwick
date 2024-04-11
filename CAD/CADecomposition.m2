@@ -1,7 +1,7 @@
 newPackage(
     "CADecomposition",
     Version => "1.0",
-    Date => "10/04/2024",
+    Date => "11/04/2024",
     Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
     Authors => {
 	{ Name => "del Rio, T.", 
@@ -227,8 +227,8 @@ findSolution = method()
 findSolution(List) := (L) -> (
     result := positivePoint(L, openCAD(L));
     if instance(result, HashTable)
-    then (true, hashify result, evalPolys(L,result) )
-    else (false, result, null)
+    then (true, hashify result)
+    else (false, result)
 )
 
 -- Turns MutableHashTables into HashTables
@@ -842,7 +842,7 @@ TEST /// -* findSolution test 1*-
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   CAD = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
-  assert(findSolution L === (true, CAD,{1_QQ,109/64,5/2}))
+  assert(findSolution L === (true, CAD))
 ///
 
 TEST /// -* findSolution test 2*-
@@ -850,7 +850,7 @@ TEST /// -* findSolution test 2*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists",null))  
+  assert(findSolution L === (false,"no point exists"))  
 ///
 
 TEST /// -* findSolution test 3*-
@@ -858,7 +858,7 @@ TEST /// -* findSolution test 3*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists",null))
+  assert(findSolution L === (false,"no point exists"))
 /// 
   
 TEST /// -* findSolution test 4*-
@@ -867,7 +867,7 @@ TEST /// -* findSolution test 4*-
   p0=x^2-1, p1=x;
   L={p0,p1}
   CAD = new HashTable from {x => 2_QQ};
-  assert(findSolution L === (true, CAD, {3_QQ,2_QQ}))
+  assert(findSolution L === (true, CAD))
 ///
 
 TEST /// -* hashify test*-
