@@ -16,7 +16,7 @@ newPackage(
         },
 
     Keywords => {"Real Algebraic Geometry"},
-    PackageExports => {"Elimination", "RealRootsNew"}, --when RealRoots is updated, rename "RealRoots_new" to "RealRoots".
+    PackageExports => {"Elimination", "RealRootsNew"}, --when RealRoots is updated, rename "RealRootsNew" to "RealRoots".
     AuxiliaryFiles => false,
     DebuggingMode => true
     )

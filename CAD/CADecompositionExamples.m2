@@ -132,3 +132,41 @@ lazardProjection(L,var)
 (S,ordering) = projectionPhase(L)
 
 samplePoints(S#0) --this is one of the crazy parts
+
+--==========================
+j:=4;
+R :=QQ[x1,x2,x3,x4,x5,x6,x7,x8,x9,x10]
+VAR:=x1*x2*x3*x4*x5*x6*x7*x8*x9*x10
+varlist:=support(VAR);
+--R := QQ[varlist];
+--vlist:=varlist;
+L = {};
+for i from 1 to j do (
+--R1 = QQ[take(varlist, i)];
+S={sum (apply(take(varlist,i) ,k->(k-1)^2)) - 4, sum (apply(take(varlist,i) ,k->(k+1)^2)) - 4};
+L = append(L,S);
+)
+L
+
+for i from 1 to j do (
+L1 := L_(#L-i);
+R1 := QQ[support(L1)];
+L2 := {sub(L1_0,R1),sub(L1_1,R1)};
+print concatenate(toString(#L-i+1)," variables:"); print elapsedTiming openCAD(L2);
+)
+
+
+
+ring(vlist)
+
+
+
+{
+A := QQ(monoid[support(L)]);
+
+R = QQ[x1,x2,x3]
+L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
+elapsedTiming
+
+
+varlist_0
