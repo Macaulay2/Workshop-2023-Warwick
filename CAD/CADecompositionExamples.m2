@@ -1,36 +1,18 @@
--- To do
+--ORDER FOR WEB
 
--- Note 21/03/2024 - Lots of updates. Testing examples for paper. Updated/checked commands, tests, docs and examples. 
--- Renamed leadCoefficientt to leadCoeff.
--- Updated a lot of commands and checked them, unifying naming.
--- samplePoint updated to only refind interval if two intervals actually touch on a root
+restart
+check "CADecomposition" --run tests
+uninstallPackage "RealRoots"
+installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
+installPackage("CADecomposition")
 
--- Note 16/02/2024 Another fix to realRootIsolation to avoid it breaking when only roots are 0. 
--- Added RealRoots2 and imports from this while RealRoots proper needs fixing.
--- Also finally fixed liftingPoint test using thorough debugging using hash command.
-
--- Note 15/02/2024 Fixed RealRoots:-realRootIsolation, which should go into prod soon. Will need to update any checks relying on this now.
-
--- Note 29/01/2024: Fixed missing case of lazardProjection (was missing trailing coeffs), updated documentation.
+--======================
 
 
--- Note 23/01/2024 - we need to tidy the documentation so each symbol is unique for each step (and is described the same)
--- e.g. L is always the initial list of polys p. 
 
--- Note 18/01/2024 - openCAD test is wrong, but original constructed hashTable also looks like it was even more wrong!
--- I think we should just work through an example slowly step-by-step comparing what we expect to get out
--- to what we actually receive, and use that to see where we're going wrong.
 
---Need to update this to do list.
---* Update examples, tests and documentation 
---* Create a "nice output" for openCAD - have a look at what Maple does
---* Extra: output descriptions of cells
+installPackage("CADecomposition")
 
---check all the "see also"s make sense and refer to all previous ones i guess!
---check samplePoints examples make sense - do them manually if you need to check.
---need to write documentation for hashify.
---positivePoint - output is a MHT - is that what we want?
---findSolution - example seems ok but check it!
 
 -* Development section *-
 restart
@@ -91,6 +73,12 @@ GML:=gmodsHeuristic(L,support(L))
 leadCoeff(p1,GML)
 leadCoeff p2,GML)
 
+L1 := for p in L list leadCoeff(p,GML) --leading coefficients
+L2 := for p in L list p-GML*contract(GML,p) --trailing coefficients
+L3 := for p in L list discriminant(p,GML) --discriminants
+L4 := for p in subsets(L,2) list resultant(p_0,p_1,GML) --resultants
+
+
 lazardProjection(L,GML)
 
 projectionPhase(L);
@@ -125,7 +113,26 @@ R=QQ[x1,x2,x3]
 --big example: intersecting sphere. This is 3-dim and takes about 58 seconds.
 R = QQ[x1,x2,x3]
 L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
-timing openCAD(L)
+timing C2 = openCAD(L)
+-- 4.8998 seconds
+
+R = QQ[x1,x2,x3,x4]
+L = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2-2^2}
+timing C4 = openCAD(L)
+-- 1503.43 seconds
+
+--This probably takes a day!
+
+--R = QQ[x1,x2,x3,x4,x5]
+--L = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2+(x5-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2+(x5+1)^2-2^2}
+--timing C5 = openCAD(L)
+
+
+
+
+
+
+
 
 var = gmodsHeuristic(L,support(L))
 lazardProjection(L,var)
@@ -134,7 +141,7 @@ lazardProjection(L,var)
 samplePoints(S#0) --this is one of the crazy parts
 
 --==========================
-j:=4;
+j:=3;
 R :=QQ[x1,x2,x3,x4,x5,x6,x7,x8,x9,x10]
 VAR:=x1*x2*x3*x4*x5*x6*x7*x8*x9*x10
 varlist:=support(VAR);
@@ -155,18 +162,14 @@ L2 := {sub(L1_0,R1),sub(L1_1,R1)};
 print concatenate(toString(#L-i+1)," variables:"); print elapsedTiming openCAD(L2);
 )
 
+--make it so it adds all of these to a list maybe so I can check them again sometime
 
+--the 4d one took ~30 mins on a good day. Try it again soon and work through it:
 
-ring(vlist)
+CAD = openCAD(L_3);
+peek CAD
+CAD#"polynomials"
+CAD#((keys CAD)_0)
+peek oo
 
-
-
-{
-A := QQ(monoid[support(L)]);
-
-R = QQ[x1,x2,x3]
-L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
-elapsedTiming
-
-
-varlist_0
+--and repeat this to get one branch

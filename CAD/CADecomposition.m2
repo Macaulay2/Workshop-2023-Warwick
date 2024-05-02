@@ -104,6 +104,7 @@ gmodsHeuristic(List, List) := (L, variables) -> (
 -- Does one step of the projection phase
 lazardProjection = method()
 lazardProjection(List, RingElement) := (L,v) -> (
+  L = factorsInList(L); --ensure input polynomials are irreducible and pairwise relatively prime.
   L0 := select(L, p -> not member(v,support(p))); --polynomials not relying on v
   L = select(L, p -> member(v,support(p))); --remove polynomials p not relying on v 
   -- these would create redundant calculations (resultants would be a power of p,
@@ -120,6 +121,7 @@ lazardProjection(List, RingElement) := (L,v) -> (
 -- Creates a full Lazard projection
 projectionPhase = method()
 projectionPhase(List) := (L) -> (
+    L = factorsInList(L);
     S := {L};
     variables := support(L); --initial variables, the ones chosen already will be dropped
     ordering := {}; -- this will contain the variable ordering chosen
@@ -749,7 +751,7 @@ TEST /// -* lazardProjection test *-
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   LP = lazardProjection(L,x1)
-  assert(LP === {x3,x2^2+1,x2,4*x2*x3-1})
+  assert(LP === {x2,x3,x2^2+1,4*x2*x3-1})
 ///
 
 TEST /// -* projectionPhase test *-
@@ -758,7 +760,7 @@ TEST /// -* projectionPhase test *-
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   PP = projectionPhase(L)
-  answerS = {{x2^2+1,x2}, {x3,x2^2+1,x2,4*x2*x3-1}, {x1*x2,x1^2*x2+x3^3-x1*x3,x2^2*x3+x3}}
+  answerS = {{x2,x2^2+1}, {x2,x3,x2^2+1,4*x2*x3-1}, {x2,x1,x1^2*x2+x3^3-x1*x3,x3,x2^2+1}}
   answerordering = {x2, x3, x1}
   assert(PP == (answerS,answerordering))
 ///
@@ -779,14 +781,14 @@ TEST /// -* liftingPoint test *-
   L={p0,p1}
   (S,ordering) = projectionPhase(L)
   alpha = new MutableHashTable
-  alpha#x3 = -1_QQ, alpha#x2 = 1_QQ;
+  alpha#x3 = -1_QQ, alpha#x1 = 1_QQ;
   LP = liftingPoint(S,alpha,ordering)
 
-  cellLevelThreeA = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-3/4}}
-  cellLevelThreeB = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>-5/2}  }
-  cellLevelThreeC = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ, x1=>1_QQ}}  
+  cellLevelThreeA = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ, x2=>-3/4}}
+  cellLevelThreeB = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ, x2=>-5/2}  }
+  cellLevelThreeC = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ, x2=>1_QQ}}  
 
-  cellLevelTwo = new MutableHashTable from {-3/4_QQ=>cellLevelThreeA, -5/2_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x3=>-1_QQ, x2=>1_QQ}, "polynomials"=>{x1,x1+1}}
+  cellLevelTwo = new MutableHashTable from {-3/4_QQ=>cellLevelThreeA, -5/2_QQ=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ}, "polynomials"=>{x2,1_QQ,x2+1}}
 
   assert(hashify(LP) === hashify(cellLevelTwo))
 ///
@@ -805,8 +807,8 @@ TEST /// -* openCAD test *-
   cellLevelThreeE = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>1_QQ, x2=>-3/4}}
   cellLevelThreeF = new MutableHashTable from {"point"=>new MutableHashTable from {x1=>1_QQ, x2=>1_QQ}}
   
-  ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x1=>-1_QQ}, "polynomials"=>{x2+1,-x2^2}}
-  ptLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>new MutableHashTable from {x1=>1_QQ}, "polynomials"=>{x2+1,x2^2}}  
+  ptLevelTwoA = new MutableHashTable from {-5/2=>cellLevelThreeA, -3/4=>cellLevelThreeB, 1_QQ=>cellLevelThreeC, "point"=>new MutableHashTable from {x1=>-1_QQ}, "polynomials"=>{x2+1,x2,-1_QQ}}
+  ptLevelTwoB = new MutableHashTable from {-5/2=>cellLevelThreeD, -3/4=>cellLevelThreeE, 1_QQ=>cellLevelThreeF, "point"=>new MutableHashTable from {x1=>1_QQ}, "polynomials"=>{x2+1,x2,1_QQ}}  
   ptLevelTwoC = new MutableHashTable
   
   cellLevelOne = new MutableHashTable from {-1_QQ=>ptLevelTwoA, 1_QQ=>ptLevelTwoB, "point"=>ptLevelTwoC, "polynomials"=>{x1}}
