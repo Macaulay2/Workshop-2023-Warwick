@@ -1,6 +1,6 @@
 newPackage(
     "CADecomposition",
-    Version => "1.0",
+    Version => "1.0.1",
     Date => "11/04/2024",
     Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
     Authors => {
@@ -36,7 +36,7 @@ export {
     "liftingPoint",
     "openCAD",
     "positivePoint",
-    "findSolution",
+    "findPositiveSolution",
 "hashify"
 }
 
@@ -225,8 +225,8 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
 )
 
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive, and return it
-findSolution = method()
-findSolution(List) := (L) -> (
+findPositiveSolution = method()
+findPositiveSolution(List) := (L) -> (
     result := positivePoint(L, openCAD(L));
     if instance(result, HashTable)
     then (true, hashify result)
@@ -615,12 +615,12 @@ doc ///
 
 doc ///
   Key
-    (findSolution, List)
-    findSolution
+    (findPositiveSolution, List)
+    findPositiveSolution
   Headline
     Checks if there is a point in which all the polynomials given in the list are strictly positive
   Usage
-    findSolution(L)
+    findPositiveSolution(L)
   Inputs
     L:List
       a list of polynomials.
@@ -638,7 +638,7 @@ doc ///
       R=QQ[x]
       p0=x^2-1, p1=x;
       L={p0,p1}
-      FS=findSolution(L)
+      FS=findPositiveSolution(L)
   SeeAlso
     openCAD
     positivePoint
@@ -683,7 +683,7 @@ doc ///
     liftingPoint
     openCAD
     positivePoint
-    findSolution
+    findPositiveSolution
 ///
 
 
@@ -838,38 +838,38 @@ TEST /// -* positivePoint test 2*-
   assert(hashify PP === hashify answer)
 ///
 
-TEST /// -* findSolution test 1*-
+TEST /// -* findPositiveSolution test 1*-
 -- Test 13
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   CAD = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
-  assert(findSolution L === (true, CAD))
+  assert(findPositiveSolution L === (true, CAD))
 ///
 
-TEST /// -* findSolution test 2*-
+TEST /// -* findPositiveSolution test 2*-
 -- Test 14
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists"))  
+  assert(findPositiveSolution L === (false,"no point exists"))  
 ///
 
-TEST /// -* findSolution test 3*-
+TEST /// -* findPositiveSolution test 3*-
 -- Test 15
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3, p3=-x1*x2;
   L={p0,p1,p2,p3}
-  assert(findSolution L === (false,"no point exists"))
+  assert(findPositiveSolution L === (false,"no point exists"))
 /// 
   
-TEST /// -* findSolution test 4*-
+TEST /// -* findPositiveSolution test 4*-
 -- Test 16
   R=QQ[x]
   p0=x^2-1, p1=x;
   L={p0,p1}
   CAD = new HashTable from {x => 2_QQ};
-  assert(findSolution L === (true, CAD))
+  assert(findPositiveSolution L === (true, CAD))
 ///
 
 TEST /// -* hashify test*-

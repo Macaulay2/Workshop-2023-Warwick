@@ -173,3 +173,7 @@ CAD#((keys CAD)_0)
 peek oo
 
 --and repeat this to get one branch
+
+--=========================
+R=QQ[x]
+positivePoint({3-x^2,(7*x-12)*(x^2+x+1)})
