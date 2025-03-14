@@ -38,12 +38,28 @@ viewHelp "CADecomposition"
 --Jirstrand example
 
 R=QQ[x1,x2]
-p1:=x1^2+x2^2-1
-p2:=x1^3-x2^2
-L={p1,p2}
+f1:=x1^2+x2^2-1
+f2:=x1^3-x2^2
+F={f1,f2}
 
-findSolution(L)
-hashify openCAD(L)
+findPositiveSolution(F)
+hashify openCAD(F)
+positivePoint(F,openCAD(F))
+peek positivePoint(F,openCAD(F))
+
+openCAD(F)
+peek(openCAD(F))
+
+  R=QQ[x1,x2,x3]
+  ff0=x1*x2, ff1=x1^2*x2-x1*x3+x3^3, ff2=x2^2*x3+x3;
+  F1={pp0,pp1,pp2}
+  CAD = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
+  CAD2 = new HashTable from {x2=>1_QQ, x3=>5/4};
+  assert(findPositiveSolution F1 === (true, CAD))
+  assert(findPositiveSolution F1 === (true, CAD2))
+  positivePoint(F1,CAD)
+  
+positivePoint(F1,openCAD(F1))
 
 --now do all the related commands: 
 
@@ -52,46 +68,64 @@ hashify openCAD(L)
 --leadCoeff,factorsInList,factors
 
 
+lazardProjection(F,x2)
+samplePoints(lazardProjection(F,x2))
+
+alpha1 = new MutableHashTable; alpha1#x1 = -5/2;
+evalPolys(F,alpha1)
+samplePoints(evalPolys(F,alpha1))
+
+alpha2 = new MutableHashTable; alpha2#x1 = -3/4
+evalPolys(F,alpha2)
+samplePoints(evalPolys(F,alpha2))
 
 
+(PP,ord) = projectionPhase(F);
 
+LP1 = liftingPoint(PP,ord,alpha1)
+peek LP1
+hashify LP1
 
+LP2 = liftingPoint(PP,ord,alpha2)
+peek LP2
+hashify LP2
 
-
+openCAD(F)
+hashify openCAD(F)
 alpha = new MutableHashTable -- this is a test, this a solution!
 alpha#x1 = 2
 alpha#x2 = 1
-evalPolys(L,alpha)
+evalPolys(F,alpha)
 
 factors(p1)
 factors(p2)
-support(L)
-factorsInList(L)
+support(F)
+factorsInList(F)
 
-GML:=gmodsHeuristic(L,support(L))
+GMF:=gmodsHeuristic(F,support(F))
 
-leadCoeff(p1,GML)
-leadCoeff p2,GML)
+leadCoeff(p1,GMF)
+leadCoeff p2,GMF)
 
-L1 := for p in L list leadCoeff(p,GML) --leading coefficients
-L2 := for p in L list p-GML*contract(GML,p) --trailing coefficients
-L3 := for p in L list discriminant(p,GML) --discriminants
-L4 := for p in subsets(L,2) list resultant(p_0,p_1,GML) --resultants
+F1 := for p in F list leadCoeff(p,GMF) --leading coefficients
+F2 := for p in F list p-GMF*contract(GMF,p) --trailing coefficients
+F3 := for p in F list discriminant(p,GMF) --discriminants
+F4 := for p in subsets(F,2) list resultant(p_0,p_1,GMF) --resultants
 
 
-lazardProjection(L,GML)
+lazardProjection(F,GMF)
 
-projectionPhase(L);
+projectionPhase(F);
 
-samplePoints(lazardProjection(L,GML));
+samplePoints(lazardProjection(F,GMF));
 
 --==========================================================
 
  R=QQ[x]
   f=x^2-1
   g=x^3-1
-  L1={f,g}
-  S = samplePoints(L1)
+  F1={f,g}
+  S = samplePoints(F1)
 
 --x^4+x^3-x-1
 
@@ -100,32 +134,32 @@ samplePoints(lazardProjection(L,GML));
 R=QQ[x1,x2,x3]
   p0=x1*x2
   p1=x1*x2+x3^2
-  L={p0,p1}
-  (P,ord) = projectionPhase(L)
+  F={p0,p1}
+  (P,ord) = projectionPhase(F)
   pts = new MutableHashTable
   pts#x1 = -1
   pts#x2 = 3
   --ord = {x2,x1,x3}
-  LP = liftingPoint(P,pts,ord)
+  LP = liftingPoint(P,ord,pts)
 
 --========================
 
 --big example: intersecting sphere. This is 3-dim and takes about 58 seconds.
 R = QQ[x1,x2,x3]
-L = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
-timing C2 = openCAD(L)
+F = {(x1-1)^2+(x2-1)^2+(x3-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2-2^2}
+timing C2 = openCAD(F)
 -- 4.8998 seconds
 
 R = QQ[x1,x2,x3,x4]
-L = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2-2^2}
-timing C4 = openCAD(L)
+F = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2-2^2}
+timing C4 = openCAD(F)
 -- 1503.43 seconds
 
 --This probably takes a day!
 
 --R = QQ[x1,x2,x3,x4,x5]
---L = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2+(x5-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2+(x5+1)^2-2^2}
---timing C5 = openCAD(L)
+--F = {(x1-1)^2+(x2-1)^2+(x3-1)^2+(x4-1)^2+(x5-1)^2-2^2,(x1+1)^2+(x2+1)^2+(x3+1)^2+(x4+1)^2+(x5+1)^2-2^2}
+--timing C5 = openCAD(F)
 
 
 
@@ -134,9 +168,9 @@ timing C4 = openCAD(L)
 
 
 
-var = gmodsHeuristic(L,support(L))
-lazardProjection(L,var)
-(S,ordering) = projectionPhase(L)
+var = gmodsHeuristic(F,support(F))
+lazardProjection(F,var)
+(S,ordering) = projectionPhase(F)
 
 samplePoints(S#0) --this is one of the crazy parts
 
@@ -147,26 +181,26 @@ VAR:=x1*x2*x3*x4*x5*x6*x7*x8*x9*x10
 varlist:=support(VAR);
 --R := QQ[varlist];
 --vlist:=varlist;
-L = {};
+F = {};
 for i from 1 to j do (
 --R1 = QQ[take(varlist, i)];
 S={sum (apply(take(varlist,i) ,k->(k-1)^2)) - 4, sum (apply(take(varlist,i) ,k->(k+1)^2)) - 4};
-L = append(L,S);
+F = append(F,S);
 )
-L
+F
 
 for i from 1 to j do (
-L1 := L_(#L-i);
-R1 := QQ[support(L1)];
-L2 := {sub(L1_0,R1),sub(L1_1,R1)};
-print concatenate(toString(#L-i+1)," variables:"); print elapsedTiming openCAD(L2);
+F1 := F_(#F-i);
+R1 := QQ[support(F1)];
+F2 := {sub(F1_0,R1),sub(F1_1,R1)};
+print concatenate(toString(#F-i+1)," variables:"); print elapsedTiming openCAD(F2);
 )
 
 --make it so it adds all of these to a list maybe so I can check them again sometime
 
 --the 4d one took ~30 mins on a good day. Try it again soon and work through it:
 
-CAD = openCAD(L_3);
+CAD = openCAD(F_3);
 peek CAD
 CAD#"polynomials"
 CAD#((keys CAD)_0)
@@ -182,3 +216,23 @@ positivePoint({3-x^2,(7*x-12)*(x^2+x+1)})
 --===================================
 R=QQ[x]
 findPositiveSolution({3-x^2,(7*x-12)*(x^2+x+1)})
+
+
+
+R=QQ[x]
+L = {(x-1/2)*(x+1/2)*x}
+samplePoints(L)
+
+A := QQ(monoid[support(L)]);
+    h:=sub(product L, A);
+    intervalSize := 1; 
+    ourRoots := realRootIsolation(h,intervalSize)
+
+
+ourRoots := realRootIsolation(h,intervalSize/2)
+ourRoots := realRootIsolation(h,intervalSize/4)
+
+#ourRoots
+
+SP = for i from 0 to #ourRoots-2 list (ourRoots_i_1+ourRoots_(i+1)_0)/2
+{((min (flatten ourRoots))-1)_QQ}|SP|{((max (flatten ourRoots))+1)_QQ}

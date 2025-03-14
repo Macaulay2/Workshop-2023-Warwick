@@ -18,7 +18,7 @@ newPackage(
 	 Email=>"thomasjyahl@tamu.edu",
 	 HomePage=>"https://www.github.com/tjyahl"}
 	},
-    Headline=>"Package for symbolically exploring, counting, and locating real solutions to general polynomial systems",
+    Headline=>"Package for symbolically exploring, counting, locating real solutions to general polynomial systems",
     Keywords=>{"Real Algebraic Geometry"},
     PackageImports=>{},
     PackageExports=>{},
@@ -398,7 +398,7 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	l := SturmSequence(f);
 	
 	--bound for real roots
-	--Cauchy bound is usually good, but Knuth is better in cases of coefficient blowup.
+	--Cauchy bound is usually good, but Lagrange is better in cases of coefficient blowup.
 		
 	(E0,C0) := coefficients f; -- get exponents and coefficients of polynomial as matrices
 
@@ -410,18 +410,18 @@ realRootIsolation (RingElement,A) := List => (f,r)->(
 	    C1 := apply(C,i -> abs(lift(i/C#0,QQ))); --divide coeffs by leading coeff, take abs, with values in QQ.
 	    E1 := flatten(apply(flatten(entries(E0)), i -> degree(i))); -- convert exponents to list
 	    MC := 1 + max(apply(drop(C1,1), abs)); -- Cauchy bound
-	    CK := apply(drop(C1,1),drop(E1,1), (c,e) -> 2*(c^(1/(E1#0-e)))); -- Knuth bound
-	    MK := max CK;
-	    if ring MK === QQ or ring MK === ZZ then ( -- want to keep result in QQ
-	        MK = MK_QQ;
+	    CL := apply(drop(C1,1),drop(E1,1), (c,e) -> 2*(c^(1/(E1#0-e)))); -- Lagrange (Fujiwara) bound
+	    ML := max CL;
+	    if ring ML === QQ or ring ML === ZZ then ( -- want to keep result in QQ
+	        ML = ML_QQ;
 		) else (
 	        if abs(C#0) > 1 then  ( -- if suitable, keep bound in form similar to other bound 
-		        MK = ceiling(abs(C#0)*MK)/abs(C#0); -- (round up to nearest 1/leadcoeff, this is a bad rational approximation if MK was very small)
+		        ML = ceiling(abs(C#0)*ML)/abs(C#0); -- (round up to nearest 1/leadcoeff, this is a bad rational approximation if ML was very small)
 		    ) else (
-		        MK = ceiling MK; -- if leading term is less than 1, the above approximation is less accurate than just taking the ceiling.
+		        ML = ceiling ML; -- if leading term is less than 1, the above approximation is less accurate than just taking the ceiling.
 	        );
 	    );
-	    M = min(MC,MK); -- take the smaller of the two bounds.
+	    M = min(MC,ML); -- take the smaller of the two bounds.
 	);
 
 	L := {{-M,M}};

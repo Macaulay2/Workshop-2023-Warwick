@@ -1,7 +1,7 @@
 newPackage(
     "CADecomposition",
-    Version => "1.0.1",
-    Date => "11/04/2024",
+    Version => "1.0.2",
+    Date => "2025/03/14",
     Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
     Authors => {
 	{ Name => "del Rio, T.", 
@@ -18,12 +18,9 @@ newPackage(
     Keywords => {"Real Algebraic Geometry"},
     PackageExports => {"Elimination", "RealRootsNew"}, --when RealRoots is updated, rename "RealRootsNew" to "RealRoots".
     AuxiliaryFiles => false,
-    DebuggingMode => true
+    DebuggingMode => false
     )
 
---"A package can contain the code for many functions, only some of which should be made visibxle to the user.
---The function export allows one to specify which symbols are to be made visible."
---At the end, trim this down to only the ones useful for people using the package.
 export {
     "factors",
     "factorsInList",
@@ -37,7 +34,7 @@ export {
     "openCAD",
     "positivePoint",
     "findPositiveSolution",
-"hashify"
+    "hashify"
 }
 
 -* Code section *-
@@ -145,7 +142,7 @@ samplePoints(List) := (L) -> (
     intervalSize := 1; 
     ourRoots := realRootIsolation(h,intervalSize); --call RealRoots:-realRootIsolation (isolates real solutions of h in intervals of width at most 1)
     if length(ourRoots)==0 then (
-        SP := {}; -- if the polynomials have no roots, set SP to empty list.
+        SP := {0}; -- if the polynomials have no roots, choose 0.
       )
       else (
     -- if two consecutive intervals have a shared start/end point that is a root then refine intervals:
@@ -166,12 +163,12 @@ samplePoints(List) := (L) -> (
 -- Given the list of lists of polynomials that the projection returns creates a CAD in a tree-like hash structure
 -- starting from the point p given. i is the level and could be deduced from p but it is sent to ease understanding
 liftingPoint = method()
-liftingPoint(List, MutableHashTable, List) := (S, alpha, ordering) -> (
+liftingPoint(List, List, MutableHashTable) := (S, ordering, alpha) -> (
     -- List (S) is a list of lists of polynomials, representing the projection polynomials at each level, starting in one variable, up to
     -- the initial list of polynomials in n variables.
+    -- List (ordering) is the variable ordering followed in the projection (the first i variables are the variables at level i)    
     -- HashTable (alpha) is a point in i variables
-    -- List (ordering) is the variable ordering followed in the projection (the first i variables are the variables at level i)
-    cell := new MutableHashTable;
+cell := new MutableHashTable;
     cell#"point" = alpha;
     i := #keys(alpha); --number of variables that have been assigned
     -- we check if all the variables have been given a value already
@@ -185,7 +182,7 @@ liftingPoint(List, MutableHashTable, List) := (S, alpha, ordering) -> (
     for samplePoint in newSamplePoints do (
         alphaNew := copy alpha;
         alphaNew#v = samplePoint;
-        cell#samplePoint = liftingPoint(S, alphaNew, ordering);
+        cell#samplePoint = liftingPoint(S, ordering, alphaNew);
     );
     cell
     )
@@ -195,7 +192,7 @@ openCAD = method()
 openCAD(List) := (L) -> (
   (S, ordering) := projectionPhase(L);
   alpha := new MutableHashTable;
-  liftingPoint(S, alpha, ordering)
+  liftingPoint(S, ordering,alpha)
 )
 
 -- Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive
@@ -515,19 +512,19 @@ doc ///
 
 doc ///
   Key
-    (liftingPoint, List, MutableHashTable, List)
+    (liftingPoint, List, List,MutableHashTable)
     liftingPoint
   Headline
     Given the projection phase of a CAD (S) and the variable ordering (ordering), this method returns an OpenCAD above the point (alpha) given.
   Usage
-    liftingPoint(S,alpha,ordering)
+    liftingPoint(S,ordering,alpha)
   Inputs
     S:List
       of lists of RingElements, representing the projection polynomials of each level.
+    ordering:List
+      the variable ordering followed in the projection.     
     alpha:MutableHashTable
       the point described using a hash table where the keys are RingElements (variables) and the values are sample points.
-    ordering:List
-      the variable ordering followed in the projection.
   Outputs
     LP:MutableHashTable
       describing an OpenCAD.
@@ -542,7 +539,7 @@ doc ///
       alpha = new MutableHashTable
       alpha#x2 = -2, alpha#x3 = -3/32;
       (S,ordering) =  projectionPhase(L)
-      LP = liftingPoint(S,alpha,ordering)
+      LP = liftingPoint(S,ordering,alpha)
       hashify LP
   SeeAlso
     evalPolys
@@ -782,7 +779,7 @@ TEST /// -* liftingPoint test *-
   (S,ordering) = projectionPhase(L)
   alpha = new MutableHashTable
   alpha#x3 = -1_QQ, alpha#x1 = 1_QQ;
-  LP = liftingPoint(S,alpha,ordering)
+  LP = liftingPoint(S,ordering,alpha)
 
   cellLevelThreeA = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ, x2=>-3/4}}
   cellLevelThreeB = new MutableHashTable from {"point"=>new MutableHashTable from {x3=>-1_QQ, x1=>1_QQ, x2=>-5/2}  }
@@ -843,8 +840,8 @@ TEST /// -* findPositiveSolution test 1*-
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
-  CAD = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
-  assert(findPositiveSolution L === (true, CAD))
+  PP = new HashTable from {x2=>1_QQ, x3=>5/4, x1=>1_QQ};
+  assert(findPositiveSolution L === (true, PP))
 ///
 
 TEST /// -* findPositiveSolution test 2*-
@@ -868,8 +865,8 @@ TEST /// -* findPositiveSolution test 4*-
   R=QQ[x]
   p0=x^2-1, p1=x;
   L={p0,p1}
-  CAD = new HashTable from {x => 2_QQ};
-  assert(findPositiveSolution L === (true, CAD))
+  PP = new HashTable from {x => 2_QQ};
+  assert(findPositiveSolution L === (true, PP))
 ///
 
 TEST /// -* hashify test*-
