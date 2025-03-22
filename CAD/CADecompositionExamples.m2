@@ -6,13 +6,8 @@ uninstallPackage "RealRoots"
 installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
 installPackage("CADecomposition")
 
+--viewHelp "CADecomposition"
 --======================
-
-
-
-
-installPackage("CADecomposition")
-
 
 -* Development section *-
 restart
@@ -31,6 +26,20 @@ installPackage "RealRootsNew" --while we wait for RealRoots to update, this is t
 viewHelp "CADecomposition"
 --if this does not load properly, html files should now be created in
 --home\[name]\.Macaulay2\local\share\doc\Macaulay2\CADecomposition\html
+
+
+collectPoints = (cell) -> (
+    pointsList = {};
+    pointsList = append(pointsList, cell#"point");
+    for key in keys(cell) do (
+        if not instance(key, String) then (
+            pointsList = pointsList | collectPoints(cell#key);
+        );
+    );
+    --maxKeys = max(for point in pointsList list length(keys(point)));
+    --pointsList = select(pointsList, pt -> length(keys(pt)) == maxKeys);
+    return pointsList;
+);
 
 --====================
 
@@ -175,7 +184,7 @@ lazardProjection(F,var)
 samplePoints(S#0) --this is one of the crazy parts
 
 --==========================
-j:=3;
+j:=4;
 R :=QQ[x1,x2,x3,x4,x5,x6,x7,x8,x9,x10]
 VAR:=x1*x2*x3*x4*x5*x6*x7*x8*x9*x10
 varlist:=support(VAR);
@@ -188,13 +197,30 @@ S={sum (apply(take(varlist,i) ,k->(k-1)^2)) - 4, sum (apply(take(varlist,i) ,k->
 F = append(F,S);
 )
 F
+C = {};
+F3 = {};
 
 for i from 1 to j do (
-F1 := F_(#F-i);
+F1 := F_(-i);
 R1 := QQ[support(F1)];
 F2 := {sub(F1_0,R1),sub(F1_1,R1)};
-print concatenate(toString(#F-i+1)," variables:"); print elapsedTiming openCAD(F2);
+F3 := append(F3,F2);
+C = append(C,elapsedTiming openCAD(F2));
+print concatenate(toString(j-i+1)," variables:"); print C_(i-1);print "\n";
 )
+
+
+CCC = {(C#0)#1, (C#1)#1, (C#2)#1, (C#3)#1}
+
+V = values hashify(CCC#3)
+
+length(collectPoints CCC#2)
+
+AA1 = collectPoints(CCC#0);
+for i from 1 to 4 do
+print length(select(AA4, pt -> length(keys(pt)) == i))
+
+
 
 --make it so it adds all of these to a list maybe so I can check them again sometime
 

@@ -4,15 +4,15 @@ newPackage(
     Date => "2025/03/14",
     Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
     Authors => {
-	{ Name => "del Rio, T.", 
-	  Email => "delriot@coventry.ac.uk", 
-	  HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},	
+    { Name => "del Rio, T.", 
+      Email => "delriot@coventry.ac.uk", 
+      HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},    
         { Name => "Rahkooy, H.", 
-	  Email => "rahkooy@maths.ox.ac.uk", 
-	  HomePage => "https://people.maths.ox.ac.uk/rahkooy/"},	
+      Email => "rahkooy@maths.ox.ac.uk", 
+      HomePage => "https://people.maths.ox.ac.uk/rahkooy/"}, 
         { Name => "Lee, C.", 
-	  Email => "cel34@bath.ac.uk", 
-	  HomePage => "https://people.bath.ac.uk/cel34/"}
+      Email => "cel34@bath.ac.uk", 
+      HomePage => "https://people.bath.ac.uk/cel34/"}
         },
 
     Keywords => {"Real Algebraic Geometry"},
@@ -110,10 +110,10 @@ lazardProjection(List, RingElement) := (L,v) -> (
   -- "return the parts of each poly p in L that rely on v"
         L1 := for p in L list leadCoeff(p,v); --leading coefficients
         L2 := for p in L list p-v*contract(v,p); --trailing coefficients
-	L3 := for p in L list discriminant(p,v); --discriminants
-	L4 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
-	factorsInList(L0|L1|L2|L3|L4) -- combine these into one list, as squarefree factors.
-	)
+    L3 := for p in L list discriminant(p,v); --discriminants
+    L4 := for p in subsets(L,2) list resultant(p_0,p_1,v); --resultants
+    factorsInList(L0|L1|L2|L3|L4) -- combine these into one list, as squarefree factors.
+    )
 
 -- Creates a full Lazard projection
 projectionPhase = method()
@@ -212,7 +212,7 @@ positivePoint(List, MutableHashTable) := (L, cell) -> (
         )
     ) else (
         evaluations := evalPolys(L,cell#"point");
-	evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
+    evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
         for e in evaluations list e>0; --see if positive or not
         if all(evaluations, elem->(elem>0)) then (
           return cell#"point"
@@ -339,19 +339,18 @@ doc ///
       This is used in the lifting phase of the CAD, where a polynomial in k variables is evaluated at a 
       point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}]$ to return a univariate polynomial in $\mathbb{R}[x_k]$.
     Example
-	  R=QQ[x0,x1,x2,x3]
-	  alpha = new MutableHashTable;
-	  alpha#x0 = 3, alpha#x1 = 4, alpha#x2 = 1;
-	  p0=x1^2*x0-2*x3*x2
-	  evalPolys(p0,alpha)
-	  alpha1 := copy alpha;
-	  alpha1#x3 = -2;
-	  evalPolys(p0,alpha1)
-	  
-          p1=x0*(x1-1)*(x2-2)*(x3-3);
-    	  L = {p0,p1}
-	  evalPolys(L,alpha)
-	  evalPolys(L,alpha1)
+      R=QQ[x0,x1,x2,x3]
+      alpha = new MutableHashTable;
+      alpha#x0 = 3, alpha#x1 = 4, alpha#x2 = 1;
+      p0=x1^2*x0-2*x3*x2
+      evalPolys(p0,alpha)
+      alpha1 := copy alpha;
+      alpha1#x3 = -2;
+      evalPolys(p0,alpha1)
+      p1=x0*(x1-1)*(x2-2)*(x3-3);
+      L = {p0,p1}
+      evalPolys(L,alpha)
+      evalPolys(L,alpha1)
   SeeAlso
 ///
 
@@ -466,10 +465,10 @@ doc ///
       polynomials from level 1 to level $n$, and the list of variables, ordered so that the first $k$ variables of the list are the variables of the polynomials
       at level $k$.
     Example
-	  R=QQ[x1,x2,x3]
-	  p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
-	  L={p0,p1,p2}
-	  projectionPhase(L)
+      R=QQ[x1,x2,x3]
+      p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
+      L={p0,p1,p2}
+      projectionPhase(L)
   SeeAlso
     gmodsHeuristic
     lazardProjection
