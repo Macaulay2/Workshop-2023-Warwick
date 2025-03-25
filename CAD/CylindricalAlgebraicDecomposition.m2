@@ -5,8 +5,8 @@ newPackage(
     Headline => "(open) Cylindrical Algebraic Decompositions",
     Authors => {
     { Name => "del Rio, T.", 
-      Email => "delriot@coventry.ac.uk", 
-      HomePage => "https://pureportal.coventry.ac.uk/en/persons/tereso-del-r%C3%ADo-almajano"},    
+      Email => "teresodra@gmail.com", 
+      HomePage => "https://sites.google.com/view/tereso"},    
         { Name => "Rahkooy, H.", 
       Email => "rahkooy@maths.ox.ac.uk", 
       HomePage => "https://people.maths.ox.ac.uk/rahkooy/"}, 
