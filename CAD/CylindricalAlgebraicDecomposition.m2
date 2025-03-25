@@ -1,8 +1,8 @@
 newPackage(
-    "CADecomposition",
-    Version => "1.0.2",
-    Date => "2025/03/14",
-    Headline => "A package for performing (open) Cylindrical Algebraic Decompositions.",
+    "CylindricalAlgebraicDecomposition",
+    Version => "1.0.3",
+    Date => "2025/03/25",
+    Headline => "(open) Cylindrical Algebraic Decompositions",
     Authors => {
     { Name => "del Rio, T.", 
       Email => "delriot@coventry.ac.uk", 
@@ -24,7 +24,7 @@ newPackage(
 export {
     "factors",
     "factorsInList",
-    "evalPolys",
+    "evaluatePolynomials",
     "leadCoeff",
     "gmodsHeuristic",
     "lazardProjection",
@@ -49,7 +49,7 @@ factors(RingElement) := (p) -> (
 -- overloads original command to return the combined support of a list of polynomials.
 support(List) := (L) -> (
     for p in L do
-      if liftable(p,QQ) then L = delete(p,L); --added to catch new output from evalPolys
+      if liftable(p,QQ) then L = delete(p,L); --added to catch new output from evaluatePolynomials
     unique(flatten(L/support))
     )
 
@@ -62,17 +62,17 @@ factorsInList(List) := (L) -> (
 )
 
 -- Evaluates the given RingElement or List of RingElements at a point given by a MutableHashTable.
-evalPolys = method()
-evalPolys(RingElement,MutableHashTable) := (p, alpha) -> (
+evaluatePolynomials = method()
+evaluatePolynomials(RingElement,MutableHashTable) := (p, alpha) -> (
     for k in keys(alpha) do(
       p=sub(p, {k => alpha#k}); --substitute in all of the values for the variables specified in alpha.
     );
     if liftable(p,QQ) then p = lift(p,QQ); --if the output is a constant, lift it.
       p
     )
-evalPolys(List,MutableHashTable) := (L, alpha) -> (
+evaluatePolynomials(List,MutableHashTable) := (L, alpha) -> (
     E := for p in L list
-      evalPolys(p,alpha); --for a list of polynomials, call evalPolys on each polynomial in the list and return the evaluated list.
+      evaluatePolynomials(p,alpha); --for a list of polynomials, call evaluatePolynomials on each polynomial in the list and return the evaluated list.
     E
     )
 
@@ -168,24 +168,24 @@ liftingPoint(List, List, MutableHashTable) := (S, ordering, alpha) -> (
     -- the initial list of polynomials in n variables.
     -- List (ordering) is the variable ordering followed in the projection (the first i variables are the variables at level i)    
     -- HashTable (alpha) is a point in i variables
-cell := new MutableHashTable;
+    cell := new MutableHashTable;
     cell#"point" = alpha;
     i := #keys(alpha); --number of variables that have been assigned
     -- we check if all the variables have been given a value already
-    if i >= length(S) then return cell; -- if so just return an empty MutableHashTable
-    U := evalPolys(S_i, alpha); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
-    cell#"polynomials"=U;
-    --Check in case U is not univariate.
-    if #support(U) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of U is " | toString(U));
-    v := ordering_i;
-    newSamplePoints := samplePoints(U);
-    for samplePoint in newSamplePoints do (
-        alphaNew := copy alpha;
-        alphaNew#v = samplePoint;
-        cell#samplePoint = liftingPoint(S, ordering, alphaNew);
-    );
-    cell
+    if i >= length(S) then cell else ( -- if so just return an empty MutableHashTable
+        U := evaluatePolynomials(S_i, alpha); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
+        cell#"polynomials" = U;
+        --Check in case U is not univariate.
+        if #support(U) > 1 then error ("Expected list of polynomials to have a single variable as support. The value of U is " | toString(U));
+        v := ordering_i;
+        for samplePoint in samplePoints(U) do (
+            alphaNew := copy alpha;
+            alphaNew#v = samplePoint;
+            cell#samplePoint = liftingPoint(S, ordering, alphaNew);
+        );
+        cell
     )
+)
 
 --project and lift the initial polynomials, performing a full open CAD.
 openCAD = method()
@@ -199,26 +199,22 @@ openCAD(List) := (L) -> (
 positivePoint = method()
 positivePoint(List, MutableHashTable) := (L, cell) -> (
     -- move down to bottom level, where all variables are evaluated.
-    if length(keys(cell#"point"))<length(support(L)) then (
+    if length(keys(cell#"point")) < length(support(L)) then (
         for key in keys(cell) do(
             -- if the key is not "points" or "polynomials", call again 
-            if not instance(key,String) then(
+            if not instance(key, String) then (
                 result := positivePoint(L, cell#key);
                 -- if the answer is a point (something different from null)
-                if instance(result, HashTable) then(
-                    return result
-                );
-            );
-        )
+                if instance(result, HashTable) then return result;
+            )
+        );
+        "no point exists"
     ) else (
-        evaluations := evalPolys(L,cell#"point");
-    evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
+        evaluations := evaluatePolynomials(L,cell#"point");
+        evaluations = for e in evaluations list lift(e,QQ); --elements in list were in R and not treated as numbers, this fixes that.
         for e in evaluations list e>0; --see if positive or not
-        if all(evaluations, elem->(elem>0)) then (
-          return cell#"point"
-        )
-    );
-    return "no point exists"
+        if all(evaluations, e->(e>0)) then cell#"point" else "no point exists"
+    )
 )
 
 -- Checks if there is a point in which all the polynomials given in the list are strictly positive, and return it
@@ -252,7 +248,7 @@ beginDocumentation()
 
 doc ///
 Key
-  CADecomposition
+  CylindricalAlgebraicDecomposition
 Headline
   Cylindrical Algebraic Decomposition
 Description
@@ -265,7 +261,7 @@ doc ///
     (factors, RingElement)
     factors
   Headline
-    Returns a list of pairs containing the polynomial's factors and exponents.
+    Polynomial factorisation.
   Usage
     factors(p)
   Inputs
@@ -289,7 +285,7 @@ doc ///
     (factorsInList, List)
     factorsInList
   Headline
-    Returns the factors that appear in a list of RingElements
+    Full collection of factors.
   Usage
     factorsInList(L)
   Inputs
@@ -312,14 +308,14 @@ doc ///
 
 doc ///
   Key
-    evalPolys
-    (evalPolys, RingElement, MutableHashTable)
-    (evalPolys, List, MutableHashTable)
+    evaluatePolynomials
+    (evaluatePolynomials, RingElement, MutableHashTable)
+    (evaluatePolynomials, List, MutableHashTable)
   Headline
-    Evaluates the given polynomial or list of polynomials with respect to the given sample point.
+    Evaluate polynomial(s) at point.
   Usage
-    evalPolys(p,alpha)
-    evalPolys(L,alpha)
+    evaluatePolynomials(p,alpha)
+    evaluatePolynomials(L,alpha)
   Inputs
     p:RingElement
       polynomial in a ring.
@@ -334,7 +330,7 @@ doc ///
       of polynomials evaluated at the sample point.
   Description
     Text
-      Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evalPolys evaluates the 
+      Given the polynomial (p) or list of polynomials (L) and sample point (alpha), evaluatePolynomials evaluates the 
       polynomial(s) at the sample point and returns the evaluated polynomial(s). 
       This is used in the lifting phase of the CAD, where a polynomial in k variables is evaluated at a 
       point $\alpha \in \mathbb{R}[x_1,\dots,\x_{k-1}]$ to return a univariate polynomial in $\mathbb{R}[x_k]$.
@@ -343,14 +339,14 @@ doc ///
       alpha = new MutableHashTable;
       alpha#x0 = 3, alpha#x1 = 4, alpha#x2 = 1;
       p0=x1^2*x0-2*x3*x2
-      evalPolys(p0,alpha)
+      evaluatePolynomials(p0,alpha)
       alpha1 := copy alpha;
       alpha1#x3 = -2;
-      evalPolys(p0,alpha1)
+      evaluatePolynomials(p0,alpha1)
       p1=x0*(x1-1)*(x2-2)*(x3-3);
       L = {p0,p1}
-      evalPolys(L,alpha)
-      evalPolys(L,alpha1)
+      evaluatePolynomials(L,alpha)
+      evaluatePolynomials(L,alpha1)
   SeeAlso
 ///
 
@@ -359,7 +355,7 @@ doc ///
     (leadCoeff, RingElement, RingElement)
     leadCoeff
   Headline
-    Finds the lead coefficient of a ring element with respect to a variable.
+    Lead coefficient with respect to a variable.
   Usage
     leadCoeff(p,v)
   Inputs
@@ -385,7 +381,7 @@ doc ///
     (gmodsHeuristic, List, List)
     gmodsHeuristic
   Headline
-    Uses the gmods heuristic to determine the next variable to project.
+    Ddetermine the next variable to project.
   Usage
     gmodsHeuristic(L,variables)
   Inputs
@@ -414,7 +410,7 @@ doc ///
     (lazardProjection, List, RingElement)
     lazardProjection
   Headline
-    Computes the Lazard projection with respect to a variable.
+    Lazard projection with respect to a variable.
   Usage
     lazardProjection(L,v)
   Inputs
@@ -447,7 +443,7 @@ doc ///
     (projectionPhase, List)
     projectionPhase
   Headline
-    Creates a full Lazard projection of a given list of polynomials
+    Full Lazard projection of list of polynomials.
   Usage
     projectionPhase(L)
   Inputs
@@ -479,7 +475,7 @@ doc ///
     (samplePoints, List)
     samplePoints
   Headline
-    Computes a list of sample points in each cell that represent each open cell.
+    List of sample points representing open cells.
   Usage
     samplePoints(L)
   Inputs
@@ -514,7 +510,7 @@ doc ///
     (liftingPoint, List, List,MutableHashTable)
     liftingPoint
   Headline
-    Given the projection phase of a CAD (S) and the variable ordering (ordering), this method returns an OpenCAD above the point (alpha) given.
+    OpenCAD above the point given.
   Usage
     liftingPoint(S,ordering,alpha)
   Inputs
@@ -541,7 +537,7 @@ doc ///
       LP = liftingPoint(S,ordering,alpha)
       hashify LP
   SeeAlso
-    evalPolys
+    evaluatePolynomials
     samplePoints
 ///
 
@@ -550,7 +546,7 @@ doc ///
     (openCAD, List)
     openCAD
   Headline
-    Given a list of polynomials, an open CAD of those polynomials is returned (main algorithm).
+    Open CAD of listed polynomials.
   Usage
     openCAD(L)
   Inputs
@@ -584,7 +580,7 @@ doc ///
     (positivePoint, List, MutableHashTable)
     positivePoint
   Headline
-    Checks if there is a point in or above the given cell in which all the polynomials given in the list are strictly positive.
+    Checks if there is a point above the cell where all polynomials are positive.
   Usage
     positivePoint(L,cell)
   Inputs
@@ -606,7 +602,7 @@ doc ///
       PP=positivePoint(L,C);
       hashify(PP)
   SeeAlso
-    evalPolys
+    evaluatePolynomials
 ///
 
 doc ///
@@ -614,7 +610,7 @@ doc ///
     (findPositiveSolution, List)
     findPositiveSolution
   Headline
-    Checks if there is a point in which all the polynomials given in the list are strictly positive
+    Checks if there is a point where all given polynomials are positive.
   Usage
     findPositiveSolution(L)
   Inputs
@@ -675,7 +671,7 @@ doc ///
       M = new MutableHashTable from {-1_QQ=>new MutableHashTable from {-5/2=>new MutableHashTable from {"point"=>new MutableHashTable from {x1=>-1_QQ, x2=>-5/2}}}};
       hashify M
   SeeAlso
-    evalPolys
+    evaluatePolynomials
     liftingPoint
     openCAD
     positivePoint
@@ -704,24 +700,24 @@ TEST /// -* factorsInList test *-
   assert(sort F === sort answer)
 ///
 
-TEST /// -* evalPolys test *-
+TEST /// -* evaluatePolynomials test *-
 -- Test 2
   R=QQ[x1,x2,x3]
   p=x1^2*x2-x1*x3+x3^3
   alpha = new MutableHashTable;
   alpha#x1 = 1, alpha#x2 = 3;
-  E = evalPolys(p,alpha)
+  E = evaluatePolynomials(p,alpha)
   assert(E == 3-x3+x3^3)
 ///
 
-TEST /// -* evalPolys test (List)*-
+TEST /// -* evaluatePolynomials test (List)*-
 -- Test 3
   R=QQ[x1,x2,x3]
   p0=x1*x2, p1=x1^2*x2-x1*x3+x3^3, p2=x2^2*x3+x3;
   L={p0,p1,p2}
   alpha = new MutableHashTable
   alpha#x1 = 1, alpha#x2 = 3;
-  E = evalPolys(L,alpha)
+  E = evaluatePolynomials(L,alpha)
   assert(E == {3, 3-x3+x3^3, 9*x3+x3})
 ///
 

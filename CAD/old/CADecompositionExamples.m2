@@ -73,7 +73,7 @@ positivePoint(F1,openCAD(F1))
 --now do all the related commands: 
 
 --projectionPhase if that makes sense, gmodsHeuristic at each bit, lazardProjection at each bit, 
---liftingPoint, evalPolys, samplePoints (realRootIso)
+--liftingPoint, evaluatePolynomials, samplePoints (realRootIso)
 --leadCoeff,factorsInList,factors
 
 
@@ -81,12 +81,12 @@ lazardProjection(F,x2)
 samplePoints(lazardProjection(F,x2))
 
 alpha1 = new MutableHashTable; alpha1#x1 = -5/2;
-evalPolys(F,alpha1)
-samplePoints(evalPolys(F,alpha1))
+evaluatePolynomials(F,alpha1)
+samplePoints(evaluatePolynomials(F,alpha1))
 
 alpha2 = new MutableHashTable; alpha2#x1 = -3/4
-evalPolys(F,alpha2)
-samplePoints(evalPolys(F,alpha2))
+evaluatePolynomials(F,alpha2)
+samplePoints(evaluatePolynomials(F,alpha2))
 
 
 (PP,ord) = projectionPhase(F);
@@ -104,7 +104,7 @@ hashify openCAD(F)
 alpha = new MutableHashTable -- this is a test, this a solution!
 alpha#x1 = 2
 alpha#x2 = 1
-evalPolys(F,alpha)
+evaluatePolynomials(F,alpha)
 
 factors(p1)
 factors(p2)
