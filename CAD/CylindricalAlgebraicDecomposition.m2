@@ -16,7 +16,7 @@ newPackage(
         },
 
     Keywords => {"Real Algebraic Geometry"},
-    PackageExports => {"Elimination", "RealRootsNew"}, --when RealRoots is updated, rename "RealRootsNew" to "RealRoots".
+    PackageExports => {"Elimination", "RealRoots"},
     AuxiliaryFiles => false,
     DebuggingMode => false
     )
@@ -763,7 +763,7 @@ TEST /// -* samplePoints test *-
   p0=x^2-1, p1=x^3-1
   L={p0,p1}
   SP = samplePoints(L)
-  assert(SP == {-3, -1/2, 2}) --this will be correct when the RealRoots update goes live
+  assert(SP == {-3, -1/2, 2})
 ///
 
 TEST /// -* liftingPoint test *-
