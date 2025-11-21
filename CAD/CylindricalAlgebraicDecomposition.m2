@@ -239,9 +239,9 @@ Description
 
     We illustrate this package with a simple example. Consider the unit circle and cuspidal cubic:
 
-    $\mathcal{F} = \{x^2 + y^2 - 1 = 0, x^3 - y^2 = 0$.
+    $\mathcal{F} = \{x^2 + y^2 - 1 = 0, x^3 - y^2 = 0\}$.
 
-    The CAD of $\mathbb{R}^2$ with respect to \mathcal{F} decomposes the plane into cells where the signs of the two polynomials are constant.
+    The CAD of $\mathbb{R}^2$ with respect to $\mathcal{F}$ decomposes the plane into cells where the signs of the two polynomials are constant.
 
   Example
     R = QQ[x,y]
@@ -251,6 +251,11 @@ Description
     hashify C0
     findPositiveSolution F
 SeeAlso
+  projectionPhase
+  liftingPoint
+  openCAD
+  positivePoint
+  findPositiveSolution
 Subnodes
   findPositiveSolution
   hashify
