@@ -253,7 +253,54 @@ Headline
   Cylindrical Algebraic Decomposition
 Description
   Text
+    The *CylindricalAlgebraicDecomposition* package provides tools to compute
+    full open CADs of real algebraic sets.
+
+    Cylindrical Algebraic Decomposition (CAD) is a fundamental tool in real
+    algebraic geometry.  Given a family of polynomials in variables
+    $x_1, \dots, x_n$, a CAD decomposes $\mathbb{R}^n$ into finitely many
+    cylindrical cells such that each polynomial has constant sign on every cell.
+    This is the basis for quantifier elimination over real closed fields and
+    many applications in robotics, optimization, control theory, and symbolic
+    computation.
+
+    This package implements an open CAD using Lazard projection and recursive
+    lifting.  The user-facing functions include:
+    - @projectionPhase@: Lazard projection
+    - @liftingPoint@: construct the open CAD above a given sample point
+    - @openCAD@: compute a full open CAD of a list of polynomials
+    - @positivePoint@ and @findPositiveSolution@: locate sample points where
+      all polynomials in a list are strictly positive
+
+    A simple example illustrates the workflow.  Consider the unit circle and
+    the cuspidal cubic:
+    \[
+       C: x^2 + y^2 - 1 = 0, \qquad
+       K: y^2 - x^3 = 0.
+    \]
+    The CAD of $\mathbb{R}^2$ with respect to these curves decomposes the plane
+    into cells where the signs of the two polynomials are constant.
+
+    Example
+      R = QQ[x,y]
+      C = x^2 + y^2 - 1
+      K = y^2 - x^3
+      L = {C, K}
+
+      -- Compute the open CAD
+      C0 = openCAD L
+      C0               -- displays the raw mutable hash table structure
+
+      -- View the CAD in a readable form
+      hashify C0       -- prints an immutable hash table version
+
+      -- Extract a point where both polynomials are positive, if one exists
+      findPositiveSolution L
+
 SeeAlso
+  projectionPhase
+  openCAD
+  liftingPoint
 ///
 
 doc ///
