@@ -3,7 +3,7 @@
 restart
 check "CylindricalAlgebraicDecomposition" --run tests
 uninstallPackage "RealRoots"
-installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
+installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
 installPackage("CylindricalAlgebraicDecomposition")
 
 --viewHelp "CylindricalAlgebraicDecomposition"
@@ -21,7 +21,7 @@ restart
 installPackage("CylindricalAlgebraicDecomposition",IgnoreExampleErrors=>true) --load and install a package and its documentation
 installPackage("CylindricalAlgebraicDecomposition")
 uninstallPackage "RealRoots"
-installPackage "RealRootsNew" --while we wait for RealRoots to update, this is the fixed version
+installPackage "RealRoots2" --while we wait for RealRoots to update, this is the fixed version
 --installPackage "CylindricalAlgebraicDecomposition" --load and install a package and its documentation
 viewHelp "CylindricalAlgebraicDecomposition"
 --if this does not load properly, html files should now be created in
@@ -119,7 +119,7 @@ leadCoeff p2,GMF)
 F1 := for p in F list leadCoeff(p,GMF) --leading coefficients
 F2 := for p in F list p-GMF*contract(GMF,p) --trailing coefficients
 F3 := for p in F list discriminant(p,GMF) --discriminants
-F4 := for p in subsets(F,2) list resultant(p_0,p_1,GMF) --resultants
+F4 := for p in subsets(F,2) list resultant(p#0,p#1,GMF) --resultants
 
 
 lazardProjection(F,GMF)
@@ -201,12 +201,12 @@ C = {};
 F3 = {};
 
 for i from 1 to j do (
-F1 := F_(-i);
+F1 := F#(-i);
 R1 := QQ[support(F1)];
-F2 := {sub(F1_0,R1),sub(F1_1,R1)};
+F2 := {sub(F1_0,R1),sub(F1#1,R1)};
 F3 := append(F3,F2);
 C = append(C,elapsedTiming openCAD(F2));
-print concatenate(toString(j-i+1)," variables:"); print C_(i-1);print "\n";
+print concatenate(toString(j-i+1)," variables:"); print C#(i-1);print "\n";
 )
 
 
@@ -262,3 +262,56 @@ ourRoots := realRootIsolation(h,intervalSize/4)
 
 SP = for i from 0 to #ourRoots-2 list (ourRoots_i_1+ourRoots_(i+1)_0)/2
 {((min (flatten ourRoots))-1)_QQ}|SP|{((max (flatten ourRoots))+1)_QQ}
+
+-----------------------
+
+      R=QQ[x_1,x_2,x_3]
+      p0=x_1*x_2, p1=x_1^2*x_2-x_1*x_3+x_3^3, p2=x_2^2*x_3+x_3;
+      L={p0,p1,p2}
+      alpha = new MutableHashTable
+      alpha#(x_2) = -2, alpha#(x_3) = -3/32;
+      (S,ordering) =  projectionPhase(L)
+      LP = liftingPoint(S,ordering,alpha)
+      hashify LP
+    cell := new MutableHashTable;
+    cell#"point" = alpha;
+i := #keys(alpha) 
+i >= #S
+
+U := evaluatePolynomials(S#i, alpha); -- evaluating the polys in i+1 vars at point p (so U should be a set of univariate polynomials)
+        cell#"polynomials" = U;
+        -- Check in case U is not univariate.
+        if #support(U) > 1 then error ("expected list of polynomials to have a single variable as support. The value of U is " | toString(U));
+        v := ordering#i;
+
+samplePoints(U)
+
+U
+
+#(support U)
+
+A := QQ(monoid[support U])
+h = sub(product U,A)
+    intervalSize := 1; 
+    ourRoots := realRootIsolation(h,intervalSize)
+#ourRoots
+sub(h,{(support h)#0=>ourRoots#0#1})
+
+      R=QQ[x_1,x_2]
+      p0=x_1-x_2, p1=x_1^3+x_2^2;
+      L={p0,p1}
+      openCAD(L) --fails
+      hashify openCAD(L)
+      
+      (S, ordering) := projectionPhase(L); --fails
+
+    L = factorsInList(L)
+    S := {L}
+    variables := support L
+    ordering := {}
+    if variables === {} then error "all polynomials are constants";
+    while #variables > 1 do ( 
+      v := gmodsHeuristic(L, variables); 
+      L = lazardProjection(L, v); --fails
+
+get(P, true, null)
