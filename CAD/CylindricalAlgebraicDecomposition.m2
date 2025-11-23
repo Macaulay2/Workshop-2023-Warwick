@@ -47,7 +47,7 @@ support(List) := (L) -> (
 -- find factors of all polynomials in a list, removing repetition
 factorsInList = method()
 factorsInList(List) := (L) -> (
-    FL := flatten for p in L list (for g in factor p list g#0); -- returns factors of each element of L and combines these into a single list of pairs.
+    FL := flatten for p in L list (for g in factor p list g#0); -- returns the factors of each element of L and combines them into a single list.
     FL = select(FL, p -> not liftable(p, QQ)); -- removes any constants.
     FL = unique FL -- Reduces list to only the unique factors, removing multiplicity.
 )
@@ -362,7 +362,7 @@ doc ///
     (gmodsHeuristic, List, List)
     gmodsHeuristic
   Headline
-    Ddetermine the next variable to project.
+    Determine the next variable to project.
   Usage
     gmodsHeuristic(L,variables)
   Inputs
@@ -415,7 +415,7 @@ doc ///
       L={p0,p1,p2}
       L2 = lazardProjection(L,x_1)
   SeeAlso
-    --leadCoefficient
+    leadCoefficient
     factorsInList
   Subnodes
     factorsInList
@@ -586,7 +586,7 @@ doc ///
       describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
   Description
     Text
-      Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns "null" otherwise.
+      Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns null otherwise.
     Example
       R=QQ[x]
       p0=x^2-1, p1=x;
