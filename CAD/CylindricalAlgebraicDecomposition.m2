@@ -586,7 +586,7 @@ doc ///
       describing a point in the cell (evaluations of all variables) where all polynomials in L are strictly positive (if one exists).
   Description
     Text
-      Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns "no point exists" otherwise.
+      Given the a list of polynomials and a cell of a CAD, this method checks if a point exists where all polynomials are strictly positive, or returns "null" otherwise.
     Example
       R=QQ[x]
       p0=x^2-1, p1=x;
