@@ -331,31 +331,31 @@ doc ///
   SeeAlso
 ///
 
---doc ///
---  Key
---    (leadCoefficient, RingElement, RingElement)
---    leadCoefficient
---  Headline
---    Lead coefficient with respect to a variable.
---  Usage
---    leadCoefficient(p,v)
---  Inputs
---    p:RingElement
---      a polynomial in the ring.
---    v:RingElement
---      a variable in the ring.
---  Outputs
---    :RingElement
---      the leading coefficient of p with respect to the variable v.
---  Description
---    Text
---      The leading coefficient of a RingElement with respect to a variable is returned.
---    Example
---      R=QQ[x_1,x_2,x_3]
---      p=x_1^2*x_2-x_1*x_3+x_3^3
---      leadCoefficient(p,x_1)
---  SeeAlso
---///
+doc ///
+  Key
+    (leadCoefficient, RingElement, RingElement)
+    leadCoefficient
+  Headline
+    Lead coefficient with respect to a variable.
+  Usage
+    leadCoefficient(p,v)
+  Inputs
+    p:RingElement
+      a polynomial in the ring.
+    v:RingElement
+      a variable in the ring.
+  Outputs
+    :RingElement
+      the leading coefficient of p with respect to the variable v.
+  Description
+    Text
+      The leading coefficient of a RingElement with respect to a variable is returned.
+    Example
+      R=QQ[x_1,x_2,x_3]
+      p=x_1^2*x_2-x_1*x_3+x_3^3
+      leadCoefficient(p,x_1)
+  SeeAlso
+///
 
 doc ///
   Key
